@@ -5,6 +5,11 @@
 --
 -- Mapping revenue dari kpi_group: APPLE / ANDROID / ACCESSORIES / VAS.
 -- CATATAN: lob 'WATCH' (aksesoris) TIDAK digabung ke 'APPLE WATCH' (disengaja).
+--
+-- Urutan DROP: dependant dulu (leaderboard/top_product) baru base view,
+-- karena mv_leaderboard_store query dari mv_dashboard_store.
+drop materialized view if exists public.mv_leaderboard_store;
+drop materialized view if exists public.mv_top_product;
 
 -- ============================================================
 -- 1. Per STORE: aktual + target + achievement %
@@ -161,8 +166,8 @@ create index if not exists mv_dashboard_store_daily_idx
 
 -- ============================================================
 -- 4. LEADERBOARD STORE: ranking toko (by achievement & revenue)
+-- (DROP sudah di atas bersama dependant lain)
 -- ============================================================
-drop materialized view if exists public.mv_leaderboard_store;
 
 create materialized view public.mv_leaderboard_store as
 select
@@ -182,8 +187,8 @@ create index if not exists mv_leaderboard_store_code_idx
 
 -- ============================================================
 -- 5. TOP PRODUCT (by sublob): hanya data tersedia (tanpa NULL/'0')
+-- (DROP sudah di atas bersama dependant lain)
 -- ============================================================
-drop materialized view if exists public.mv_top_product;
 
 create materialized view public.mv_top_product as
 select
