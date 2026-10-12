@@ -14,11 +14,11 @@ Identitas dataset transaksi toko. Sumber: `data/raw/store-transactions.xlsx`
 | `brand_name` | text | tidak | `APPLE`, `INFINIX` | Nama brand |
 | `product_division` | text | tidak | `HEALTH EQUIPMENT` | Divisi produk |
 | `product_group` | text | tidak | `ACCESSORIES`, `DEVICES` | — |
-| `product_category` | text | tidak | `CHARGER`, `PHONE` | `text` karena di Excel campur teks+angka |
+| `product_category` | text | tidak | `CHARGER`, `PHONE` | `text` Kategori Produk |
 | `date` | date | tidak | `2026-10-01` | Format ISO `YYYY-MM-DD` |
-| `item` | text | tidak | `APPMD3J4ZA/A / 20W USB-C POWER ADAPTER` | Gabungan kode + deskripsi |
+| `item` | text | tidak | `APPMD3J4ZA/A / 20W USB-C POWER ADAPTER` | Gabungan kode + deskripsi (Produk) |
 | `qty_item` | integer | tidak | `1`, `3` | Qty terjual |
-| `localamount` | integer | tidak | `0`, `549000` | Rupiah; `0` = valid (bukan NULL) |
+| `localamount` | integer | tidak | `0`, `549000` | Harga produk |
 | `store_code` | text | tidak | `QF37`, `QF20` | Kunci relasi ke `master_target`/`profiles` (bukan FK formal) |
 | `month` | text | tidak | `October` | Nama bulan |
 | `year` | integer | tidak | `2026` | Tahun |
@@ -26,7 +26,7 @@ Identitas dataset transaksi toko. Sumber: `data/raw/store-transactions.xlsx`
 | `sap_description` | text | tidak | `20W USB-C POWER ADAPTER` | Deskripsi SAP |
 | `brand_code` | text | tidak | `APP`, `IFX` | Kode brand |
 | `lob` | text | tidak | `CHARGER`, `IPHONE` | Line of business |
-| `sublob` | text | **ya** | `0`, `iPhone 16` | Satu-satunya kolom yang dapat null; `text` karena campur angka+teks |
+| `sublob` | text | **ya** | `0`, `iPhone 16` | Tipe produk |
 | `kpi_group` | text | tidak | `ACCESSORIES`, `APPLE` | Grup KPI |
 | `store_name` | text | tidak | `DIGIPLUS JOGJA CITY MALL` | Nama toko |
 | `concept` | text | tidak | `Multibrand`, `Samsung` | Konsep toko |
