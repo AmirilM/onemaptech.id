@@ -3,7 +3,7 @@
 Push store-transactions.csv ke Supabase (public.store_transactions).
 
 Penggunaan (dari root proyek):
-    python3 scripts/push_to_supabase.py [--csv data/store-transactions.csv] [--table store_transactions] [--batch 100] [--clean]
+    python3 scripts/push/push_store.py [--csv data/clean/store-transactions.csv] [--table store_transactions] [--batch 100] [--clean]
 
 - Membaca koneksi dari .env di root proyek: SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY
   (fallback: SUPABASE_SECRET_KEY / SUPABASE_ANON_KEY).
@@ -21,7 +21,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 
 INT_COLUMNS = {"qty_item", "year", "localamount"}
 NULL_LITERAL = "NULL"
@@ -63,7 +63,7 @@ def convert_row(raw: dict) -> dict:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--csv", default=str(ROOT / "data" / "store-transactions.csv"))
+    ap.add_argument("--csv", default=str(ROOT / "data" / "clean" / "store-transactions.csv"))
     ap.add_argument("--table", default="store_transactions")
     ap.add_argument("--batch", type=int, default=100)
     ap.add_argument("--clean", action="store_true",
@@ -72,7 +72,7 @@ def main():
 
     csv_path = Path(args.csv)
     if not csv_path.is_absolute() and not csv_path.exists():
-        for candidate in (ROOT / csv_path, ROOT / "data" / Path(csv_path).name):
+        for candidate in (ROOT / csv_path, ROOT / "data" / "clean" / Path(csv_path).name):
             if candidate.exists():
                 csv_path = candidate
                 break
