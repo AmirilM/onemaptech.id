@@ -27,6 +27,8 @@ import time
 from pathlib import Path
 from typing import List, Optional
 
+from dotenv import load_dotenv
+
 ROOT = Path(__file__).resolve().parents[1]
 CLEAN_SCRIPT = ROOT / "scripts" / "clean" / "clean_store.py"
 PUSH_SCRIPT = ROOT / "scripts" / "push" / "push_store.py"
@@ -70,6 +72,32 @@ def run(cmd: List[str], label: str, log: TeeLog) -> None:
     log.line(f"OK ({elapsed:.1f}s)")
 
 
+def refresh_views(log: TeeLog) -> None:
+    """Refresh materialized view dashboard via RPC (best-effort, tidak fatal)."""
+    import os
+
+    from supabase import create_client
+
+    log.line("\n=== 3/3 refresh dashboard views ===")
+    load_dotenv(ROOT / ".env")
+    url = os.getenv("SUPABASE_URL", "").strip()
+    key = (
+        os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+        or os.getenv("SUPABASE_SECRET_KEY", "").strip()
+        or os.getenv("SUPABASE_ANON_KEY", "").strip()
+    )
+    if not url or not key:
+        log.line("  Lewati refresh: SUPABASE_URL / key kosong.")
+        return
+    try:
+        start = time.time()
+        create_client(url, key).rpc("refresh_dashboard_views", {}).execute()
+        log.line(f"  OK ({time.time() - start:.1f}s): mv_dashboard_store/daily/store_daily di-refresh.")
+    except Exception as e:
+        log.line(f"  WARNING refresh gagal (tidak fatal): {e}")
+        log.line("  Pastikan sql/dashboard-views.sql sudah dijalankan di SQL Editor.")
+
+
 def main():
     ap = argparse.ArgumentParser(description="Daily clean + push store-transactions (replace).")
     ap.add_argument("--xlsx", default=str(ROOT / "data" / "raw" / "store-transactions.xlsx"))
@@ -80,6 +108,7 @@ def main():
                     help="Jangan kosongkan tabel dulu (default: replace penuh dengan --clean).")
     ap.add_argument("--skip-clean", action="store_true", help="Lewati tahap clean.")
     ap.add_argument("--skip-push", action="store_true", help="Lewati tahap push.")
+    ap.add_argument("--skip-refresh", action="store_true", help="Lewati refresh dashboard views.")
     ap.add_argument("--log-dir", default=str(ROOT / "logs"), help="Folder file log.")
     ap.add_argument("--no-log", action="store_true", help="Jangan tulis file log (hanya console).")
     args = ap.parse_args()
@@ -97,7 +126,8 @@ def main():
     log.line(f"Mulai: {datetime.datetime.now().isoformat(timespec='seconds')}")
     log.line(f"Args: xlsx={args.xlsx} sheet={args.sheet} table={args.table} "
              f"batch={args.batch} replace={not args.no_clean} "
-             f"skip_clean={args.skip_clean} skip_push={args.skip_push}")
+             f"skip_clean={args.skip_clean} skip_push={args.skip_push} "
+             f"skip_refresh={args.skip_refresh}")
 
     xlsx = Path(args.xlsx)
     if not xlsx.is_absolute() and not xlsx.exists():
@@ -115,7 +145,7 @@ def main():
 
     if not args.skip_clean:
         run([sys.executable, str(CLEAN_SCRIPT), str(xlsx), args.sheet],
-            f"1/2 clean ({xlsx.name})", log)
+            f"1/3 clean ({xlsx.name})", log)
     else:
         log.line("Tahap clean dilewati (--skip-clean).")
 
@@ -126,9 +156,14 @@ def main():
                     "--batch", str(args.batch)]
         if not args.no_clean:
             push_cmd.append("--clean")
-        run(push_cmd, f"2/2 push -> public.{args.table} (replace={not args.no_clean})", log)
+        run(push_cmd, f"2/3 push -> public.{args.table} (replace={not args.no_clean})", log)
     else:
         log.line("Tahap push dilewati (--skip-push).")
+
+    if not args.skip_refresh:
+        refresh_views(log)
+    else:
+        log.line("Refresh dashboard views dilewati (--skip-refresh).")
 
     log.line(f"\nDaily push selesai dalam {time.time() - total_start:.1f}s.")
     log.close()
