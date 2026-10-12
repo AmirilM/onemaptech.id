@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { greeting } from "@/lib/names";
 import { num, pct, rupiah, rupiahCompact } from "@/lib/format";
 import type {
   DailyRow,
@@ -12,6 +11,7 @@ import type {
   TopProductRow,
 } from "@/lib/types";
 import FilterBar from "@/components/filter-bar";
+import GreetHead from "@/components/greet-head";
 import TrendChart from "@/components/trend-chart";
 
 type Params = { store?: string; from?: string; to?: string };
@@ -281,10 +281,7 @@ async function DashContent({
         <p className="text-xs font-semibold tracking-[0.2em] text-cyan-300">
           DASHBOARD
         </p>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">
-          {greeting()},{" "}
-          {prof?.sales_name ?? user.email}
-        </h1>
+        <GreetHead name={prof?.sales_name ?? user.email ?? "?"} />
         <p className="mt-1 text-xs text-zinc-500">
           {prof
             ? `${prof.role}${prof.store_code ? ` · ${prof.store_code} — ${prof.store_name ?? ""}` : " · semua store"}`
@@ -419,7 +416,7 @@ async function DashContent({
       </div>
 
       <footer className="mt-6 text-center text-xs text-zinc-600">
-        OneMapTech · refresh harian · {new Date().getFullYear()}
+        OneMapTech · refresh harian
       </footer>
     </main>
   );
