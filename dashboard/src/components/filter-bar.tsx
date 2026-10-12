@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 
 type Props = {
@@ -19,6 +19,7 @@ export default function FilterBar({
   currentTo,
 }: Props) {
   const router = useRouter();
+  const pathname = usePathname();
   const params = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [store, setStore] = useState(currentStore);
@@ -34,14 +35,14 @@ export default function FilterBar({
     else next.delete("from");
     if (to) next.set("to", to);
     else next.delete("to");
-    startTransition(() => router.push(`/?${next.toString()}`));
+    startTransition(() => router.push(`${pathname}?${next.toString()}`));
   }
 
   function reset() {
     setStore(lockedStore ?? "");
     setFrom("");
     setTo("");
-    startTransition(() => router.push("/"));
+    startTransition(() => router.push(pathname));
   }
 
   const input =
@@ -58,7 +59,7 @@ export default function FilterBar({
           value={store}
           onChange={(e) => setStore(e.target.value)}
           disabled={!!lockedStore}
-          className={`${input} min-w-56 disabled:opacity-60`}
+          className={`${input} w-full disabled:opacity-60 sm:w-auto sm:min-w-56`}
         >
           <option value="">Semua store</option>
           {stores.map((s) => (

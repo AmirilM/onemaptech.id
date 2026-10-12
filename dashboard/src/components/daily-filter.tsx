@@ -46,7 +46,7 @@ export default function DailyFilter({
           value={store}
           onChange={(e) => setStore(e.target.value)}
           disabled={!!lockedStore}
-          className={`${input} min-w-56 disabled:opacity-60`}
+          className={`${input} w-full disabled:opacity-60 sm:w-auto sm:min-w-56`}
         >
           <option value="">Semua store</option>
           {stores.map((s) => (
