@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getSessionProfile } from "@/lib/auth";
 import { initials } from "@/lib/names";
 import LogoutButton from "@/components/logout-button";
+import MobileNav from "@/components/mobile-nav";
 import SidebarNav from "@/components/sidebar";
 
 export default function AppLayout({
@@ -14,7 +15,7 @@ export default function AppLayout({
     <div className="flex min-h-screen">
       <Suspense
         fallback={
-          <aside className="sticky top-0 h-screen w-60 shrink-0 border-r border-white/10 bg-black/30 p-4 text-sm text-zinc-500">
+          <aside className="sticky top-0 hidden h-screen w-60 shrink-0 border-r border-white/10 bg-black/30 p-4 text-sm text-zinc-500 md:block">
             Memuat...
           </aside>
         }
@@ -33,7 +34,13 @@ async function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-white/10 bg-black/30 p-4">
+      <MobileNav
+        name={name}
+        role={role}
+        avatarUrl={session.profile?.avatar_url ?? null}
+        isAdmin={session.isAdmin}
+      />
+      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-white/10 bg-black/30 p-4 md:flex">
         <div className="px-2 py-3">
           <p className="text-sm font-bold tracking-[0.18em] text-cyan-300">
             ONEMAPTECH
