@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { greeting } from "@/lib/names";
 import { num, pct, rupiah, rupiahCompact } from "@/lib/format";
 import type {
   DailyRow,
@@ -11,7 +12,6 @@ import type {
   TopProductRow,
 } from "@/lib/types";
 import FilterBar from "@/components/filter-bar";
-import LogoutButton from "@/components/logout-button";
 import TrendChart from "@/components/trend-chart";
 
 type Params = { store?: string; from?: string; to?: string };
@@ -277,22 +277,20 @@ async function DashContent({
 
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-8">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold tracking-[0.2em] text-cyan-300">
-            ONEMAPTECH
-          </p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">
-            Sales Dashboard
-          </h1>
-          <p className="mt-1 text-xs text-zinc-500">
-            {prof
-              ? `${prof.sales_name} · ${prof.role}${prof.store_code ? ` · ${prof.store_code}` : ""}`
-              : user.email}{" "}
-            · data s.d. {lastUpdated}
-          </p>
-        </div>
-        <LogoutButton />
+      <header>
+        <p className="text-xs font-semibold tracking-[0.2em] text-cyan-300">
+          DASHBOARD
+        </p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">
+          {greeting()},{" "}
+          {prof?.sales_name ?? user.email}
+        </h1>
+        <p className="mt-1 text-xs text-zinc-500">
+          {prof
+            ? `${prof.role}${prof.store_code ? ` · ${prof.store_code} — ${prof.store_name ?? ""}` : " · semua store"}`
+            : user.email}{" "}
+          · data s.d. {lastUpdated}
+        </p>
       </header>
 
       <div className="mt-5">
