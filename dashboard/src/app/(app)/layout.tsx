@@ -44,9 +44,18 @@ async function AppShell({ children }: { children: React.ReactNode }) {
           <SidebarNav isAdmin={session.isAdmin} />
         </div>
         <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-violet-500 text-sm font-bold text-slate-950">
-            {initials(name)}
-          </div>
+          {session.profile?.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={session.profile.avatar_url}
+              alt="Foto profil"
+              className="h-10 w-10 shrink-0 rounded-full object-cover"
+            />
+          ) : (
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-violet-500 text-sm font-bold text-slate-950">
+              {initials(name)}
+            </div>
+          )}
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">{name}</p>
             <p className="truncate text-xs text-zinc-500">{role}</p>

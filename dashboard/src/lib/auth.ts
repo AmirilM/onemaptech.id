@@ -19,7 +19,7 @@ export async function getSessionProfile(): Promise<SessionProfile | null> {
   const { data } = salesId
     ? await supabase
         .from("profiles")
-        .select("sales_id,sales_name,store_code,store_name,role")
+        .select("sales_id,sales_name,store_code,store_name,role,avatar_url")
         .eq("sales_id", salesId)
         .maybeSingle()
     : { data: null };

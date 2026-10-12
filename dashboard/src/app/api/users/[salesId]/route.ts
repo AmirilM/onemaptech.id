@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { guard } from "@/lib/admin";
 
@@ -84,6 +85,7 @@ export async function PATCH(
       },
     });
   }
+  revalidatePath("/", "layout");
   return NextResponse.json({ ok: true });
 }
 

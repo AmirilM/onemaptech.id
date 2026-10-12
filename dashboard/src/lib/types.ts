@@ -70,4 +70,5 @@ export type Profile = {
   store_code: string | null;
   store_name: string | null;
   role: string;
+  avatar_url?: string | null;
 };
