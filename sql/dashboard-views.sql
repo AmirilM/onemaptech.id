@@ -160,7 +160,49 @@ create index if not exists mv_dashboard_store_daily_idx
     on public.mv_dashboard_store_daily (store_code, date);
 
 -- ============================================================
--- 4. Fungsi refresh (dipanggil daily_push / manual)
+-- 4. LEADERBOARD STORE: ranking toko (by achievement & revenue)
+-- ============================================================
+drop materialized view if exists public.mv_leaderboard_store;
+
+create materialized view public.mv_leaderboard_store as
+select
+    s.store_code,
+    s.store_name,
+    s.trx_count,
+    s.revenue_total,
+    s.total_target,
+    s.ach_total_pct,
+    rank() over (order by s.ach_total_pct desc nulls last) as rank_achievement,
+    rank() over (order by s.revenue_total desc) as rank_revenue
+from public.mv_dashboard_store s
+order by s.ach_total_pct desc nulls last;
+
+create index if not exists mv_leaderboard_store_code_idx
+    on public.mv_leaderboard_store (store_code);
+
+-- ============================================================
+-- 5. TOP PRODUCT (by sublob): hanya data tersedia (tanpa NULL/'0')
+-- ============================================================
+drop materialized view if exists public.mv_top_product;
+
+create materialized view public.mv_top_product as
+select
+    t.sublob as product,
+    count(*) as trx_count,
+    coalesce(sum(t.qty_item), 0) as total_qty,
+    coalesce(sum(t.localamount), 0) as revenue_total,
+    rank() over (order by sum(t.localamount) desc) as rank_revenue,
+    rank() over (order by sum(t.qty_item) desc) as rank_qty
+from public.store_transactions t
+where t.sublob is not null and t.sublob <> '0'
+group by t.sublob
+order by sum(t.localamount) desc;
+
+create index if not exists mv_top_product_name_idx
+    on public.mv_top_product (product);
+
+-- ============================================================
+-- 6. Fungsi refresh (dipanggil daily_push / manual)
 -- ============================================================
 create or replace function public.refresh_dashboard_views()
 returns void
@@ -172,9 +214,13 @@ begin
     refresh materialized view public.mv_dashboard_store;
     refresh materialized view public.mv_dashboard_daily;
     refresh materialized view public.mv_dashboard_store_daily;
+    refresh materialized view public.mv_leaderboard_store;
+    refresh materialized view public.mv_top_product;
 end;
 $$;
 
 comment on materialized view public.mv_dashboard_store is 'Agregat dashboard per store: revenue KPI + target + achievement %.';
 comment on materialized view public.mv_dashboard_daily is 'Agregat dashboard per tanggal (aktual saja).';
 comment on materialized view public.mv_dashboard_store_daily is 'Agregat dashboard per store x tanggal (aktual saja).';
+comment on materialized view public.mv_leaderboard_store is 'Ranking toko by achievement % dan revenue.';
+comment on materialized view public.mv_top_product is 'Top product by sublob (tanpa NULL/0): rank revenue + qty.';

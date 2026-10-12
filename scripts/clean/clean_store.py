@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[2]
 NULL_LITERAL = "NULL"  # ditulis tanpa quote di CSV, dibaca Postgres sebagai NULL
 
 
-def normalize(cell):
+def normalize(col, cell):
     """Kembalikan (nilai_string, jenis_inferensi) untuk satu sel."""
     if cell is None:
         return NULL_LITERAL, None
@@ -47,6 +47,9 @@ def normalize(cell):
     if text.upper() == NULL_LITERAL:
         # hindari ambigu: kutip agar bukan NULL palsu
         return text, "text"
+    if col == "sublob":
+        # konsistensi: UPPERCASE semua + rapikan spasi ganda
+        text = " ".join(text.upper().split())
     return text, "text"
 
 
@@ -100,7 +103,7 @@ def main():
             total += 1
             out_row = []
             for col, cell in zip(header, row):
-                value, kind = normalize(cell)
+                value, kind = normalize(col, cell)
                 if value == NULL_LITERAL and kind is None:
                     null_counts[col] += 1
                 elif value == NULL_LITERAL:
