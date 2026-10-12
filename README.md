@@ -50,3 +50,9 @@ python3 scripts/push/push_target.py --clean
 - Literal `NULL` di CSV = null di Postgres. Nilai `0` valid tetap `0`.
 - Kolom `*_target` dibulatkan ke integer (ROUND_HALF_UP).
 - Butuh: `pip install openpyxl pandas supabase python-dotenv`
+
+## Dashboard
+
+Web dashboard Next.js di `dashboard/` (lihat `dashboard/README.md`).
+Butuh 2 SQL dijalankan di SQL Editor: `sql/dashboard-views.sql` lalu
+`sql/dashboard-rls.sql`. Seed akun: `python3 scripts/seed_auth.py`.

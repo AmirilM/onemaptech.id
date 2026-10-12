@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background:
+    radial-gradient(1200px 500px at 15% -10%, rgba(34, 211, 238, 0.12), transparent 60%),
+    radial-gradient(900px 500px at 90% 0%, rgba(167, 139, 250, 0.12), transparent 55%),
+    #070b14;
+  color: #f4f4f5;
+  font-family: var(--font-sans);
+  min-height: 100vh;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+  cursor: pointer;
+}
+
+select option {
+  background-color: #0b1220;
+}
