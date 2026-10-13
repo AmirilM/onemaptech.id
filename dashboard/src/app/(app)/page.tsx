@@ -12,44 +12,107 @@ import type {
   TopProductRow,
 } from "@/lib/types";
 import FilterBar from "@/components/filter-bar";
-import ClearRangeButton from "@/components/clear-range-button";
 import GreetHead from "@/components/greet-head";
 import TrendChart from "@/components/trend-chart";
 
-type Params = { store?: string; from?: string; to?: string };
+type Params = { store?: string };
+
+function getWibPeriod(): { elapsed: number; daysInMonth: number } {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const get = (t: string) =>
+    Number(parts.find((p) => p.type === t)?.value ?? "0");
+  const year = get("year");
+  const month = get("month");
+  const day = get("day");
+  const daysInMonth = new Date(year, month, 0).getDate();
+  return {
+    elapsed: day >= 1 ? day : 1,
+    daysInMonth: daysInMonth >= 1 ? daysInMonth : 30,
+  };
+}
 
 function kpiCard(
   label: string,
-  revenue: number | null,
+  actual: number,
   target: number | null,
-  ach: number | null,
   accent: string,
   bar: string,
+  elapsed: number,
+  daysInMonth: number,
 ) {
+  const ach = target ? Math.round((10000 * actual) / target) / 100 : null;
+  const estimated =
+    elapsed > 0 ? Math.round(((actual / elapsed) * daysInMonth) * 100) / 100 : null;
+  const estPct =
+    estimated !== null && target
+      ? Math.round((10000 * estimated) / target) / 100
+      : null;
+  const variance = target !== null ? target - actual : null;
+  const shortfall = variance !== null && variance > 0;
   const reached = ach !== null && ach >= 100;
   const over = ach !== null && ach > 100;
+  const row = "flex items-baseline justify-between gap-2 text-xs tabular-nums";
   return (
     <div
       key={label}
       className="rounded-2xl border border-white/10 bg-white/[0.03] p-5"
     >
       <p className="text-xs font-medium tracking-wide text-zinc-400">{label}</p>
-      <p className="mt-2 text-2xl font-bold tracking-tight">
-        {rupiahCompact(revenue)}
-      </p>
-      <div className="mt-2 flex items-baseline justify-between text-xs">
-        <span className="text-zinc-500">Target {rupiahCompact(target)}</span>
-        <span className={`font-semibold ${reached ? "text-emerald-300" : accent}`}>
-          {pct(ach)}
-        </span>
+      <dl className="mt-3 space-y-1.5">
+        <div className={row}>
+          <dt className="text-zinc-500">Target</dt>
+          <dd className="font-medium text-zinc-100">{rupiahCompact(target)}</dd>
+        </div>
+        <div className={row}>
+          <dt className="text-zinc-500">Actual Sales</dt>
+          <dd className="font-semibold text-zinc-100">
+            {rupiahCompact(actual)}
+          </dd>
+        </div>
+        <div className={row}>
+          <dt className="text-zinc-500">Variance</dt>
+          <dd
+            className={`font-medium ${shortfall ? "text-red-300" : variance !== null && variance <= 0 ? "text-emerald-300" : "text-zinc-100"}`}
+          >
+            {rupiahCompact(variance)}
+          </dd>
+        </div>
+        <div className={row}>
+          <dt className="text-zinc-500">Estimated</dt>
+          <dd className="font-medium text-zinc-100">
+            {rupiahCompact(estimated)}
+          </dd>
+        </div>
+      </dl>
+      <div className="my-3 border-t border-white/10" />
+      <div className="space-y-1.5">
+        <div className={row}>
+          <span className="text-zinc-500">Achievement</span>
+          <span className={`font-semibold ${reached ? "text-emerald-300" : accent}`}>
+            {pct(ach)}
+          </span>
+        </div>
+        <div className={row}>
+          <span className="text-zinc-500">Estimated</span>
+          <span className="font-medium text-zinc-300">{pct(estPct)}</span>
+        </div>
       </div>
       <div
         className="relative mt-2 h-1.5 overflow-hidden rounded-full bg-white/10"
         role="img"
-        aria-label={`${label}: revenue ${rupiahCompact(revenue)}, target ${rupiahCompact(target)}, achievement ${pct(ach)}`}
+        aria-label={`${label}: actual ${rupiahCompact(actual)}, target ${rupiahCompact(target)}, achievement ${pct(ach)}, estimated ${pct(estPct)}`}
       >
-        <div className="absolute inset-y-0 left-0 w-[80%] bg-rose-400/15" />
-        <div className="absolute inset-y-0 left-[80%] w-[20%] bg-amber-300/15" />
+        <div
+          className={`absolute inset-y-0 left-0 rounded-full ${bar} opacity-30`}
+          style={{
+            width: `${Math.min(100, estPct ?? 0)}%`,
+          }}
+        />
         <div
           className={`absolute inset-y-0 left-0 rounded-full ${bar}`}
           style={{
@@ -88,7 +151,7 @@ function DashboardSkeleton() {
       <div className={`mt-4 h-[76px] ${pulse}`} />
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {["Total", "Apple", "Android", "Accessories", "VAS"].map((l) => (
-          <div key={l} className={`${pulse} h-[132px]`} />
+          <div key={l} className={`${pulse} h-[252px]`} />
         ))}
       </div>
       <div className={`mt-4 h-80 ${pulse}`} />
@@ -144,8 +207,6 @@ async function DashContent({
   const lockedStore =
     prof?.role === "Store Supervisor" ? (prof?.store_code ?? null) : null;
   const store = lockedStore ?? (params.store || "");
-  const from = params.from || "";
-  const to = params.to || "";
 
   // Daftar store untuk filter
   const { data: storeList } = await supabase
@@ -171,7 +232,8 @@ async function DashContent({
   const { data: leaderboard } = await lbQuery;
   const lb = (leaderboard ?? []) as LeaderboardRow[];
 
-  // Tren: per store+date bila filter store, global harian bila tidak
+  // Tren: per store bila filter store, global harian bila tidak —
+  // periode berjalan penuh (tanpa filter tanggal)
   type TrendPoint = {
     date: string;
     revenue_total: number;
@@ -182,16 +244,13 @@ async function DashContent({
   };
   let trend: TrendPoint[] = [];
   if (store) {
-    let q = supabase
+    const { data } = await supabase
       .from("mv_dashboard_store_daily")
       .select(
         "date,revenue_total,revenue_apple,revenue_android,revenue_accessories,revenue_vas",
       )
       .eq("store_code", store)
       .order("date");
-    if (from) q = q.gte("date", from);
-    if (to) q = q.lte("date", to);
-    const { data } = await q;
     trend = ((data ?? []) as StoreDailyRow[]).map((d) => ({
       date: d.date,
       revenue_total: d.revenue_total,
@@ -201,15 +260,12 @@ async function DashContent({
       revenue_vas: d.revenue_vas,
     }));
   } else {
-    let q = supabase
+    const { data } = await supabase
       .from("mv_dashboard_daily")
       .select(
         "date,revenue_total,revenue_apple,revenue_android,revenue_accessories,revenue_vas",
       )
       .order("date");
-    if (from) q = q.gte("date", from);
-    if (to) q = q.lte("date", to);
-    const { data } = await q;
     trend = ((data ?? []) as DailyRow[]).map((d) => ({
       date: d.date,
       revenue_total: d.revenue_total,
@@ -228,12 +284,9 @@ async function DashContent({
     .limit(10);
   const top = (topRaw ?? []) as TopProductRow[];
 
-  // KPI: revenue SELALU dijumlahkan dari tren (sudah kena filter
-  // store+tanggal), agar basisnya konsisten antar kartu. Target = periode
-  // penuh (snapshot, tanpa dimensi harian). % achievement hanya ditampilkan
-  // bila filter tanggal TIDAK aktif — revenue parsial vs target penuh
-  // akan menyesatkan.
-  const hasDateFilter = Boolean(from || to);
+  // KPI: revenue dijumlahkan dari tren periode berjalan penuh
+  // (ikut filter store, abaikan filter tanggal). Target = periode
+  // penuh (snapshot, tanpa dimensi harian).
   const sumTrend = (f: (p: TrendPoint) => number) =>
     trend.reduce((a, p) => a + f(p), 0);
   const kpiRevenue = {
@@ -302,22 +355,17 @@ async function DashContent({
     };
   }
   const kpi = { ...kpiRevenue, ...kpiTargets };
-  const ach = (rev: number, tgt: number | null) =>
-    tgt ? Math.round((10000 * rev) / tgt) / 100 : null;
-  // Sembunyikan achievement saat filter tanggal aktif (lihat komentar di atas)
-  const showAch = !hasDateFilter;
+  const { elapsed, daysInMonth } = getWibPeriod();
 
   const th =
     "px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500";
   const td = "px-3 py-2.5 text-sm tabular-nums";
   const card = "rounded-2xl border border-white/10 bg-white/[0.03] p-4 md:p-5";
 
-  // Deep-link ke tampilan 1 store, periode tetap dipertahankan
+  // Deep-link ke tampilan 1 store
   function storeHref(code: string) {
     const q = new URLSearchParams();
     q.set("store", code);
-    if (from) q.set("from", from);
-    if (to) q.set("to", to);
     return `/?${q.toString()}`;
   }
 
@@ -341,35 +389,29 @@ async function DashContent({
           stores={(storeList ?? []) as { store_code: string; store_name: string | null }[]}
           lockedStore={lockedStore}
           currentStore={store}
-          currentFrom={from}
-          currentTo={to}
+          showDate={false}
         />
       </div>
 
       <section aria-label="Ringkasan revenue" className="mt-4">
         <h2 className="sr-only">Ringkasan revenue</h2>
         <p className="mb-3 text-xs text-zinc-500">
-          {hasDateFilter
-            ? `Revenue ${from || "…"} – ${to || "…"} · % achievement disembunyikan (target periode penuh)`
-            : "Revenue periode berjalan · vs target"}
+          Revenue periode berjalan · vs target
         </p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, showAch ? ach(kpi.revenue_total, kpi.total_target) : null, "text-zinc-100", "bg-cyan-400")}
-          {kpiCard("Apple", kpi.revenue_apple, kpi.apple_target, showAch ? ach(kpi.revenue_apple, kpi.apple_target) : null, "text-sky-300", "bg-sky-400")}
-          {kpiCard("Android", kpi.revenue_android, kpi.android_target, showAch ? ach(kpi.revenue_android, kpi.android_target) : null, "text-violet-300", "bg-violet-400")}
-          {kpiCard("Accessories", kpi.revenue_accessories, kpi.accessories_target, showAch ? ach(kpi.revenue_accessories, kpi.accessories_target) : null, "text-amber-300", "bg-amber-400")}
-          {kpiCard("VAS", kpi.revenue_vas, kpi.vas_target, showAch ? ach(kpi.revenue_vas, kpi.vas_target) : null, "text-emerald-300", "bg-emerald-400")}
+          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, "text-zinc-100", "bg-cyan-400", elapsed, daysInMonth)}
+          {kpiCard("Apple Revenue", kpi.revenue_apple, kpi.apple_target, "text-sky-300", "bg-sky-400", elapsed, daysInMonth)}
+          {kpiCard("Android Revenue", kpi.revenue_android, kpi.android_target, "text-violet-300", "bg-violet-400", elapsed, daysInMonth)}
+          {kpiCard("Accessories Revenue", kpi.revenue_accessories, kpi.accessories_target, "text-amber-300", "bg-amber-400", elapsed, daysInMonth)}
+          {kpiCard("VAS Revenue", kpi.revenue_vas, kpi.vas_target, "text-emerald-300", "bg-emerald-400", elapsed, daysInMonth)}
         </div>
       </section>
 
       <section className={`mt-4 ${card}`}>
         <h2 className="text-sm font-semibold">Tren Revenue Harian</h2>
         <p className="mb-3 text-xs text-zinc-500">
-          {store ? `Store ${store}` : "Semua store"} ·{" "}
-          {from || to
-            ? `periode ${from || "…"} – ${to || "…"}`
-            : `s.d. ${latestDate}`}{" "}
-          · sumbu dalam Rp
+          {store ? `Store ${store}` : "Semua store"} · s.d. {latestDate} ·
+          sumbu dalam Rp
         </p>
         {trend.length ? (
           <div
@@ -381,9 +423,8 @@ async function DashContent({
         ) : (
           <div className="py-10 text-center">
             <p className="text-sm text-zinc-500">
-              Tidak ada data pada rentang ini.
+              Tidak ada data pada periode ini.
             </p>
-            {(from || to) && <ClearRangeButton />}
           </div>
         )}
       </section>
