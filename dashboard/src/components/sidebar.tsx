@@ -21,10 +21,16 @@ const ITEMS: { href: string; label: string; icon: LucideIcon; admin?: boolean }[
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-export default function SidebarNav({ isAdmin }: { isAdmin: boolean }) {
+export default function SidebarNav({
+  isAdmin,
+  collapsed = false,
+}: {
+  isAdmin: boolean;
+  collapsed?: boolean;
+}) {
   const pathname = usePathname();
   return (
-    <nav className="flex flex-col gap-1">
+    <nav className="flex flex-col gap-1" aria-label="Navigasi utama">
       {ITEMS.filter((i) => !i.admin || isAdmin).map((i) => {
         const active =
           i.href === "/" ? pathname === "/" : pathname.startsWith(i.href);
@@ -33,14 +39,19 @@ export default function SidebarNav({ isAdmin }: { isAdmin: boolean }) {
           <Link
             key={i.href}
             href={i.href}
-            className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm transition ${
+            title={collapsed ? i.label : undefined}
+            aria-label={collapsed ? i.label : undefined}
+            aria-current={active ? "page" : undefined}
+            className={`flex items-center rounded-xl py-2.5 text-sm transition ${
+              collapsed ? "justify-center px-0" : "gap-3 px-4"
+            } ${
               active
                 ? "bg-primary/15 font-semibold text-primary-bright"
                 : "text-muted hover:bg-white/5 hover:text-ink"
             }`}
           >
             <Icon size={18} strokeWidth={2} aria-hidden className="shrink-0" />
-            {i.label}
+            {!collapsed && i.label}
           </Link>
         );
       })}

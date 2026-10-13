@@ -3,9 +3,11 @@
 Identitas dataset transaksi toko. Sumber: `data/raw/store-transactions.xlsx`
 (sheet `RAW`) → `data/clean/store-transactions.csv` → `public.store_transactions`.
 
-- **22 kolom** tetap. Isi diperbarui harian (replace penuh via `scripts/daily_push_supabase.py`).
+- **23 kolom** tetap. Isi diperbarui harian (replace penuh via `scripts/daily_push_supabase.py`).
 - Tanpa primary key. `NULL` di CSV = null di Postgres; `0` adalah nilai valid
   (bukan kosong), misal di `localamount` dan `sublob`.
+- Kolom `area_manager`: nama Area Manager per baris (1 AM = banyak store,
+  referensi `master_stores`). Tidak pernah NULL di data bersih.
 
 ## Kamus kolom
 
@@ -33,6 +35,7 @@ Identitas dataset transaksi toko. Sumber: `data/raw/store-transactions.xlsx`
 | `week_apple` | text | tidak | `W1`, `W2` | Minggu kalender Apple |
 | `quarter_apple` | text | tidak | `Q1` | Kuartal kalender Apple |
 | `week_sf` | text | tidak | `W40`, `W41` | Minggu kalender SF |
+| `area_manager` | text | tidak | `Andri Wiyoga`, `SUHARTONO` | 9 AM; 1 AM = banyak store (lihat `master-stores`) |
 
 ## Relasi
 

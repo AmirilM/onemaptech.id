@@ -6,6 +6,7 @@ export type SessionProfile = {
   email: string;
   profile: Profile | null;
   lockedStore: string | null;
+  lockedAM: string | null;
   isAdmin: boolean;
 };
 
@@ -26,11 +27,15 @@ export async function getSessionProfile(): Promise<SessionProfile | null> {
   const profile = (data ?? null) as Profile | null;
   const lockedStore =
     profile?.role === "Store Supervisor" ? (profile?.store_code ?? null) : null;
+  // Area Manager terkunci ke area-nya (sales_name = master_stores/store_transactions area_manager).
+  const lockedAM =
+    profile?.role === "Area Manager" ? (profile?.sales_name ?? null) : null;
   return {
     userId: user.id,
     email: user.email ?? "",
     profile,
     lockedStore,
+    lockedAM,
     isAdmin: profile?.role === "Admin",
   };
 }

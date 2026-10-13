@@ -52,6 +52,8 @@ export type TopProductRow = {
 };
 
 export type StoreRow = {
+  store_code?: string;
+  area_manager?: string | null;
   revenue_total: number;
   revenue_apple: number;
   revenue_android: number;
@@ -71,4 +73,27 @@ export type Profile = {
   store_name: string | null;
   role: string;
   avatar_url?: string | null;
+};
+
+export type AreaManagerRow = {
+  area_manager: string;
+  store_count: number;
+  trx_count: number;
+  revenue_total: number;
+  revenue_apple: number;
+  revenue_android: number;
+  revenue_accessories: number;
+  revenue_vas: number;
+  total_target: number | null;
+  apple_target: number | null;
+  android_target: number | null;
+  accessories_target: number | null;
+  vas_target: number | null;
+  ach_total_pct: number | null;
+};
+
+export type StoreMapRow = {
+  store_code: string;
+  store_name: string | null;
+  area_manager: string | null;
 };

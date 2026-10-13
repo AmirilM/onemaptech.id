@@ -4,8 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth";
 import { num, pct, rupiah } from "@/lib/format";
 import type { TopProductRow } from "@/lib/types";
+import { effectiveAM, getStoresOfAM, storeInScope } from "@/lib/scope";
 
-type Params = { store?: string };
+type Params = { store?: string; am?: string };
 
 export default function ProductsPage({
   searchParams,
@@ -38,7 +39,12 @@ async function ProductsContent({
   if (!user) redirect("/login");
   const session = await getSessionProfile();
   const lockedStore = session?.lockedStore ?? null;
-  const store = lockedStore ?? (params.store || "");
+  const lockedAM = session?.lockedAM ?? null;
+  const am = effectiveAM(lockedAM, params.am || "");
+  const amStores = await getStoresOfAM(supabase, am);
+  const amScopeBroken = am !== "" && amStores.length === 0;
+  const store = storeInScope(lockedStore ?? (params.store || ""), am, amStores);
+  const scopeLabel = store ? `Store ${store}` : am ? `Area ${am}` : "Semua store";
 
   // Top product global (MV tanpa dimensi store)
   const { data: topRaw } = await supabase
@@ -48,7 +54,7 @@ async function ProductsContent({
     .limit(50);
   const top = (topRaw ?? []) as TopProductRow[];
 
-  // Share kategori dari agregat harian (ikut filter store bila ada)
+  // Share kategori dari agregat harian (ikut filter store / area bila ada)
   let cat: { label: string; revenue: number }[];
   if (store) {
     const { data } = await supabase
@@ -68,6 +74,32 @@ async function ProductsContent({
       { label: "Android", revenue: s((r) => r.revenue_android) },
       { label: "Accessories", revenue: s((r) => r.revenue_accessories) },
       { label: "VAS", revenue: s((r) => r.revenue_vas) },
+    ];
+  } else if (am && amStores.length) {
+    const { data } = await supabase
+      .from("mv_dashboard_store_daily")
+      .select("revenue_apple,revenue_android,revenue_accessories,revenue_vas")
+      .in("store_code", amStores);
+    const rows = (data ?? []) as {
+      revenue_apple: number;
+      revenue_android: number;
+      revenue_accessories: number;
+      revenue_vas: number;
+    }[];
+    const s = (f: (r: (typeof rows)[number]) => number) =>
+      rows.reduce((a, r) => a + f(r), 0);
+    cat = [
+      { label: "Apple", revenue: s((r) => r.revenue_apple) },
+      { label: "Android", revenue: s((r) => r.revenue_android) },
+      { label: "Accessories", revenue: s((r) => r.revenue_accessories) },
+      { label: "VAS", revenue: s((r) => r.revenue_vas) },
+    ];
+  } else if (amScopeBroken) {
+    cat = [
+      { label: "Apple", revenue: 0 },
+      { label: "Android", revenue: 0 },
+      { label: "Accessories", revenue: 0 },
+      { label: "VAS", revenue: 0 },
     ];
   } else {
     const { data } = await supabase
@@ -105,8 +137,18 @@ async function ProductsContent({
         Analitik Produk
       </h1>
       <p className="mt-1 text-xs text-muted">
-        {store ? `Store ${store}` : "Semua store"} · by sublob (tanpa NULL/0)
+        {scopeLabel} · by sublob (tanpa NULL/0)
       </p>
+
+      {amScopeBroken && (
+        <div className="mt-4 rounded-2xl border border-warning/30 bg-warning/10 p-4 text-sm">
+          <p className="font-semibold text-[#FCD34D]">Data area tidak terbaca</p>
+          <p className="mt-1 text-muted">
+            Mapping store area ({am}) tidak dapat dimuat. Minta admin menjalankan{" "}
+            <code>sql/dashboard-rls.sql</code> terbaru di SQL Editor, lalu muat ulang.
+          </p>
+        </div>
+      )}
 
       <section className={`mt-4 ${card}`}>
         <h2 className="text-sm font-semibold text-ink">Share Kategori</h2>
@@ -133,7 +175,7 @@ async function ProductsContent({
       <section className={`mt-4 ${card}`}>
         <h2 className="text-sm font-semibold text-ink">Top Product (Top 50)</h2>
         <p className="mb-2 text-xs text-muted">
-          Global{store ? " — tidak ikut filter store" : ""}
+          Global{(store || am) ? " — tidak ikut filter store/area" : ""}
         </p>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] border-collapse">

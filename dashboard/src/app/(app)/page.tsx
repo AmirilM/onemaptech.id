@@ -12,6 +12,7 @@ import type {
   TopProductRow,
 } from "@/lib/types";
 import FilterBar from "@/components/filter-bar";
+import { distinctAMs, effectiveAM, getStoreMap, storeInScope } from "@/lib/scope";
 import GreetHead from "@/components/greet-head";
 import QtyBarChart, { type QtyBarItem } from "@/components/qty-bar-chart";
 import BrandShareDonut, {
@@ -26,7 +27,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-type Params = { store?: string };
+type Params = { store?: string; am?: string };
 
 function getWibPeriod(): { elapsed: number; daysInMonth: number } {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -247,13 +248,28 @@ async function DashContent({
 
   const lockedStore =
     prof?.role === "Store Supervisor" ? (prof?.store_code ?? null) : null;
-  const store = lockedStore ?? (params.store || "");
+  const lockedAM =
+    prof?.role === "Area Manager" ? (prof?.sales_name ?? null) : null;
+  // Scope AM (ketat): peta store → AM dari master_stores.
+  const storeMap = await getStoreMap(supabase);
+  const amList = distinctAMs(storeMap);
+  const am = effectiveAM(lockedAM, params.am || "");
+  const amStores = am
+    ? storeMap.filter((r) => r.area_manager === am).map((r) => r.store_code)
+    : [];
+  // Bila filter area aktif tapi mapping tak terbaca (mis. akses master_stores
+  // belum dibuka), jangan tampilkan angka global yang menyesatkan.
+  const amScopeBroken = am !== "" && amStores.length === 0;
+  const store = storeInScope(lockedStore ?? (params.store || ""), am, amStores);
 
-  // Daftar store untuk filter
-  const { data: storeList } = await supabase
+  // Daftar store untuk filter (ketat: AM hanya lihat store miliknya)
+  const { data: storeListRaw } = await supabase
     .from("mv_leaderboard_store")
     .select("store_code,store_name")
     .order("store_code");
+  const storeList = (
+    (storeListRaw ?? []) as { store_code: string; store_name: string | null }[]
+  ).filter((s) => !am || amStores.includes(s.store_code));
 
   // Freshness data — independen dari filter tanggal
   const { data: latest } = await supabase
@@ -270,6 +286,8 @@ async function DashContent({
     .select("*")
     .order("ach_total_pct", { ascending: false, nullsFirst: false });
   if (store) lbQuery = lbQuery.eq("store_code", store);
+  else if (am && amStores.length) lbQuery = lbQuery.in("store_code", amStores);
+  else if (amScopeBroken) lbQuery = lbQuery.eq("store_code", "__no_match__");
   const { data: leaderboard } = await lbQuery;
   const lb = (leaderboard ?? []) as LeaderboardRow[];
 
@@ -321,6 +339,15 @@ async function DashContent({
       .eq("store_code", store)
       .order("date");
     trend = ((data ?? []) as StoreDailyRow[]).map(toTrendPoint);
+  } else if (am && amStores.length) {
+    const { data } = await supabase
+      .from("mv_dashboard_store_daily")
+      .select(QTY_SELECT)
+      .in("store_code", amStores)
+      .order("date");
+    trend = ((data ?? []) as StoreDailyRow[]).map(toTrendPoint);
+  } else if (am) {
+    trend = [];
   } else {
     const { data } = await supabase
       .from("mv_dashboard_daily")
@@ -444,6 +471,42 @@ async function DashContent({
       accessories_target: s?.accessories_target ?? null,
       vas_target: s?.vas_target ?? null,
     };
+  } else if (am && amStores.length) {
+    const { data: targets } = await supabase
+      .from("mv_dashboard_store")
+      .select(
+        "total_target,apple_target,android_target,accessories_target,vas_target",
+      )
+      .in("store_code", amStores);
+    const t = (targets ?? []) as Pick<
+      StoreRow,
+      | "total_target"
+      | "apple_target"
+      | "android_target"
+      | "accessories_target"
+      | "vas_target"
+    >[];
+    const sum = (f: (x: (typeof t)[number]) => number | null) =>
+      t.reduce<number | null>(
+        (acc, x) => (acc ?? 0) + (f(x) ?? 0),
+        t.length ? 0 : null,
+      );
+    kpiTargets = {
+      total_target: sum((x) => x.total_target),
+      apple_target: sum((x) => x.apple_target),
+      android_target: sum((x) => x.android_target),
+      accessories_target: sum((x) => x.accessories_target),
+      vas_target: sum((x) => x.vas_target),
+    };
+  } else if (amScopeBroken) {
+    // Mapping area tak terbaca: jangan tampilkan target global yang menyesatkan.
+    kpiTargets = {
+      total_target: null,
+      apple_target: null,
+      android_target: null,
+      accessories_target: null,
+      vas_target: null,
+    };
   } else {
     const { data: targets } = await supabase
       .from("master_target")
@@ -479,12 +542,15 @@ async function DashContent({
   const td = "px-3 py-2.5 text-sm tabular-nums text-soft";
   const card = "rounded-2xl border border-line bg-surface p-4 shadow-sm md:p-5";
 
-  // Deep-link ke tampilan 1 store
+  // Deep-link ke tampilan 1 store (pertahankan filter AM)
   function storeHref(code: string) {
     const q = new URLSearchParams();
+    if (am) q.set("am", am);
     q.set("store", code);
     return `/?${q.toString()}`;
   }
+
+  const scopeLabel = store ? `Store ${store}` : am ? `Area ${am}` : "Semua store";
 
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-8">
@@ -495,7 +561,7 @@ async function DashContent({
         <GreetHead name={prof?.sales_name ?? user.email ?? "?"} />
         <p className="mt-1 text-xs text-muted">
           {prof
-            ? `${prof.role}${prof.store_code ? ` · ${prof.store_code} — ${prof.store_name ?? ""}` : " · semua store"}`
+            ? `${prof.role}${lockedAM ? ` · ${lockedAM}` : prof.store_code ? ` · ${prof.store_code} — ${prof.store_name ?? ""}` : " · semua store"}`
             : user.email}{" "}
           · data diperbarui {latestDate}
         </p>
@@ -507,8 +573,21 @@ async function DashContent({
           lockedStore={lockedStore}
           currentStore={store}
           showDate={false}
+          areaManagers={lockedAM ? [] : amList}
+          lockedAM={lockedAM}
+          currentAM={am}
         />
       </div>
+
+      {amScopeBroken && (
+        <div className="mt-4 rounded-2xl border border-warning/30 bg-warning/10 p-4 text-sm">
+          <p className="font-semibold text-[#FCD34D]">Data area tidak terbaca</p>
+          <p className="mt-1 text-muted">
+            Mapping store area ({am}) tidak dapat dimuat. Minta admin menjalankan{" "}
+            <code>sql/dashboard-rls.sql</code> terbaru di SQL Editor, lalu muat ulang.
+          </p>
+        </div>
+      )}
 
       <section aria-label="Ringkasan revenue" className="mt-4">
         <h2 className="sr-only">Ringkasan revenue</h2>
@@ -528,7 +607,7 @@ async function DashContent({
         <section className={`${card} lg:col-span-3`} aria-label="Brand share by qty">
           <h2 className="text-sm font-semibold text-ink">Brand Share</h2>
           <p className="mb-3 text-xs text-muted">
-            {store ? `Store ${store}` : "Semua store"} · total periode · unit
+            {scopeLabel} · total periode · unit
           </p>
           {brandShareTotal ? (
             <div
@@ -552,7 +631,7 @@ async function DashContent({
         <section className={`${card} lg:col-span-4`} aria-label="Apple qty total">
           <h2 className="text-sm font-semibold text-ink">Apple Qty</h2>
           <p className="mb-3 text-xs text-muted">
-            {store ? `Store ${store}` : "Semua store"} · total periode · unit
+            {scopeLabel} · total periode · unit
           </p>
           {trend.length ? (
             <QtyBarChart
@@ -571,7 +650,7 @@ async function DashContent({
         <section className={`${card} lg:col-span-5`} aria-label="Android qty total">
           <h2 className="text-sm font-semibold text-ink">Android Qty</h2>
           <p className="mb-3 text-xs text-muted">
-            {store ? `Store ${store}` : "Semua store"} · total periode · unit
+            {scopeLabel} · total periode · unit
           </p>
           {trend.length ? (
             <QtyBarChart

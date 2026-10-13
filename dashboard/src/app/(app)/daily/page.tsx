@@ -5,8 +5,9 @@ import { getSessionProfile } from "@/lib/auth";
 import { pct, rupiah } from "@/lib/format";
 import DailyFilter from "@/components/daily-filter";
 import TrendChart from "@/components/trend-chart";
+import { distinctAMs, effectiveAM, getStoreMap, storeInScope } from "@/lib/scope";
 
-type Params = { store?: string; month?: string };
+type Params = { store?: string; month?: string; am?: string };
 type Row = {
   date: string;
   revenue_total: number;
@@ -50,7 +51,15 @@ async function DailyContent({
   if (!user) redirect("/login");
   const session = await getSessionProfile();
   const lockedStore = session?.lockedStore ?? null;
-  const store = lockedStore ?? (params.store || "");
+  const lockedAM = session?.lockedAM ?? null;
+  const storeMap = await getStoreMap(supabase);
+  const amList = distinctAMs(storeMap);
+  const am = effectiveAM(lockedAM, params.am || "");
+  const amStores = am
+    ? storeMap.filter((r) => r.area_manager === am).map((r) => r.store_code)
+    : [];
+  const amScopeBroken = am !== "" && amStores.length === 0;
+  const store = storeInScope(lockedStore ?? (params.store || ""), am, amStores);
 
   // Bulan default = bulan dari tanggal data terakhir
   const { data: latest } = await supabase
@@ -83,7 +92,34 @@ async function DailyContent({
         .lte("date", end)
         .order("date");
       rows = (data ?? []) as Row[];
-    } else {
+    } else if (am && amStores.length) {
+      const { data } = await supabase
+        .from("mv_dashboard_store_daily")
+        .select(COLS)
+        .in("store_code", amStores)
+        .gte("date", start)
+        .lte("date", end)
+        .order("date");
+      // Agregasi per tanggal di server-side (MV berdimensi store x tanggal)
+      const byDate = new Map<string, Row>();
+      for (const r of (data ?? []) as (Row & { store_code: string })[]) {
+        const cur = byDate.get(r.date) ?? {
+          date: r.date,
+          revenue_total: 0,
+          revenue_apple: 0,
+          revenue_android: 0,
+          revenue_accessories: 0,
+          revenue_vas: 0,
+        };
+        cur.revenue_total += r.revenue_total;
+        cur.revenue_apple += r.revenue_apple;
+        cur.revenue_android += r.revenue_android;
+        cur.revenue_accessories += r.revenue_accessories;
+        cur.revenue_vas += r.revenue_vas;
+        byDate.set(r.date, cur);
+      }
+      rows = [...byDate.values()].sort((a, b) => (a.date < b.date ? -1 : 1));
+    } else if (!am) {
       const { data } = await supabase
         .from("mv_dashboard_daily")
         .select(COLS)
@@ -94,10 +130,13 @@ async function DailyContent({
     }
   }
 
-  const { data: storeList } = await supabase
+  const { data: storeListRaw } = await supabase
     .from("mv_leaderboard_store")
     .select("store_code,store_name")
     .order("store_code");
+  const storeList = (
+    (storeListRaw ?? []) as { store_code: string; store_name: string | null }[]
+  ).filter((s) => !am || amStores.includes(s.store_code));
 
   const growth = (i: number): number | null => {
     if (i === 0) return null;
@@ -120,7 +159,7 @@ async function DailyContent({
         Ringkasan Harian
       </h1>
       <p className="mt-1 text-xs text-muted">
-        {store ? `Store ${store}` : "Semua store"} · {month || "-"}
+        {store ? `Store ${store}` : am ? `Area ${am}` : "Semua store"} · {month || "-"}
       </p>
 
       <div className="mt-4">
@@ -129,8 +168,21 @@ async function DailyContent({
           lockedStore={lockedStore}
           currentStore={store}
           currentMonth={month}
+          areaManagers={lockedAM ? [] : amList}
+          lockedAM={lockedAM}
+          currentAM={am}
         />
       </div>
+
+      {amScopeBroken && (
+        <div className="mt-4 rounded-2xl border border-warning/30 bg-warning/10 p-4 text-sm">
+          <p className="font-semibold text-[#FCD34D]">Data area tidak terbaca</p>
+          <p className="mt-1 text-muted">
+            Mapping store area ({am}) tidak dapat dimuat. Minta admin menjalankan{" "}
+            <code>sql/dashboard-rls.sql</code> terbaru di SQL Editor, lalu muat ulang.
+          </p>
+        </div>
+      )}
 
       <section className={`mt-4 ${card}`}>
         <h2 className="text-sm font-semibold text-ink">Daily Trend</h2>

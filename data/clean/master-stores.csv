@@ -1,0 +1,131 @@
+store_code,cost_centre,store_name,store_concept,regional_head,area_manager
+QA01,QFQAQA01,SAMSUNG GRAND OUTLET KARAWANG,Samsung,Zikri Rahmadanor,Kholik Novalaya
+QA02,QFQAQA02,SAMSUNG RITA SUPERMALL TEGAL,Samsung,Alex Fransisco,Amiril Mu'minin
+QA03,QFQAQA03,SAMSUNG PACIFIC MALL TEGAL,Samsung,Alex Fransisco,Amiril Mu'minin
+QA04,QFQAQA04,SAMSUNG UNIMAS SIDOARJO,Samsung,Alex Fransisco,Yudis Setyo Prayogo
+QA05,QFQAQA05,SAMSUNG BASKO CITY MALL PADANG,Samsung,Zikri Rahmadanor,M Rizky Hamdani Siregar
+QA06,QFQAQA06,SAMSUNG PLAZA SEMANGGI,Samsung,Zikri Rahmadanor,Iwan Kurniawan
+QA07,QFQAQA07,SAMSUNG HIVE HARAPAN INDAH,Samsung,Zikri Rahmadanor,Muhammad Aditya Heliansyah
+QD01,QFQDQD01,SEIBU GRAND INDONESIA,Shop in Shop,Zikri Rahmadanor,Andri Wiyoga
+QD02,QFQDQD02,SOGO MALL KELAPA GADING,Shop in Shop,Zikri Rahmadanor,Andri Wiyoga
+QD03,QFQDQD03,SOGO KOTA KASABLANKA,Shop in Shop,Zikri Rahmadanor,Andri Wiyoga
+QD04,QFQDQD04,SOGO PARIS VAN JAVA,Shop in Shop,Zikri Rahmadanor,Kholik Novalaya
+QD05,QFQDQD05,SOGO CENTRAL PARK,Shop in Shop,Zikri Rahmadanor,Andri Wiyoga
+QD07,QFQDQD07,SOGO DELI PARK MALL,Shop in Shop,Zikri Rahmadanor,M Rizky Hamdani Siregar
+QD08,QFQDQD08,SOGO EMPORIUM PLUIT,Shop in Shop,Zikri Rahmadanor,Muhammad Aditya Heliansyah
+QF01,QFQFQF01,DIGIPLUS GRAND INDONESIA,Multibrand,Zikri Rahmadanor,Andri Wiyoga
+QF03,QFQFQF03,DIGIPLUS BINTARO XCHANGE,Multibrand,Zikri Rahmadanor,Iwan Kurniawan
+QF04,QFQFQF04,DIGIPLUS MALL OLYMPIC GARDEN MALANG,Multibrand,Alex Fransisco,Yudis Setyo Prayogo
+QF05,QFQFQF05,DIGIPLUS SOLO PARAGON MALL,Multibrand,Alex Fransisco,Amiril Mu'minin
+QF06,QFQFQF06,DIGIPLUS PIK AVENUE,Multibrand,Zikri Rahmadanor,Muhammad Aditya Heliansyah
+QF07,QFQFQF07,DIGIPLUS MARGOCITY DEPOK,Multibrand,Zikri Rahmadanor,Muhammad Aditya Heliansyah
+QF08,QFQFQF08,DIGIPLUS GANDARIA CITY,Multibrand,Zikri Rahmadanor,Iwan Kurniawan
+QF09,QFQFQF09,DIGIPLUS PAKUWON MALL YOGYAKARTA,Multibrand,Alex Fransisco,Amiril Mu'minin
+QF10,QFQFQF10,DIGIPLUS KOTA KASABLANKA,Multibrand,Zikri Rahmadanor,Andri Wiyoga
+QF11,QFQFQF11,DIGIPLUS WTC MALL SURABAYA,Multibrand,Alex Fransisco,Yudis Setyo Prayogo
+QF12,QFQFQF12,DIGIPLUS PLASA MARINA SURABAYA,Multibrand,Alex Fransisco,Yudis Setyo Prayogo
+QF14,QFQFQF14,DIGIPLUS DUTA MALL BANJARMASIN,Multibrand,Alex Fransisco,Sulaeman Muh. Tahir
+QF15,QFQFQF15,DIGIPLUS BIG MALL SAMARINDA,Multibrand,Alex Fransisco,Sulaeman Muh. Tahir
+QF16,QFQFQF16,DIGIPLUS CIBINONG CITY MALL 2,Multibrand,Zikri Rahmadanor,Iwan Kurniawan
+QF17,QFQFQF17,DIGIPLUS NIPAH PARK MAKASSAR,Multibrand,Alex Fransisco,Sulaeman Muh. Tahir
+QF18,QFQFQF18,DIGIPLUS TRANS STUDIO MALL MAKASSAR,Multibrand,Alex Fransisco,Sulaeman Muh. Tahir
+QF19,QFQFQF19,DIGIPLUS TUNJUNGAN PLAZA 3 SURABAYA,Multibrand,Alex Fransisco,Yudis Setyo Prayogo
+QF1A,QFQFQF1A,DIGIPLUS FS BOULEVARD MAKASSAR,Multibrand,Alex Fransisco,Sulaeman Muh. Tahir
+QF1B,QFQFQF1B,DIGIPLUS FS BULUSARUANG MAKASSAR,Multibrand,Alex Fransisco,Sulaeman Muh. Tahir
+QF1C,QFQFQF1C,DIGIPLUS SUNRISE MOJOKERTO,Multibrand,Alex Fransisco,Yudis Setyo Prayogo
+QF1D,QFQFQF1D,DIGIPLUS SAMARINDA CENTRAL PLAZA,Multibrand,Alex Fransisco,Sulaeman Muh. Tahir
+QF1F,QFQFQF1F,DIGIPLUS PARIS VAN JAVA,Multibrand,Zikri Rahmadanor,Kholik Novalaya
+QF1H,QFQFQF1H,DIGIPLUS CITIMALL KETAPANG,Multibrand,Alex Fransisco,Yudis Setyo Prayogo
+QF1I,QFQFQF1I,DIGIPLUS KUALA KAPUAS,Multibrand,Alex Fransisco,Yudis Setyo Prayogo
+QF1J,QFQFQF1J,DIGIPLUS BASSURA MALL,Multibrand,Zikri Rahmadanor,Andri Wiyoga
+QF1K,QFQFQF1K,DIGIPLUS K SQUARE BATAM,Multibrand,Zikri Rahmadanor,M Rizky Hamdani Siregar
+QF1L,QFQFQF1L,DIGIPLUS SIRA VILLAGE GRAND OUTLET BALI,Multibrand,Alex Fransisco,SUHARTONO
+QF1N,QFQFQF1N,DIGIPLUS AEON MALL JKT GARDEN CITY,Multibrand,Zikri Rahmadanor,Muhammad Aditya Heliansyah
+QF1R,QFQFQF1R,DIGIPLUS LIPPO PLAZA JEMBER,Multibrand,Alex Fransisco,Yudis Setyo Prayogo
+QF20,QFQFQF20,DIGIPLUS THE PARK SEMARANG,Multibrand,Alex Fransisco,Amiril Mu'minin
+QF21,QFQFQF21,DIGIPLUS METROPOLITAN MALL BEKASI,Multibrand,Zikri Rahmadanor,Muhammad Aditya Heliansyah
+QF23,QFQFQF23,DIGIPLUS LIVING WORLD DENPASAR,Multibrand,Alex Fransisco,SUHARTONO
+QF24,QFQFQF24,DIGIPLUS GALAXY MALL SURABAYA,Multibrand,Alex Fransisco,Yudis Setyo Prayogo
+QF25,QFQFQF25,DGIPLUS PARAHYANGAN BANDUNG,Multibrand,Zikri Rahmadanor,Kholik Novalaya
+QF26,QFQFQF26,DIGIPLUS THE GRAND OUTLET KARAWANG,Multibrand,Zikri Rahmadanor,Kholik Novalaya
+QF27,QFQFQF27,DIGIPLUS RITA SUPERMALL PURWOKERTO,Multibrand,Alex Fransisco,Amiril Mu'minin
+QF28,QFQFQF28,DIGIPLUS RITA SUPERMALL TEGAL,Multibrand,Alex Fransisco,Amiril Mu'minin
+QF29,QFQFQF29,DIGIPLUS PLAZA ATRIUM SENEN,Multibrand,Zikri Rahmadanor,Muhammad Aditya Heliansyah
+QF30,QFQFQF30,DIGIPLUS FX SUDIRMAN,Multibrand,Zikri Rahmadanor,Iwan Kurniawan
+QF31,QFQFQF31,DIGIPLUS QUEEN CITY MALL,Multibrand,Alex Fransisco,Amiril Mu'minin
+QF32,QFQFQF32,DIGIPLUS GAIA BUMI RAYA PONTIANAK,Multibrand,Alex Fransisco,Yudis Setyo Prayogo
+QF33,QFQFQF33,DIGIPLUS JAMBI TOWN SQUARE,Multibrand,Zikri Rahmadanor,M Rizky Hamdani Siregar
+QF34,QFQFQF34,DIGIPLUS LIPPO PLAZA JOGJA,Multibrand,Alex Fransisco,Amiril Mu'minin
+QF35,QFQFQF35,DIGIPLUS EWALK BALIKPAPAN SUPERBLOCK,Multibrand,Alex Fransisco,Sulaeman Muh. Tahir
+QF36,QFQFQF36,DIGIPLUS CIPUTRA SEMARANG,Multibrand,Alex Fransisco,Amiril Mu'minin
+QF37,QFQFQF37,DIGIPLUS JOGJA CITY MALL,Multibrand,Alex Fransisco,Amiril Mu'minin
+QF38,QFQFQF38,DIGIPLUS KARAWANG CENTRAL PLAZA,Multibrand,Zikri Rahmadanor,Kholik Novalaya
+QF39,QFQFQF39,DIGIPLUS SUMMARECON BANDUNG,Multibrand,Zikri Rahmadanor,Kholik Novalaya
+QF40,QFQFQF40,DIGIPLUS FESTIVAL CITYLINK BANDUNG,Multibrand,Zikri Rahmadanor,Kholik Novalaya
+QF41,QFQFQF41,DIGIPLUS ARMADA TOWN SQUARE,Multibrand,Alex Fransisco,Amiril Mu'minin
+QF42,QFQFQF42,DIGIPLUS BANDUNG INDAH PLAZA,Multibrand,Zikri Rahmadanor,Kholik Novalaya
+QF43,QFQFQF43,DIGIPLUS BENCOOLEN MALL BENGKULU,Multibrand,Zikri Rahmadanor,M Rizky Hamdani Siregar
+QF44,QFQFQF44,DIGIPLUS AEON DELTAMAS,Multibrand,Zikri Rahmadanor,Muhammad Aditya Heliansyah
+QF45,QFQFQF45,DIGIPLUS TRANSPARK BINTARO,Multibrand,Zikri Rahmadanor,Iwan Kurniawan
+QF46,QFQFQF46,DIGIPLUS ARION MALL,Multibrand,Zikri Rahmadanor,Andri Wiyoga
+QF47,QFQFQF47,DIGIPLUS MANHATTAN MEDAN,Multibrand,Zikri Rahmadanor,M Rizky Hamdani Siregar
+QF48,QFQFQF48,DIGIPLUS SLEMAN CITY HALL,Multibrand,Alex Fransisco,Amiril Mu'minin
+QF49,QFQFQF49,DIGIPLUS CIREBON SUPER BLOCK,Multibrand,Zikri Rahmadanor,Kholik Novalaya
+QF50,QFQFQF50,DIGIPLUS CITIMALL GARUT,Multibrand,Zikri Rahmadanor,Kholik Novalaya
+QF51,QFQFQF51,DIGIPLUS GAJAH MADA,Multibrand,Zikri Rahmadanor,Muhammad Aditya Heliansyah
+QF52,QFQFQF52,DIGIPLUS EKALOS BOGOR,Multibrand,Zikri Rahmadanor,Muhammad Aditya Heliansyah
+QF53,QFQFQF53,DIGIPLUS PAKUWON MALL BEKASI,Multibrand,Zikri Rahmadanor,Muhammad Aditya Heliansyah
+QF54,QFQFQF54,DIGIPLUS CITIMALL GORONTALO,Multibrand,Alex Fransisco,Sulaeman Muh. Tahir
+QF55,QFQFQF55,DIGIPLUS METROPOLITAN CILEUNGSI,Multibrand,Zikri Rahmadanor,Andri Wiyoga
+QF56,QFQFQF56,DIGIPLUS KARTINI LAMPUNG,Multibrand,Zikri Rahmadanor,M Rizky Hamdani Siregar
+QF57,QFQFQF57,DIGIPLUS PAKUWON CITY MALL 3 SURABAYA,Multibrand,Alex Fransisco,Yudis Setyo Prayogo
+QF58,QFQFQF58,DIGIPLUS QMALL BANJARBARU,Multibrand,Alex Fransisco,Sulaeman Muh. Tahir
+QF59,QFQFQF59,DIGIPLUS THE PARK SOLO,Multibrand,Alex Fransisco,Amiril Mu'minin
+QF60,QFQFQF60,DIGIPLUS THE PARK SAWANGAN DEPOK,Multibrand,Zikri Rahmadanor,Muhammad Aditya Heliansyah
+QF61,QFQFQF61,DIGIPLUS SUMMARECON MALL BEKASI,Multibrand,Zikri Rahmadanor,Muhammad Aditya Heliansyah
+QF62,QFQFQF62,DIGIPLUS LIPPO PLAZA BAU BAU,Multibrand,Alex Fransisco,Sulaeman Muh. Tahir
+QF63,QFQFQF63,DIGIPLUS GRAND METROPOLITAN MALL,Multibrand,Zikri Rahmadanor,Muhammad Aditya Heliansyah
+QF64,QFQFQF64,DIGIPLUS THE PARK PEJATEN,Multibrand,Zikri Rahmadanor,Muhammad Aditya Heliansyah
+QF65,QFQFQF65,DIGIPLUS MALL BALI GALERIA,Multibrand,Alex Fransisco,SUHARTONO
+QF66,QFQFQF66,DIGIPLUS PALEMBANG ICON MALL,Multibrand,Zikri Rahmadanor,M Rizky Hamdani Siregar
+QF67,QFQFQF67,DIGIPLUS ARTHA GADING,Multibrand,Zikri Rahmadanor,Andri Wiyoga
+QF68,QFQFQF68,DIGIPLUS LIPPO PLAZA KENDARI,Multibrand,Alex Fransisco,Sulaeman Muh. Tahir
+QF69,QFQFQF69,DIGIPLUS SUMMARECON MALL SERPONG,Multibrand,Zikri Rahmadanor,Iwan Kurniawan
+QF70,QFQFQF70,DIGIPLUS MEGA MALL BATAM CENTRE,Multibrand,Zikri Rahmadanor,M Rizky Hamdani Siregar
+QF71,QFQFQF71,DIGIPLUS SUMMARECON MALL KELAPA GADING,Multibrand,Zikri Rahmadanor,Andri Wiyoga
+QF72,QFQFQF72,DIGIPLUS LIVING WORLD ALAM SUTERA,Multibrand,Zikri Rahmadanor,Iwan Kurniawan
+QF73,QFQFQF73,DIGIPLUS PALEMBANG TRADE CENTRE,Multibrand,Zikri Rahmadanor,M Rizky Hamdani Siregar
+QF74,QFQFQF74,DIGIPLUS PLAZA MILLENIUM MEDAN,Multibrand,Zikri Rahmadanor,M Rizky Hamdani Siregar
+QF75,QFQFQF75,DIGIPLUS LOTTE SHOPPING AVENUE,Multibrand,Zikri Rahmadanor,Iwan Kurniawan
+QF76,QFQFQF76,DIGIPLUS DP MALL SEMARANG,Multibrand,Alex Fransisco,Amiril Mu'minin
+QF77,QFQFQF77,DIGIPLUS TSM BALI,Multibrand,Alex Fransisco,SUHARTONO
+QF78,QFQFQF78,DIGIPLUS BANDUNG ELECTRONIC CENTRE,Multibrand,Zikri Rahmadanor,Kholik Novalaya
+QF79,QFQFQF79,DIGIPLUS GRAGE MALL,Multibrand,Zikri Rahmadanor,Kholik Novalaya
+QF80,QFQFQF80,DIGIPLUS MALL SKA PEKANBARU,Multibrand,Zikri Rahmadanor,M Rizky Hamdani Siregar
+QF81,QFQFQF81,DIGIPLUS LIVING WORLD GRAND WISATA,Multibrand,Zikri Rahmadanor,Andri Wiyoga
+QF82,QFQFQF82,DIGIPLUS ONE BATAM MALL,Multibrand,Zikri Rahmadanor,M Rizky Hamdani Siregar
+QF83,QFQFQF83,DIGIPLUS LOMBOK EPICENTRUM,Multibrand,Alex Fransisco,Yudis Setyo Prayogo
+QF84,QFQFQF84,DIGIPLUS RESINDA PARK MALL,Multibrand,Zikri Rahmadanor,Kholik Novalaya
+QF85,QFQFQF85,DIGIPLUS MALL CIPUTRA TANGERANG,Multibrand,Zikri Rahmadanor,Iwan Kurniawan
+QF86,QFQFQF86,DIGIPLUS DUTA MALL PALANGKA RAYA,Multibrand,Alex Fransisco,Yudis Setyo Prayogo
+QF87,QFQFQF87,DIGIPLUS PURI INDAH MALL,Multibrand,Zikri Rahmadanor,Iwan Kurniawan
+QF88,QFQFQF88,DIGIPLUS MALL RATU INDAH MAKASSAR,Multibrand,Alex Fransisco,Sulaeman Muh. Tahir
+QF89,QFQFQF89,DIGIPLUS SUN PLAZA MEDAN,Multibrand,Zikri Rahmadanor,M Rizky Hamdani Siregar
+QF90,QFQFQF90,DIGIPLUS KLATEN TOWN SQUARE,Multibrand,Alex Fransisco,Amiril Mu'minin
+QF91,QFQFQF91,DIGIPLUS ROYAL PLAZA SURABAYA,Multibrand,Alex Fransisco,Yudis Setyo Prayogo
+QF92,QFQFQF92,DIGIPLUS MALUKU CITY MALL,Multibrand,Alex Fransisco,Sulaeman Muh. Tahir
+QF93,QFQFQF93,DIGIPLUS DELI PARK MALL,Multibrand,Zikri Rahmadanor,M Rizky Hamdani Siregar
+QF94,QFQFQF94,DIGIPLUS CITIMALL BONTANG,Multibrand,Alex Fransisco,Sulaeman Muh. Tahir
+QF95,QFQFQF95,DIGIPLUS MALL CIPUTRA JAKARTA,Multibrand,Zikri Rahmadanor,Andri Wiyoga
+QF97,QFQFQF97,DIGIPLUS TEUKU UMAR BALI,Multibrand,Alex Fransisco,SUHARTONO
+QF98,QFQFQF98,DIGIPLUS TEROGONG RAYA,Multibrand,Zikri Rahmadanor,Iwan Kurniawan
+QF99,QFQFQF99,DIGIPLUS 23 SEMARANG MALL,Multibrand,Alex Fransisco,Amiril Mu'minin
+QG01,QFQGQG01,PLANET SPORTS SENAYAN CITY,Apple Zone,Zikri Rahmadanor,Iwan Kurniawan
+QG02,QFQGQG02,PLANET SPORTS PIM 1,Apple Zone,Zikri Rahmadanor,Iwan Kurniawan
+QG03,QFQGQG03,PLANET SPORTS GI,Apple Zone,Zikri Rahmadanor,Andri Wiyoga
+QG04,QFQGQG04,PLANET SPORTS MKG,Apple Zone,Zikri Rahmadanor,Andri Wiyoga
+QH01,QFQHQH01,DIGIPLUS PLANET SPORT BXC2,Apple Zone,Zikri Rahmadanor,Iwan Kurniawan
+QH02,QFQHQH02,DIGIPLUS PLANET SPORT TP6,Apple Zone,Alex Fransisco,Yudis Setyo Prayogo
+QK01,QFQKQK01,SAMSUNG GRAND MALL PALU,Samsung,Alex Fransisco,Sulaeman Muh. Tahir
+QK02,QFQKQK02,SAMSUNG SUZUYA MERDEKA MALL SIANTAR,Samsung,Zikri Rahmadanor,M Rizky Hamdani Siregar
+QK03,QFQKQK03,SAMSUNG SHILA AT SAWANGAN,Samsung,Zikri Rahmadanor,Muhammad Aditya Heliansyah

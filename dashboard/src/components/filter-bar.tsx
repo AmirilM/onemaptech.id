@@ -13,6 +13,9 @@ type Props = {
   currentFrom?: string;
   currentTo?: string;
   showDate?: boolean;
+  areaManagers?: string[];
+  lockedAM?: string | null;
+  currentAM?: string;
 };
 
 function parseISODate(s: string): Date | undefined {
@@ -67,12 +70,16 @@ export default function FilterBar({
   currentFrom = "",
   currentTo = "",
   showDate = true,
+  areaManagers = [],
+  lockedAM = null,
+  currentAM = "",
 }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [store, setStore] = useState(currentStore);
+  const [am, setAm] = useState(lockedAM ?? currentAM);
   const [range, setRange] = useState<DateRange | undefined>(() =>
     showDate ? rangeFromParams(currentFrom, currentTo) : undefined,
   );
@@ -86,10 +93,11 @@ export default function FilterBar({
   const panelRef = useRef<HTMLDivElement>(null);
 
   // Sync saat back/forward navigation — render-time adjust (tanpa effect)
-  const [prev, setPrev] = useState({ s: currentStore, f: currentFrom, t: currentTo });
-  if (currentStore !== prev.s || (showDate && (currentFrom !== prev.f || currentTo !== prev.t))) {
-    setPrev({ s: currentStore, f: currentFrom, t: currentTo });
+  const [prev, setPrev] = useState({ s: currentStore, f: currentFrom, t: currentTo, a: lockedAM ?? currentAM });
+  if (currentStore !== prev.s || (showDate && (currentFrom !== prev.f || currentTo !== prev.t)) || (lockedAM ?? currentAM) !== prev.a) {
+    setPrev({ s: currentStore, f: currentFrom, t: currentTo, a: lockedAM ?? currentAM });
     setStore(currentStore);
+    setAm(lockedAM ?? currentAM);
     if (showDate) setRange(rangeFromParams(currentFrom, currentTo));
   }
 
@@ -121,10 +129,12 @@ export default function FilterBar({
     };
   }, [open ]);
 
-  function push(storeVal: string, r: DateRange | undefined) {
+  function push(storeVal: string, r: DateRange | undefined, amVal: string = am) {
     const next = new URLSearchParams(params.toString());
     if (storeVal) next.set("store", storeVal);
     else next.delete("store");
+    if (amVal) next.set("am", amVal);
+    else next.delete("am");
     if (showDate) {
       if (r?.from && r?.to) {
         next.set("from", toISODate(r.from));
@@ -146,6 +156,13 @@ export default function FilterBar({
     push(v, range);
   }
 
+  function handleAM(v: string) {
+    // Ketat: ganti AM → reset store (store harus milik AM tersebut).
+    setAm(v);
+    setStore("");
+    push("", range, v);
+  }
+
   function handleSelect(r: DateRange | undefined) {
     setRange(r);
     // Auto-run hanya saat range lengkap; klik pertama (from saja) belum push
@@ -160,9 +177,20 @@ export default function FilterBar({
   function reset() {
     const s = lockedStore ?? "";
     setStore(s);
+    setAm(lockedAM ?? "");
     setRange(undefined);
     setOpen(false);
-    startTransition(() => router.replace(pathname));
+    startTransition(() => {
+      if (lockedAM || lockedStore) {
+        const next = new URLSearchParams();
+        if (lockedAM) next.set("am", lockedAM);
+        if (lockedStore) next.set("store", lockedStore);
+        const qs = next.toString();
+        router.replace(qs ? `${pathname}?${qs}` : pathname);
+      } else {
+        router.replace(pathname);
+      }
+    });
   }
 
   const input =
@@ -170,6 +198,24 @@ export default function FilterBar({
 
   return (
     <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-line bg-surface p-4 shadow-sm">
+      {(areaManagers.length > 0 || lockedAM) && (
+        <label className="flex w-full flex-col gap-1 text-xs text-muted sm:w-auto">
+          Area Manager
+          <select
+            value={am}
+            onChange={(e) => handleAM(e.target.value)}
+            disabled={!!lockedAM}
+            className={`${input} w-full disabled:opacity-60 sm:w-auto sm:min-w-56`}
+          >
+            <option value="">Semua area</option>
+            {(lockedAM ? [lockedAM] : areaManagers).map((a) => (
+              <option key={a} value={a}>
+                {a}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       <label className="flex w-full flex-col gap-1 text-xs text-muted sm:w-auto">
         Store
         <select
@@ -278,6 +324,11 @@ export default function FilterBar({
       {lockedStore && (
         <span className="w-full text-xs text-warning sm:w-auto">
           Terkunci ke store {lockedStore} (role kamu).
+        </span>
+      )}
+      {lockedAM && !lockedStore && (
+        <span className="w-full text-xs text-warning sm:w-auto">
+          Terkunci ke area {lockedAM} — hanya store milikmu yang tampil.
         </span>
       )}
     </div>
