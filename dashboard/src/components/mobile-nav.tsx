@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react";
 import { initials } from "@/lib/names";
 import LogoutButton from "@/components/logout-button";
 import SidebarNav from "@/components/sidebar";
@@ -50,9 +51,9 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
           aria-label="Buka menu"
           aria-expanded={open}
           aria-controls="mobile-drawer"
-          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-white/10 px-3 py-1.5 text-lg leading-none text-zinc-200 active:bg-white/10"
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-white/10 px-3 py-1.5 leading-none text-zinc-200 active:bg-white/10"
         >
-          ☰
+          <Menu size={20} aria-hidden />
         </button>
       </div>
 
@@ -80,7 +81,7 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
                 aria-label="Tutup menu"
                 className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-white/10 px-3 py-1.5 text-zinc-300 active:bg-white/10"
               >
-                ✕
+                <X size={20} aria-hidden />
               </button>
             </div>
             <div className="mt-2 flex-1 overflow-y-auto" onClick={() => setOpen(false)}>

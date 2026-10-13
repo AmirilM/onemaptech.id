@@ -2,14 +2,23 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  CalendarDays,
+  ClipboardList,
+  LayoutDashboard,
+  Package,
+  Settings,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 
-const ITEMS = [
-  { href: "/", label: "Dashboard", icon: "◧" },
-  { href: "/daily", label: "Daily Summary", icon: "◔" },
-  { href: "/products", label: "Product Analytics", icon: "⬣" },
-  { href: "/report", label: "Report", icon: "▤" },
-  { href: "/users", label: "User Management", icon: "⛉", admin: true },
-  { href: "/settings", label: "Settings", icon: "⚙" },
+const ITEMS: { href: string; label: string; icon: LucideIcon; admin?: boolean }[] = [
+  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/daily", label: "Daily Summary", icon: CalendarDays },
+  { href: "/products", label: "Product Analytics", icon: Package },
+  { href: "/report", label: "Report", icon: ClipboardList },
+  { href: "/users", label: "User Management", icon: Users, admin: true },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export default function SidebarNav({ isAdmin }: { isAdmin: boolean }) {
@@ -19,6 +28,7 @@ export default function SidebarNav({ isAdmin }: { isAdmin: boolean }) {
       {ITEMS.filter((i) => !i.admin || isAdmin).map((i) => {
         const active =
           i.href === "/" ? pathname === "/" : pathname.startsWith(i.href);
+        const Icon = i.icon;
         return (
           <Link
             key={i.href}
@@ -29,7 +39,7 @@ export default function SidebarNav({ isAdmin }: { isAdmin: boolean }) {
                 : "text-zinc-400 hover:bg-white/5 hover:text-zinc-100"
             }`}
           >
-            <span className="w-5 text-center">{i.icon}</span>
+            <Icon size={18} strokeWidth={2} aria-hidden className="shrink-0" />
             {i.label}
           </Link>
         );

@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { num, pct, rupiahCompact } from "@/lib/format";
@@ -11,6 +12,7 @@ import type {
   TopProductRow,
 } from "@/lib/types";
 import FilterBar from "@/components/filter-bar";
+import ClearRangeButton from "@/components/clear-range-button";
 import GreetHead from "@/components/greet-head";
 import TrendChart from "@/components/trend-chart";
 
@@ -41,13 +43,20 @@ function kpiCard(
           {pct(ach)}
         </span>
       </div>
-      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+      <div
+        className="relative mt-2 h-1.5 overflow-hidden rounded-full bg-white/10"
+        role="img"
+        aria-label={`${label}: revenue ${rupiahCompact(revenue)}, target ${rupiahCompact(target)}, achievement ${pct(ach)}`}
+      >
+        <div className="absolute inset-y-0 left-0 w-[80%] bg-rose-400/15" />
+        <div className="absolute inset-y-0 left-[80%] w-[20%] bg-amber-300/15" />
         <div
-          className={`h-full rounded-full ${bar}`}
+          className={`absolute inset-y-0 left-0 rounded-full ${bar}`}
           style={{
             width: `${Math.min(100, ach ?? 0)}%`,
           }}
         />
+        <div className="absolute inset-y-0 right-0 w-0.5 bg-white/70" />
       </div>
       {over && (
         <p className="mt-1 text-[11px] font-medium text-emerald-300">
@@ -64,15 +73,30 @@ export default function DashboardPage({
   searchParams: Promise<Params>;
 }) {
   return (
-    <Suspense
-      fallback={
-        <main className="mx-auto max-w-7xl p-8 text-sm text-zinc-500">
-          Memuat dashboard...
-        </main>
-      }
-    >
+    <Suspense fallback={<DashboardSkeleton />}>
       <DashContent searchParams={searchParams} />
     </Suspense>
+  );
+}
+
+function DashboardSkeleton() {
+  const pulse = "animate-pulse rounded-2xl border border-white/10 bg-white/[0.03]";
+  return (
+    <main aria-busy="true" aria-label="Memuat dashboard" className="mx-auto max-w-7xl p-4 md:p-8">
+      <div className="h-3 w-24 rounded bg-white/10" />
+      <div className="mt-2 h-8 w-64 max-w-full rounded bg-white/10" />
+      <div className={`mt-4 h-[76px] ${pulse}`} />
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        {["Total", "Apple", "Android", "Accessories", "VAS"].map((l) => (
+          <div key={l} className={`${pulse} h-[132px]`} />
+        ))}
+      </div>
+      <div className={`mt-4 h-80 ${pulse}`} />
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className={`${pulse} h-72`} />
+        <div className={`${pulse} h-72`} />
+      </div>
+    </main>
   );
 }
 
@@ -288,6 +312,15 @@ async function DashContent({
   const td = "px-3 py-2.5 text-sm tabular-nums";
   const card = "rounded-2xl border border-white/10 bg-white/[0.03] p-4 md:p-5";
 
+  // Deep-link ke tampilan 1 store, periode tetap dipertahankan
+  function storeHref(code: string) {
+    const q = new URLSearchParams();
+    q.set("store", code);
+    if (from) q.set("from", from);
+    if (to) q.set("to", to);
+    return `/?${q.toString()}`;
+  }
+
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-8">
       <header>
@@ -303,7 +336,7 @@ async function DashContent({
         </p>
       </header>
 
-      <div className="mt-5">
+      <div className="mt-4">
         <FilterBar
           stores={(storeList ?? []) as { store_code: string; store_name: string | null }[]}
           lockedStore={lockedStore}
@@ -313,7 +346,7 @@ async function DashContent({
         />
       </div>
 
-      <section aria-label="Ringkasan revenue" className="mt-5">
+      <section aria-label="Ringkasan revenue" className="mt-4">
         <h2 className="sr-only">Ringkasan revenue</h2>
         <p className="mb-3 text-xs text-zinc-500">
           {hasDateFilter
@@ -346,9 +379,12 @@ async function DashContent({
             <TrendChart data={trend} />
           </div>
         ) : (
-          <p className="py-10 text-center text-sm text-zinc-500">
-            Tidak ada data pada rentang ini.
-          </p>
+          <div className="py-10 text-center">
+            <p className="text-sm text-zinc-500">
+              Tidak ada data pada rentang ini.
+            </p>
+            {(from || to) && <ClearRangeButton />}
+          </div>
         )}
       </section>
 
@@ -384,7 +420,13 @@ async function DashContent({
                       {r.rank_achievement}
                     </td>
                     <td className={td}>
-                      <span className="font-medium">{r.store_code}</span>
+                      <Link
+                        href={storeHref(r.store_code)}
+                        title={`Lihat store ${r.store_code}`}
+                        className="font-medium text-cyan-200 underline-offset-4 hover:underline"
+                      >
+                        {r.store_code}
+                      </Link>
                       <span className="block max-w-48 truncate text-xs text-zinc-500">
                         {r.store_name}
                       </span>
@@ -463,7 +505,7 @@ async function DashContent({
         </section>
       </div>
 
-      <footer className="mt-6 text-center text-xs text-zinc-600">
+      <footer className="mt-6 text-center text-xs text-zinc-500">
         OneMapTech · refresh harian
       </footer>
     </main>

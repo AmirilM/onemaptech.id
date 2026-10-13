@@ -44,8 +44,8 @@ select option {
   --rdp-today-color: #22d3ee;
   --rdp-range_middle-background-color: rgba(34, 211, 238, 0.12);
   --rdp-range_middle-color: #f4f4f5;
-  --rdp-day-width: 36px;
-  --rdp-day-height: 36px;
+  --rdp-day-width: 40px;
+  --rdp-day-height: 40px;
 }
 .rdp-dark .rdp-month_caption {
   color: #f4f4f5;
@@ -62,4 +62,22 @@ select option {
 .rdp-dark .rdp-button_previous .rdp-chevron,
 .rdp-dark .rdp-button_next .rdp-chevron {
   fill: #a1a1aa;
+}
+
+/* Focus terlihat untuk semua kontrol interaktif */
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 2px solid rgba(34, 211, 238, 0.7);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
