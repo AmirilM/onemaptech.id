@@ -3,6 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { DayPicker, type DateRange } from "react-day-picker";
+import { id } from "react-day-picker/locale/id";
 import "react-day-picker/style.css";
 
 type Props = {
@@ -16,8 +17,18 @@ type Props = {
 function parseISODate(s: string): Date | undefined {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
   if (!m) return undefined;
-  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
-  return Number.isNaN(d.getTime()) ? undefined : d;
+  const y = Number(m[1]);
+  const mo = Number(m[2]);
+  const d = Number(m[3]);
+  const dt = new Date(y, mo - 1, d);
+  if (
+    dt.getFullYear() !== y ||
+    dt.getMonth() !== mo - 1 ||
+    dt.getDate() !== d
+  ) {
+    return undefined;
+  }
+  return dt;
 }
 
 function toISODate(d: Date): string {
@@ -64,7 +75,12 @@ export default function FilterBar({
     rangeFromParams(currentFrom, currentTo),
   );
   const [open, setOpen] = useState(false);
-  const [months, setMonths] = useState(1);
+  const [months, setMonths] = useState(() =>
+    typeof window !== "undefined" &&
+    window.matchMedia("(min-width: 768px)").matches
+      ? 2
+      : 1,
+  );
   const panelRef = useRef<HTMLDivElement>(null);
 
   // Sync saat back/forward navigation — render-time adjust (tanpa effect)
@@ -165,7 +181,7 @@ export default function FilterBar({
       </label>
 
       <div ref={panelRef} className="relative w-full sm:w-auto">
-        <span className="mb-1 flex items-center gap-2 text-xs text-zinc-400">
+        <span id="periode-label" className="mb-1 flex items-center gap-2 text-xs text-zinc-400">
           Periode
           {isPending && <span className="text-cyan-300">Memuat…</span>}
         </span>
@@ -173,9 +189,14 @@ export default function FilterBar({
           type="button"
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
+          aria-haspopup="dialog"
+          aria-labelledby="periode-label periode-value"
           className={`${input} flex w-full items-center justify-between gap-3 sm:w-auto sm:min-w-64`}
         >
-          <span className={range?.from ? "text-zinc-100" : "text-zinc-500"}>
+          <span
+            id="periode-value"
+            className={range?.from ? "text-zinc-100" : "text-zinc-500"}
+          >
             {rangeLabel(range)}
           </span>
           <svg
@@ -198,9 +219,11 @@ export default function FilterBar({
         </button>
 
         {open && (
-          <div className="absolute left-0 top-full z-30 mt-2 max-w-[calc(100vw-2rem)] overflow-x-auto rounded-2xl border border-white/10 bg-[#0b1220] p-3 shadow-2xl shadow-black/60">
+          <div className="absolute left-0 top-full z-50 mt-2 max-w-[calc(100vw-2rem)] overflow-x-auto rounded-2xl border border-white/10 bg-[#0b1220] p-3 shadow-2xl shadow-black/60">
             <DayPicker
               mode="range"
+              locale={id}
+              weekStartsOn={1}
               selected={range}
               onSelect={handleSelect}
               numberOfMonths={months}
@@ -209,7 +232,9 @@ export default function FilterBar({
             />
             <div className="mt-2 flex items-center justify-between gap-2 border-t border-white/10 pt-2">
               <span className="px-1 text-xs text-zinc-400">
-                {rangeLabel(range)}
+                {range?.from && !range.to
+                  ? "Pilih tanggal kedua untuk rentang"
+                  : rangeLabel(range)}
               </span>
               <span className="flex gap-2">
                 {range?.from && (

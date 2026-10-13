@@ -20,15 +20,19 @@ type Point = {
 };
 
 function compact(v: number): string {
-  if (Math.abs(v) >= 1_000_000_000) return `${(v / 1_000_000_000).toFixed(1)}M`;
-  if (Math.abs(v) >= 1_000_000) return `${(v / 1_000_000).toFixed(0)}jt`;
-  if (Math.abs(v) >= 1_000) return `${(v / 1_000).toFixed(0)}rb`;
-  return `${v}`;
+  const a = Math.abs(v);
+  if (a >= 1_000_000_000)
+    return `${(v / 1_000_000_000).toLocaleString("id-ID", { maximumFractionDigits: 1 })} M`;
+  if (a >= 1_000_000)
+    return `${(v / 1_000_000).toLocaleString("id-ID", { maximumFractionDigits: 1 })} jt`;
+  if (a >= 1_000)
+    return `${(v / 1_000).toLocaleString("id-ID", { maximumFractionDigits: 0 })} rb`;
+  return v.toLocaleString("id-ID");
 }
 
 export default function TrendChart({ data }: { data: Point[] }) {
   return (
-    <div className="h-72 w-full">
+    <div className="h-64 w-full sm:h-72">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
