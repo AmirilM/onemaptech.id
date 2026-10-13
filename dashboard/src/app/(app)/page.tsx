@@ -13,6 +13,7 @@ import type {
 } from "@/lib/types";
 import FilterBar from "@/components/filter-bar";
 import GreetHead from "@/components/greet-head";
+import QtyBarChart, { type QtyBarItem } from "@/components/qty-bar-chart";
 import TrendChart from "@/components/trend-chart";
 import {
   Apple,
@@ -279,40 +280,108 @@ async function DashContent({
     revenue_android: number;
     revenue_accessories: number;
     revenue_vas: number;
+    qty_mac: number;
+    qty_iphone: number;
+    qty_ipad: number;
+    qty_apple_watch: number;
+    qty_samsung: number;
+    qty_oppo: number;
+    qty_xiaomi: number;
+    qty_huawei: number;
+    qty_infinix: number;
+    qty_motorola: number;
   };
+  const QTY_SELECT =
+    "date,revenue_total,revenue_apple,revenue_android,revenue_accessories,revenue_vas,qty_mac,qty_iphone,qty_ipad,qty_apple_watch,qty_samsung,qty_oppo,qty_xiaomi,qty_huawei,qty_infinix,qty_motorola";
+  const toTrendPoint = (d: DailyRow) => ({
+    date: d.date,
+    revenue_total: d.revenue_total,
+    revenue_apple: d.revenue_apple,
+    revenue_android: d.revenue_android,
+    revenue_accessories: d.revenue_accessories,
+    revenue_vas: d.revenue_vas,
+    qty_mac: d.qty_mac,
+    qty_iphone: d.qty_iphone,
+    qty_ipad: d.qty_ipad,
+    qty_apple_watch: d.qty_apple_watch,
+    qty_samsung: d.qty_samsung,
+    qty_oppo: d.qty_oppo,
+    qty_xiaomi: d.qty_xiaomi,
+    qty_huawei: d.qty_huawei,
+    qty_infinix: d.qty_infinix,
+    qty_motorola: d.qty_motorola,
+  });
   let trend: TrendPoint[] = [];
   if (store) {
     const { data } = await supabase
       .from("mv_dashboard_store_daily")
-      .select(
-        "date,revenue_total,revenue_apple,revenue_android,revenue_accessories,revenue_vas",
-      )
+      .select(QTY_SELECT)
       .eq("store_code", store)
       .order("date");
-    trend = ((data ?? []) as StoreDailyRow[]).map((d) => ({
-      date: d.date,
-      revenue_total: d.revenue_total,
-      revenue_apple: d.revenue_apple,
-      revenue_android: d.revenue_android,
-      revenue_accessories: d.revenue_accessories,
-      revenue_vas: d.revenue_vas,
-    }));
+    trend = ((data ?? []) as StoreDailyRow[]).map(toTrendPoint);
   } else {
     const { data } = await supabase
       .from("mv_dashboard_daily")
-      .select(
-        "date,revenue_total,revenue_apple,revenue_android,revenue_accessories,revenue_vas",
-      )
+      .select(QTY_SELECT)
       .order("date");
-    trend = ((data ?? []) as DailyRow[]).map((d) => ({
-      date: d.date,
-      revenue_total: d.revenue_total,
-      revenue_apple: d.revenue_apple,
-      revenue_android: d.revenue_android,
-      revenue_accessories: d.revenue_accessories,
-      revenue_vas: d.revenue_vas,
-    }));
+    trend = ((data ?? []) as DailyRow[]).map(toTrendPoint);
   }
+  const byQtyDesc = (items: QtyBarItem[]) =>
+    [...items].sort((a, b) => b.qty - a.qty);
+  const appleQty = byQtyDesc([
+    {
+      label: "iPhone",
+      qty: trend.reduce((a, p) => a + p.qty_iphone, 0),
+      fill: "#38bdf8",
+    },
+    {
+      label: "Mac",
+      qty: trend.reduce((a, p) => a + p.qty_mac, 0),
+      fill: "#22d3ee",
+    },
+    {
+      label: "iPad",
+      qty: trend.reduce((a, p) => a + p.qty_ipad, 0),
+      fill: "#a78bfa",
+    },
+    {
+      label: "Watch",
+      qty: trend.reduce((a, p) => a + p.qty_apple_watch, 0),
+      fill: "#34d399",
+    },
+  ]);
+  const androidQty = byQtyDesc([
+    {
+      label: "Samsung",
+      qty: trend.reduce((a, p) => a + p.qty_samsung, 0),
+      fill: "#818cf8",
+    },
+    {
+      label: "Oppo",
+      qty: trend.reduce((a, p) => a + p.qty_oppo, 0),
+      fill: "#34d399",
+    },
+    {
+      label: "Xiaomi",
+      qty: trend.reduce((a, p) => a + p.qty_xiaomi, 0),
+      fill: "#fb923c",
+    },
+    {
+      label: "Huawei",
+      qty: trend.reduce((a, p) => a + p.qty_huawei, 0),
+      fill: "#fb7185",
+    },
+    {
+      label: "Infinix",
+      qty: trend.reduce((a, p) => a + p.qty_infinix, 0),
+      fill: "#fbbf24",
+    },
+    {
+      label: "Motorola",
+      qty: trend.reduce((a, p) => a + p.qty_motorola, 0),
+      fill: "#22d3ee",
+    },
+  ]);
 
   // Top product (global — MV tanpa dimensi store)
   const { data: topRaw } = await supabase
@@ -445,27 +514,67 @@ async function DashContent({
         </div>
       </section>
 
-      <section className={`mt-4 ${card}`}>
-        <h2 className="text-sm font-semibold">Tren Revenue Harian</h2>
-        <p className="mb-3 text-xs text-zinc-500">
-          {store ? `Store ${store}` : "Semua store"} · s.d. {latestDate} ·
-          sumbu dalam Rp
-        </p>
-        {trend.length ? (
-          <div
-            role="img"
-            aria-label={`Grafik tren revenue harian, ${trend.length} titik data`}
-          >
-            <TrendChart data={trend} />
-          </div>
-        ) : (
-          <div className="py-10 text-center">
-            <p className="text-sm text-zinc-500">
-              Tidak ada data pada periode ini.
-            </p>
-          </div>
-        )}
-      </section>
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <section className={card} aria-label="Tren revenue harian">
+          <h2 className="text-sm font-semibold">Tren Revenue Harian</h2>
+          <p className="mb-3 text-xs text-zinc-500">
+            {store ? `Store ${store}` : "Semua store"} · s.d. {latestDate} ·
+            sumbu dalam Rp
+          </p>
+          {trend.length ? (
+            <div
+              role="img"
+              aria-label={`Grafik tren revenue harian, ${trend.length} titik data`}
+            >
+              <TrendChart data={trend} />
+            </div>
+          ) : (
+            <div className="py-10 text-center">
+              <p className="text-sm text-zinc-500">
+                Tidak ada data pada periode ini.
+              </p>
+            </div>
+          )}
+        </section>
+
+        <section className={card} aria-label="Apple qty total">
+          <h2 className="text-sm font-semibold">Apple Qty</h2>
+          <p className="mb-3 text-xs text-zinc-500">
+            {store ? `Store ${store}` : "Semua store"} · total periode · unit
+          </p>
+          {trend.length ? (
+            <QtyBarChart
+              data={appleQty}
+              ariaLabel="Grafik total qty Apple: Mac, iPad, iPhone, Watch, urut terbesar"
+            />
+          ) : (
+            <div className="py-10 text-center">
+              <p className="text-sm text-zinc-500">
+                Tidak ada data pada periode ini.
+              </p>
+            </div>
+          )}
+        </section>
+
+        <section className={card} aria-label="Android qty total">
+          <h2 className="text-sm font-semibold">Android Qty</h2>
+          <p className="mb-3 text-xs text-zinc-500">
+            {store ? `Store ${store}` : "Semua store"} · total periode · unit
+          </p>
+          {trend.length ? (
+            <QtyBarChart
+              data={androidQty}
+              ariaLabel="Grafik total qty Android: Samsung, Oppo, Xiaomi, Huawei, Infinix, Motorola, urut terbesar"
+            />
+          ) : (
+            <div className="py-10 text-center">
+              <p className="text-sm text-zinc-500">
+                Tidak ada data pada periode ini.
+              </p>
+            </div>
+          )}
+        </section>
+      </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <section className={card}>
