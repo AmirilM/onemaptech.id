@@ -38,17 +38,17 @@ function BrandShareTooltip({
   return (
     <div
       style={{
-        background: "#14141F",
-        border: "1px solid #262638",
+        background: "#FFFFFF",
+        border: "1px solid #E8E8EF",
         borderRadius: 12,
         fontSize: 12,
         maxWidth: "80vw",
         padding: "8px 12px",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+        boxShadow: "0 8px 24px rgba(23,23,28,0.12)",
       }}
     >
-      <p style={{ color: "#EDE9FE", margin: 0, fontWeight: 600 }}>{name}</p>
-      <p style={{ color: "#C9C5DB", margin: "4px 0 0" }}>
+      <p style={{ color: "#17171C", margin: 0, fontWeight: 600 }}>{name}</p>
+      <p style={{ color: "#4B5563", margin: "4px 0 0" }}>
         {num(qty)} unit ({pct(share)})
       </p>
     </div>

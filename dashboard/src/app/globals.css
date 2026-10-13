@@ -3,41 +3,41 @@
 @theme {
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
 
-  --color-canvas: #0b0b14;
-  --color-surface: #14141f;
-  --color-elevated: #1b1b2a;
-  --color-line: #262638;
-  --color-track: #1e1e2e;
-  --color-ink: #ede9fe;
-  --color-muted: #9aa0b2;
-  --color-soft: #c9c5db;
-  --color-faint: #6d7186;
-  --color-primary: #8b5cf6;
-  --color-primary-hover: #7c3aed;
-  --color-primary-bright: #a78bfa;
-  --color-primary-dim: rgba(139, 92, 246, 0.14);
-  --color-secondary: #22d3ee;
-  --color-accent: #34d399;
-  --color-warning: #fbbf24;
-  --color-danger: #fb7185;
-  --color-success: #34d399;
+  --color-canvas: #f4f5fa;
+  --color-surface: #ffffff;
+  --color-elevated: #ffffff;
+  --color-line: #e8e8ef;
+  --color-track: #ede9fe;
+  --color-ink: #17171c;
+  --color-muted: #6b7280;
+  --color-soft: #4b5563;
+  --color-faint: #9ca3af;
+  --color-primary: #7c3aed;
+  --color-primary-hover: #6d28d9;
+  --color-primary-bright: #7c3aed;
+  --color-primary-dim: rgba(124, 58, 237, 0.1);
+  --color-secondary: #0891b2;
+  --color-accent: #059669;
+  --color-warning: #b45309;
+  --color-danger: #dc2626;
+  --color-success: #059669;
 
   /* Compat lama: navy -> violet, gold -> amber */
-  --color-navy: #8b5cf6;
-  --color-navy-hover: #7c3aed;
-  --color-gold: #fbbf24;
-  --color-gold-deep: #fcd34d;
+  --color-navy: #7c3aed;
+  --color-navy-hover: #6d28d9;
+  --color-gold: #d97706;
+  --color-gold-deep: #b45309;
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
   -webkit-text-size-adjust: 100%;
 }
 
 body {
   background:
-    radial-gradient(1000px 420px at 12% -10%, rgba(139, 92, 246, 0.14), transparent 60%),
-    radial-gradient(900px 420px at 88% -8%, rgba(34, 211, 238, 0.08), transparent 55%),
+    radial-gradient(900px 380px at 85% -10%, rgba(124, 58, 237, 0.12), transparent 60%),
+    radial-gradient(700px 320px at 60% -8%, rgba(139, 92, 246, 0.08), transparent 55%),
     var(--color-canvas);
   color: var(--color-ink);
   font-family: var(--font-sans);
@@ -50,13 +50,12 @@ body {
 .overflow-x-auto {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
-  scrollbar-color: rgba(237, 233, 254, 0.25) transparent;
+  scrollbar-color: rgba(23, 23, 28, 0.25) transparent;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="month"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
-  filter: invert(0.75);
 }
 
 select option {
@@ -64,12 +63,12 @@ select option {
   color: var(--color-ink);
 }
 
-/* react-day-picker — violet dark theme override */
+/* react-day-picker — violet light theme override */
 .rdp-premium {
   --rdp-accent-color: var(--color-primary);
-  --rdp-accent-background-color: rgba(139, 92, 246, 0.18);
-  --rdp-today-color: var(--color-primary-bright);
-  --rdp-range_middle-background-color: rgba(139, 92, 246, 0.18);
+  --rdp-accent-background-color: rgba(124, 58, 237, 0.1);
+  --rdp-today-color: var(--color-primary);
+  --rdp-range_middle-background-color: rgba(124, 58, 237, 0.1);
   --rdp-range_middle-color: var(--color-ink);
   --rdp-day-width: 40px;
   --rdp-day-height: 40px;
@@ -99,7 +98,7 @@ button:focus-visible,
 a:focus-visible,
 select:focus-visible,
 input:focus-visible {
-  outline: 2px solid rgba(139, 92, 246, 0.6);
+  outline: 2px solid rgba(124, 58, 237, 0.5);
   outline-offset: 2px;
 }
 

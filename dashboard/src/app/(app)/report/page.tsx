@@ -82,7 +82,7 @@ async function ReportContent({
 
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-8">
-      <p className="text-xs font-semibold tracking-[0.2em] text-primary-bright">
+      <p className="text-xs font-semibold tracking-[0.2em] text-primary">
         REPORT
       </p>
       <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink md:text-3xl">
@@ -108,7 +108,7 @@ async function ReportContent({
 
       {amScopeBroken && (
         <div className="mt-4 rounded-2xl border border-warning/30 bg-warning/10 p-4 text-sm">
-          <p className="font-semibold text-[#FCD34D]">Data area tidak terbaca</p>
+          <p className="font-semibold text-warning">Data area tidak terbaca</p>
           <p className="mt-1 text-muted">
             Mapping store area ({am}) tidak dapat dimuat. Minta admin menjalankan{" "}
             <code>sql/dashboard-rls.sql</code> terbaru di SQL Editor, lalu muat ulang.
@@ -139,7 +139,7 @@ async function ReportContent({
               {preview.map((r, i) => (
                 <tr
                   key={i}
-                  className="border-b border-line/60 last:border-0 hover:bg-white/5"
+                  className="border-b border-line/60 last:border-0 hover:bg-violet-50"
                 >
                   {cols.map((c, ci) => (
                     <td key={c} className={`${td}${ci === 0 ? " sticky left-0 bg-surface" : ""}`}>

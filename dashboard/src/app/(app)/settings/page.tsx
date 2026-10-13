@@ -41,7 +41,7 @@ async function SettingsContent() {
 
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-8">
-      <p className="text-xs font-semibold tracking-[0.2em] text-primary-bright">
+      <p className="text-xs font-semibold tracking-[0.2em] text-primary">
         SETTINGS
       </p>
       <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink md:text-3xl">

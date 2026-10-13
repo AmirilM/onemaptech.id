@@ -106,10 +106,10 @@ function kpiCard(
           <dd
             className={`rounded-full px-2.5 py-[3px] text-xs leading-4 font-semibold tabular-nums ${
               shortfall
-                ? "bg-danger/15 text-[#FDA4AF] ring-1 ring-inset ring-danger/30"
+                ? "bg-danger/10 text-danger ring-1 ring-inset ring-danger/25"
                 : covered
-                  ? "bg-accent/15 text-[#6EE7B7] ring-1 ring-inset ring-accent/30"
-                  : "bg-white/5 text-ink"
+                  ? "bg-accent/10 text-accent ring-1 ring-inset ring-accent/25"
+                  : "bg-canvas text-ink"
             }`}
           >
             {rupiahCompact(variance)}
@@ -127,7 +127,7 @@ function kpiCard(
         <div className={row}>
           <span className="text-muted">Achievement</span>
           <span
-            className={`text-[15px] leading-5 font-bold tabular-nums ${reached ? "text-[#6EE7B7]" : accent}`}
+            className={`text-[15px] leading-5 font-bold tabular-nums ${reached ? "text-accent" : accent}`}
           >
             {pct(ach)}
           </span>
@@ -154,16 +154,15 @@ function kpiCard(
           className={`absolute inset-y-0 left-0 rounded-full ${bar}`}
           style={{
             width: `${Math.min(100, ach ?? 0)}%`,
-            boxShadow: "0 0 10px -4px rgba(139,92,246,0.45)",
           }}
         />
         {(ach ?? 0) < 100 && (
-          <div className="absolute inset-y-0 right-0 w-0.5 bg-primary/40" />
+          <div className="absolute inset-y-0 right-0 w-0.5 bg-primary/30" />
         )}
       </div>
       <div className="mt-2 h-4">
         {over && (
-          <p className="text-[11px] leading-4 font-medium text-[#6EE7B7]">
+          <p className="text-[11px] leading-4 font-medium text-accent">
             Melebihi target
           </p>
         )}
@@ -187,9 +186,9 @@ export default function DashboardPage({
 function DashboardSkeleton() {
   const pulse = "animate-pulse rounded-2xl border border-line bg-surface";
   return (
-    <main aria-busy="true" aria-label="Memuat dashboard" className="mx-auto max-w-7xl bg-canvas p-4 md:p-8">
-      <div className="h-3 w-24 rounded bg-white/10" />
-      <div className="mt-2 h-8 w-64 max-w-full rounded bg-white/10" />
+    <main aria-busy="true" aria-label="Memuat dashboard" className="mx-auto max-w-[1600px] bg-transparent p-4 md:p-8">
+      <div className="h-3 w-24 rounded bg-slate-200" />
+      <div className="mt-2 h-8 w-64 max-w-full rounded bg-slate-200" />
       <div className={`mt-4 h-[76px] ${pulse}`} />
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {["Total", "Apple", "Android", "Accessories", "VAS"].map((l) => (
@@ -217,7 +216,7 @@ async function DashContent({
     return (
       <main className="mx-auto max-w-xl p-8">
         <div className="rounded-2xl border border-warning/30 bg-warning/10 p-6 text-sm">
-          <p className="font-semibold text-[#FCD34D]">Supabase belum dikonfigurasi</p>
+          <p className="font-semibold text-warning">Supabase belum dikonfigurasi</p>
           <p className="mt-2 text-muted">
             Copy <code>dashboard/.env.example</code> ke{" "}
             <code>dashboard/.env.local</code> lalu isi{" "}
@@ -361,62 +360,62 @@ async function DashContent({
     {
       label: "iPhone",
       qty: trend.reduce((a, p) => a + p.qty_iphone, 0),
-      fill: "#8B5CF6",
+      fill: "#7C3AED",
     },
     {
       label: "Mac",
       qty: trend.reduce((a, p) => a + p.qty_mac, 0),
-      fill: "#22D3EE",
+      fill: "#8B5CF6",
     },
     {
       label: "iPad",
       qty: trend.reduce((a, p) => a + p.qty_ipad, 0),
-      fill: "#818CF8",
+      fill: "#A78BFA",
     },
     {
       label: "Watch",
       qty: trend.reduce((a, p) => a + p.qty_apple_watch, 0),
-      fill: "#34D399",
+      fill: "#C4B5FD",
     },
   ]);
   const androidQty = byQtyDesc([
     {
       label: "Samsung",
       qty: trend.reduce((a, p) => a + p.qty_samsung, 0),
-      fill: "#8B5CF6",
+      fill: "#6D28D9",
     },
     {
       label: "Oppo",
       qty: trend.reduce((a, p) => a + p.qty_oppo, 0),
-      fill: "#22D3EE",
+      fill: "#7C3AED",
     },
     {
       label: "Xiaomi",
       qty: trend.reduce((a, p) => a + p.qty_xiaomi, 0),
-      fill: "#818CF8",
+      fill: "#8B5CF6",
     },
     {
       label: "Huawei",
       qty: trend.reduce((a, p) => a + p.qty_huawei, 0),
-      fill: "#34D399",
+      fill: "#A78BFA",
     },
     {
       label: "Infinix",
       qty: trend.reduce((a, p) => a + p.qty_infinix, 0),
-      fill: "#A78BFA",
+      fill: "#C4B5FD",
     },
     {
       label: "Motorola",
       qty: trend.reduce((a, p) => a + p.qty_motorola, 0),
-      fill: "#64748B",
+      fill: "#DDD6FE",
     },
   ]);
 
   const appleTotalQty = appleQty.reduce((a, d) => a + d.qty, 0);
   const androidTotalQty = androidQty.reduce((a, d) => a + d.qty, 0);
   const brandShare: BrandShareItem[] = [
-    { name: "Apple", qty: appleTotalQty, fill: "#8B5CF6" },
-    { name: "Android", qty: androidTotalQty, fill: "#22D3EE" },
+    { name: "Apple", qty: appleTotalQty, fill: "#7C3AED" },
+    { name: "Android", qty: androidTotalQty, fill: "#C4B5FD" },
   ];
   const brandShareTotal = appleTotalQty + androidTotalQty;
 
@@ -553,35 +552,61 @@ async function DashContent({
   const scopeLabel = store ? `Store ${store}` : am ? `Area ${am}` : "Semua store";
 
   return (
-    <main className="mx-auto max-w-7xl p-4 md:p-8">
-      <header>
-        <p className="text-xs font-semibold tracking-[0.2em] text-primary-bright">
-          DASHBOARD
-        </p>
-        <GreetHead name={prof?.sales_name ?? user.email ?? "?"} />
-        <p className="mt-1 text-xs text-muted">
-          {prof
-            ? `${prof.role}${lockedAM ? ` · ${lockedAM}` : prof.store_code ? ` · ${prof.store_code} — ${prof.store_name ?? ""}` : " · semua store"}`
-            : user.email}{" "}
-          · data diperbarui {latestDate}
-        </p>
-      </header>
+    <main className="mx-auto max-w-[1600px] p-4 md:p-8">
+      <div className="grid gap-4 xl:grid-cols-12">
+        <div className="min-w-0 xl:col-span-7 2xl:col-span-5">
+          <header>
+            <p className="text-xs font-semibold tracking-[0.2em] text-primary">
+              DASHBOARD
+            </p>
+            <GreetHead name={prof?.sales_name ?? user.email ?? "?"} />
+            <p className="mt-1 text-xs text-muted">
+              {prof
+                ? `${prof.role}${lockedAM ? ` · ${lockedAM}` : prof.store_code ? ` · ${prof.store_code} — ${prof.store_name ?? ""}` : " · semua store"}`
+                : user.email}{" "}
+              · data diperbarui {latestDate}
+            </p>
+          </header>
 
-      <div className="mt-4">
-        <FilterBar
-          stores={(storeList ?? []) as { store_code: string; store_name: string | null }[]}
-          lockedStore={lockedStore}
-          currentStore={store}
-          showDate={false}
-          areaManagers={lockedAM ? [] : amList}
-          lockedAM={lockedAM}
-          currentAM={am}
-        />
+          <div className="mt-4">
+            <FilterBar
+              stores={(storeList ?? []) as { store_code: string; store_name: string | null }[]}
+              lockedStore={lockedStore}
+              currentStore={store}
+              showDate={false}
+              areaManagers={lockedAM ? [] : amList}
+              lockedAM={lockedAM}
+              currentAM={am}
+            />
+          </div>
+        </div>
+        {/* Graphic header — dekoratif in-flow, hanya desktop lebar */}
+        <div
+          aria-hidden
+          className="pointer-events-none hidden min-w-0 select-none xl:col-span-5 xl:flex xl:items-end xl:justify-end xl:gap-2 2xl:col-span-7"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/header-phone.webp"
+            alt=""
+            width={1200}
+            height={400}
+            className="w-[76%] object-contain"
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/header-tagline.webp"
+            alt=""
+            width={520}
+            height={316}
+            className="w-[22%] max-w-[220px] object-contain"
+          />
+        </div>
       </div>
 
       {amScopeBroken && (
         <div className="mt-4 rounded-2xl border border-warning/30 bg-warning/10 p-4 text-sm">
-          <p className="font-semibold text-[#FCD34D]">Data area tidak terbaca</p>
+          <p className="font-semibold text-warning">Data area tidak terbaca</p>
           <p className="mt-1 text-muted">
             Mapping store area ({am}) tidak dapat dimuat. Minta admin menjalankan{" "}
             <code>sql/dashboard-rls.sql</code> terbaru di SQL Editor, lalu muat ulang.
@@ -595,11 +620,11 @@ async function DashContent({
           Revenue periode berjalan · vs target
         </p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 items-stretch">
-          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, "text-primary-bright", "bg-primary", elapsed, daysInMonth, Wallet, "bg-primary/15 text-primary-bright ring-1 ring-inset ring-primary/40")}
-          {kpiCard("Apple Revenue", kpi.revenue_apple, kpi.apple_target, "text-secondary", "bg-secondary", elapsed, daysInMonth, Apple, "bg-secondary/15 text-secondary ring-1 ring-inset ring-secondary/40")}
-          {kpiCard("Android Revenue", kpi.revenue_android, kpi.android_target, "text-[#CBD5E1]", "bg-[#94A3B8]", elapsed, daysInMonth, Smartphone, "bg-white/5 text-[#CBD5E1] ring-1 ring-inset ring-white/20")}
-          {kpiCard("Accessories Revenue", kpi.revenue_accessories, kpi.accessories_target, "text-[#A5B4FC]", "bg-[#818CF8]", elapsed, daysInMonth, Headphones, "bg-[#818CF8]/15 text-[#A5B4FC] ring-1 ring-inset ring-[#818CF8]/40")}
-          {kpiCard("VAS Revenue", kpi.revenue_vas, kpi.vas_target, "text-[#6EE7B7]", "bg-accent", elapsed, daysInMonth, Sparkles, "bg-accent/15 text-[#6EE7B7] ring-1 ring-inset ring-accent/40")}
+          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, "text-primary", "bg-primary", elapsed, daysInMonth, Wallet, "bg-primary/10 text-primary ring-1 ring-inset ring-primary/25")}
+          {kpiCard("Apple Revenue", kpi.revenue_apple, kpi.apple_target, "text-primary", "bg-primary", elapsed, daysInMonth, Apple, "bg-primary/10 text-primary ring-1 ring-inset ring-primary/25")}
+          {kpiCard("Android Revenue", kpi.revenue_android, kpi.android_target, "text-primary", "bg-[#8B5CF6]", elapsed, daysInMonth, Smartphone, "bg-primary/10 text-primary ring-1 ring-inset ring-primary/25")}
+          {kpiCard("Accessories Revenue", kpi.revenue_accessories, kpi.accessories_target, "text-primary", "bg-[#A78BFA]", elapsed, daysInMonth, Headphones, "bg-primary/10 text-primary ring-1 ring-inset ring-primary/25")}
+          {kpiCard("VAS Revenue", kpi.revenue_vas, kpi.vas_target, "text-accent", "bg-accent", elapsed, daysInMonth, Sparkles, "bg-accent/10 text-accent ring-1 ring-inset ring-accent/25")}
         </div>
       </section>
 
@@ -691,7 +716,7 @@ async function DashContent({
                 {lb.map((r) => (
                   <tr
                     key={r.store_code}
-                    className="border-b border-line/60 last:border-0 hover:bg-white/5"
+                    className="border-b border-line/60 last:border-0 hover:bg-violet-50"
                   >
                     <td
                       className={`${td} sticky left-0 bg-surface text-muted`}
@@ -702,7 +727,7 @@ async function DashContent({
                       <Link
                         href={storeHref(r.store_code)}
                         title={`Lihat store ${r.store_code}`}
-                        className="font-medium text-primary-bright underline-offset-4 hover:underline"
+                        className="font-medium text-primary underline-offset-4 hover:underline"
                       >
                         {r.store_code}
                       </Link>
@@ -735,7 +760,7 @@ async function DashContent({
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <p className="text-xs text-muted">Berdasarkan sublob · global</p>
             {store && (
-              <span className="rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-[11px] font-medium text-[#FCD34D]">
+              <span className="rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-[11px] font-medium text-warning">
                 Tidak ikut filter store
               </span>
             )}
@@ -757,7 +782,7 @@ async function DashContent({
                 {top.map((r) => (
                   <tr
                     key={r.product}
-                    className="border-b border-line/60 last:border-0 hover:bg-white/5"
+                    className="border-b border-line/60 last:border-0 hover:bg-violet-50"
                   >
                     <td
                       className={`${td} sticky left-0 bg-surface text-muted`}

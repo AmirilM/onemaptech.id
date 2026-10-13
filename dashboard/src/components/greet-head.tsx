@@ -17,7 +17,16 @@ export default function GreetHead({ name }: { name: string }) {
 
   return (
     <h1 className="mt-1 break-words text-xl font-bold tracking-tight text-ink md:text-2xl">
-      {greet ? `${greet}, ${name}` : `Hello, ${name}`}
+      {greet ? (
+        <>
+          {greet},{" "}
+          <span className="text-primary">{name}</span>
+        </>
+      ) : (
+        <>
+          Hello, <span className="text-primary">{name}</span>
+        </>
+      )}
     </h1>
   );
 }

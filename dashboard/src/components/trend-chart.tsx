@@ -48,18 +48,18 @@ function TrendTooltip({
   return (
     <div
       style={{
-        background: "#14141F",
-        border: "1px solid #262638",
+        background: "#FFFFFF",
+        border: "1px solid #E8E8EF",
         borderRadius: 12,
         fontSize: 12,
         maxWidth: "80vw",
         padding: "8px 12px",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+        boxShadow: "0 8px 24px rgba(23,23,28,0.12)",
       }}
     >
-      <p style={{ color: "#EDE9FE", margin: 0, fontWeight: 600 }}>{label}</p>
+      <p style={{ color: "#17171C", margin: 0, fontWeight: 600 }}>{label}</p>
       {payload.map((row, i) => (
-        <p key={i} style={{ color: "#C9C5DB", margin: "4px 0 0" }}>
+        <p key={i} style={{ color: "#4B5563", margin: "4px 0 0" }}>
           <span
             style={{
               display: "inline-block",
@@ -111,18 +111,18 @@ export default function TrendChart({ data }: { data: Point[] }) {
           data={data}
           margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
         >
-          <CartesianGrid stroke="#262638" vertical={false} />
+          <CartesianGrid stroke="#E8E8EF" vertical={false} />
           <XAxis
             dataKey="date"
-            tick={{ fill: "#9AA0B2", fontSize: 11 }}
+            tick={{ fill: "#6B7280", fontSize: 11 }}
             tickLine={false}
-            axisLine={{ stroke: "#262638" }}
+            axisLine={{ stroke: "#E8E8EF" }}
             tickFormatter={(d: string) => d.slice(5)}
             interval="preserveStartEnd"
             minTickGap={28}
           />
           <YAxis
-            tick={{ fill: "#9AA0B2", fontSize: 11 }}
+            tick={{ fill: "#6B7280", fontSize: 11 }}
             tickLine={false}
             axisLine={false}
             tickFormatter={compact}
@@ -130,14 +130,14 @@ export default function TrendChart({ data }: { data: Point[] }) {
           />
           <Tooltip
             content={<TrendTooltip />}
-            cursor={{ stroke: "rgba(139,92,246,0.4)" }}
+            cursor={{ stroke: "rgba(124,58,237,0.35)" }}
           />
-          <Legend wrapperStyle={{ fontSize: 12, color: "#9AA0B2" }} iconSize={8} iconType="circle" />
+          <Legend wrapperStyle={{ fontSize: 12, color: "#6B7280" }} iconSize={8} iconType="circle" />
           <Line
             type="monotone"
             dataKey="revenue_apple"
             name="Apple"
-            stroke="#8B5CF6"
+            stroke="#7C3AED"
             strokeWidth={2.5}
             dot={false}
             isAnimationActive={!reducedMotion}
@@ -146,7 +146,7 @@ export default function TrendChart({ data }: { data: Point[] }) {
             type="monotone"
             dataKey="revenue_android"
             name="Android"
-            stroke="#22D3EE"
+            stroke="#0891B2"
             strokeWidth={2}
             strokeDasharray="7 4"
             dot={false}
@@ -156,7 +156,7 @@ export default function TrendChart({ data }: { data: Point[] }) {
             type="monotone"
             dataKey="revenue_accessories"
             name="Accessories"
-            stroke="#34D399"
+            stroke="#059669"
             strokeWidth={2}
             strokeDasharray="2 3"
             dot={false}

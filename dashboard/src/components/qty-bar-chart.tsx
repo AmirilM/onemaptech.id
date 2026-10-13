@@ -36,17 +36,17 @@ function QtyTooltip({
   return (
     <div
       style={{
-        background: "#14141F",
-        border: "1px solid #262638",
+        background: "#FFFFFF",
+        border: "1px solid #E8E8EF",
         borderRadius: 12,
         fontSize: 12,
         maxWidth: "80vw",
         padding: "8px 12px",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+        boxShadow: "0 8px 24px rgba(23,23,28,0.12)",
       }}
     >
-      <p style={{ color: "#EDE9FE", margin: 0, fontWeight: 600 }}>{label}</p>
-      <p style={{ color: "#C9C5DB", margin: "4px 0 0" }}>
+      <p style={{ color: "#17171C", margin: 0, fontWeight: 600 }}>{label}</p>
+      <p style={{ color: "#4B5563", margin: "4px 0 0" }}>
         {num(qty)} unit ({pct(share)})
       </p>
     </div>
@@ -72,16 +72,16 @@ export default function QtyBarChart({
       </p>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 20, right: 8, left: 0, bottom: 0 }}>
-          <CartesianGrid stroke="#262638" vertical={false} />
+          <CartesianGrid stroke="#E8E8EF" vertical={false} />
           <XAxis
             dataKey="label"
-            tick={{ fill: "#9AA0B2", fontSize: 10 }}
+            tick={{ fill: "#6B7280", fontSize: 10 }}
             tickLine={false}
-            axisLine={{ stroke: "#262638" }}
+            axisLine={{ stroke: "#E8E8EF" }}
             interval={0}
           />
           <YAxis
-            tick={{ fill: "#9AA0B2", fontSize: 11 }}
+            tick={{ fill: "#6B7280", fontSize: 11 }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(v: number) => num(v)}
@@ -90,7 +90,7 @@ export default function QtyBarChart({
           />
           <Tooltip
             content={(props) => <QtyTooltip {...props} total={total} />}
-            cursor={{ fill: "rgba(139,92,246,0.12)" }}
+            cursor={{ fill: "rgba(124,58,237,0.08)" }}
           />
           <Bar dataKey="qty" name="Qty" radius={[6, 6, 0, 0]} maxBarSize={44}>
             {data.map((d) => (
@@ -105,7 +105,7 @@ export default function QtyBarChart({
                 return num(qty);
               }}
               style={{
-                fill: "#9AA0B2",
+                fill: "#6B7280",
                 fontSize: 10,
               }}
             />

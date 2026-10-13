@@ -22,7 +22,7 @@ export default function ClearRangeButton() {
       type="button"
       onClick={clear}
       disabled={isPending}
-      className="mt-3 min-h-[44px] rounded-lg border border-line px-4 py-2 text-sm text-soft hover:bg-white/5 active:bg-white/10 disabled:opacity-60"
+      className="mt-3 min-h-[44px] rounded-lg border border-line px-4 py-2 text-sm text-soft hover:bg-violet-50 active:bg-violet-100 disabled:opacity-60"
     >
       {isPending ? "Memuat…" : "Hapus filter tanggal"}
     </button>

@@ -76,7 +76,7 @@ export default function AppSidebar({ name, role, avatarUrl, isAdmin }: Props) {
           aria-expanded={!collapsed}
           aria-label={collapsed ? "Bentangkan sidebar" : "Ciutkan sidebar"}
           title={collapsed ? "Bentangkan sidebar" : "Ciutkan sidebar"}
-          className="flex min-h-[40px] min-w-[40px] items-center justify-center rounded-lg border border-line text-muted hover:bg-white/5 hover:text-ink active:bg-white/10"
+          className="flex min-h-[40px] min-w-[40px] items-center justify-center rounded-lg border border-line text-muted hover:bg-violet-50 hover:text-ink active:bg-violet-100"
         >
           {collapsed ? (
             <PanelLeftOpen size={18} aria-hidden />
@@ -101,7 +101,7 @@ export default function AppSidebar({ name, role, avatarUrl, isAdmin }: Props) {
           ) : (
             <div
               title={`${name} · ${role}`}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-bright"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white"
             >
               {initials(name)}
             </div>
@@ -118,7 +118,7 @@ export default function AppSidebar({ name, role, avatarUrl, isAdmin }: Props) {
               className="h-10 w-10 shrink-0 rounded-full object-cover"
             />
           ) : (
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-bright">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
               {initials(name)}
             </div>
           )}

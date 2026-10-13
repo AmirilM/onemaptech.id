@@ -78,7 +78,7 @@ export default function UserForm({
     "min-h-[44px] w-full rounded-lg border border-line bg-canvas px-3 py-2 text-base text-ink outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/30 md:text-sm";
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-black/70 p-4 [padding-bottom:env(safe-area-inset-bottom)]">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-black/40 p-4 [padding-bottom:env(safe-area-inset-bottom)]">
       <form
         onSubmit={submit}
         className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-line bg-surface p-6 shadow-xl"
@@ -133,7 +133,7 @@ export default function UserForm({
           />
         </div>
         {error && (
-          <p className="mt-3 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-[#FDA4AF]">
+          <p className="mt-3 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
             {error}
           </p>
         )}
@@ -144,7 +144,7 @@ export default function UserForm({
                 type="button"
                 onClick={remove}
                 disabled={loading}
-                className="min-h-[44px] rounded-lg border border-danger/40 px-4 py-2 text-sm text-[#FDA4AF] hover:bg-danger/10"
+                className="min-h-[44px] rounded-lg border border-danger/40 px-4 py-2 text-sm text-danger hover:bg-danger/10"
               >
                 Hapus
               </button>
@@ -154,7 +154,7 @@ export default function UserForm({
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[44px] rounded-lg border border-line px-4 py-2 text-sm text-soft hover:bg-white/5 active:bg-white/10"
+              className="min-h-[44px] rounded-lg border border-line px-4 py-2 text-sm text-soft hover:bg-violet-50 active:bg-violet-100"
             >
               Batal
             </button>

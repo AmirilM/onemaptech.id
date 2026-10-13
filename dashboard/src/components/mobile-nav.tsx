@@ -59,7 +59,7 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
           aria-label="Buka menu"
           aria-expanded={open}
           aria-controls="mobile-drawer"
-          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-line px-3 py-1.5 leading-none text-soft active:bg-white/10"
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-line px-3 py-1.5 leading-none text-soft active:bg-violet-100"
         >
           <Menu size={20} aria-hidden />
         </button>
@@ -68,7 +68,7 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
       {open && (
         <div className="fixed inset-0 z-[60] md:hidden">
           <div
-            className="absolute inset-0 bg-black/70"
+            className="absolute inset-0 bg-black/40"
             onClick={() => setOpen(false)}
           />
           <aside
@@ -95,7 +95,7 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
               <button
                 onClick={() => setOpen(false)}
                 aria-label="Tutup menu"
-                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-line px-3 py-1.5 text-muted active:bg-white/10"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-line px-3 py-1.5 text-muted active:bg-violet-100"
               >
                 <X size={20} aria-hidden />
               </button>
@@ -112,7 +112,7 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
                   className="h-10 w-10 shrink-0 rounded-full object-cover"
                 />
               ) : (
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-bright">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
                   {initials(name)}
                 </div>
               )}

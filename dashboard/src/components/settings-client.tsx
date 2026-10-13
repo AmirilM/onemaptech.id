@@ -122,7 +122,7 @@ export default function SettingsClient(p: Props) {
               className="h-16 w-16 shrink-0 rounded-full object-cover"
             />
           ) : (
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary/20 text-lg font-bold text-primary-bright">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
               {initials(p.salesName)}
             </div>
           )}
@@ -132,7 +132,7 @@ export default function SettingsClient(p: Props) {
               {p.role}
               {p.storeCode ? ` · ${p.storeCode}` : ""}
             </p>
-            <label className="mt-2 inline-block cursor-pointer rounded-lg border border-line px-3 py-1.5 text-xs text-soft hover:bg-white/5">
+            <label className="mt-2 inline-block cursor-pointer rounded-lg border border-line px-3 py-1.5 text-xs text-soft hover:bg-violet-50">
               Ganti foto
               <input
                 type="file"
@@ -186,7 +186,7 @@ export default function SettingsClient(p: Props) {
           <button
             type="submit"
             disabled={loading}
-            className="w-fit min-h-[44px] rounded-lg border border-line px-4 py-2 text-sm text-soft hover:bg-white/5 active:bg-white/10 disabled:opacity-60"
+            className="w-fit min-h-[44px] rounded-lg border border-line px-4 py-2 text-sm text-soft hover:bg-violet-50 active:bg-violet-100 disabled:opacity-60"
           >
             Ganti password
           </button>

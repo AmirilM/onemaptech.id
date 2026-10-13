@@ -152,7 +152,7 @@ async function DailyContent({
 
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-8">
-      <p className="text-xs font-semibold tracking-[0.2em] text-primary-bright">
+      <p className="text-xs font-semibold tracking-[0.2em] text-primary">
         DAILY SUMMARY
       </p>
       <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink md:text-3xl">
@@ -176,7 +176,7 @@ async function DailyContent({
 
       {amScopeBroken && (
         <div className="mt-4 rounded-2xl border border-warning/30 bg-warning/10 p-4 text-sm">
-          <p className="font-semibold text-[#FCD34D]">Data area tidak terbaca</p>
+          <p className="font-semibold text-warning">Data area tidak terbaca</p>
           <p className="mt-1 text-muted">
             Mapping store area ({am}) tidak dapat dimuat. Minta admin menjalankan{" "}
             <code>sql/dashboard-rls.sql</code> terbaru di SQL Editor, lalu muat ulang.
@@ -218,7 +218,7 @@ async function DailyContent({
                 return (
                   <tr
                     key={r.date}
-                    className="border-b border-line/60 last:border-0 hover:bg-white/5"
+                    className="border-b border-line/60 last:border-0 hover:bg-violet-50"
                   >
                     <td className={`${td} sticky left-0 bg-surface font-medium text-ink`}>{r.date}</td>
                     <td className={`${td} text-right`}>
@@ -239,8 +239,8 @@ async function DailyContent({
                         g === null
                           ? "text-faint"
                           : g >= 0
-                            ? "text-[#6EE7B7]"
-                            : "text-[#FDA4AF]"
+                            ? "text-accent"
+                            : "text-danger"
                       }`}
                     >
                       {g === null ? "-" : `${g >= 0 ? "▲" : "▼"} ${pct(Math.abs(g))}`}

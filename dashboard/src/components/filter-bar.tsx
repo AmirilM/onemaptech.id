@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { DayPicker, type DateRange } from "react-day-picker";
 import { id } from "react-day-picker/locale/id";
+import { Map, RotateCcw, Store } from "lucide-react";
 import "react-day-picker/style.css";
 
 type Props = {
@@ -197,47 +198,61 @@ export default function FilterBar({
     "min-h-[44px] rounded-lg border border-line bg-canvas px-3 py-2 text-base text-ink outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/30 md:text-sm";
 
   return (
-    <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-line bg-surface p-4 shadow-sm">
+    <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-line bg-surface p-4 shadow-sm xl:flex-nowrap">
       {(areaManagers.length > 0 || lockedAM) && (
-        <label className="flex w-full flex-col gap-1 text-xs text-muted sm:w-auto">
+        <label className="flex w-full min-w-0 flex-col gap-1 text-xs text-muted sm:flex-1">
           Area Manager
+          <span className="relative block">
+            <Map
+              size={16}
+              aria-hidden
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+            />
+            <select
+              value={am}
+              onChange={(e) => handleAM(e.target.value)}
+              disabled={!!lockedAM}
+              className={`${input} w-full disabled:opacity-60 pl-10`}
+            >
+              <option value="">Semua area</option>
+              {(lockedAM ? [lockedAM] : areaManagers).map((a) => (
+                <option key={a} value={a}>
+                  {a}
+                </option>
+              ))}
+            </select>
+          </span>
+        </label>
+      )}
+      <label className="flex w-full min-w-0 flex-col gap-1 text-xs text-muted sm:flex-1">
+        Store
+        <span className="relative block">
+          <Store
+            size={16}
+            aria-hidden
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+          />
           <select
-            value={am}
-            onChange={(e) => handleAM(e.target.value)}
-            disabled={!!lockedAM}
-            className={`${input} w-full disabled:opacity-60 sm:w-auto sm:min-w-56`}
+            value={store}
+            onChange={(e) => handleStore(e.target.value)}
+            disabled={!!lockedStore}
+            className={`${input} w-full disabled:opacity-60 pl-10`}
           >
-            <option value="">Semua area</option>
-            {(lockedAM ? [lockedAM] : areaManagers).map((a) => (
-              <option key={a} value={a}>
-                {a}
+            <option value="">Semua store</option>
+            {stores.map((s) => (
+              <option key={s.store_code} value={s.store_code}>
+                {s.store_code} — {s.store_name ?? "-"}
               </option>
             ))}
           </select>
-        </label>
-      )}
-      <label className="flex w-full flex-col gap-1 text-xs text-muted sm:w-auto">
-        Store
-        <select
-          value={store}
-          onChange={(e) => handleStore(e.target.value)}
-          disabled={!!lockedStore}
-          className={`${input} w-full disabled:opacity-60 sm:w-auto sm:min-w-56`}
-        >
-          <option value="">Semua store</option>
-          {stores.map((s) => (
-            <option key={s.store_code} value={s.store_code}>
-              {s.store_code} — {s.store_name ?? "-"}
-            </option>
-          ))}
-        </select>
+        </span>
       </label>
 
       {showDate && (
       <div ref={panelRef} className="relative w-full sm:w-auto">
         <span id="periode-label" className="mb-1 flex items-center gap-2 text-xs text-muted">
           Periode
-          {isPending && <span className="text-primary-bright">Memuat…</span>}
+          {isPending && <span className="text-primary">Memuat…</span>}
         </span>
         <button
           type="button"
@@ -295,7 +310,7 @@ export default function FilterBar({
                   <button
                     type="button"
                     onClick={clearRange}
-                    className="min-h-[36px] rounded-lg px-3 py-1 text-xs text-muted hover:bg-white/5 active:bg-white/10"
+                    className="min-h-[36px] rounded-lg px-3 py-1 text-xs text-muted hover:bg-violet-50 active:bg-violet-100"
                   >
                     Hapus
                   </button>
@@ -317,8 +332,9 @@ export default function FilterBar({
       <button
         type="button"
         onClick={reset}
-        className="min-h-[44px] rounded-lg border border-line px-4 py-2 text-sm text-soft hover:bg-white/5 active:bg-white/10"
+        className="flex min-h-[44px] shrink-0 items-center gap-2 rounded-lg border border-line px-4 py-2 text-sm text-soft hover:bg-violet-50 active:bg-violet-100"
       >
+        <RotateCcw size={16} aria-hidden />
         Reset
       </button>
       {lockedStore && (

@@ -38,7 +38,7 @@ export default function UsersClient({ rows }: { rows: UserRow[] }) {
               {rows.map((r) => (
                 <tr
                   key={r.sales_id}
-                  className="border-b border-line last:border-0 hover:bg-white/5"
+                  className="border-b border-line last:border-0 hover:bg-violet-50"
                 >
                   <td className={`${td} font-medium text-ink`}>{r.sales_id}</td>
                   <td className={td}>{r.sales_name}</td>
@@ -49,14 +49,14 @@ export default function UsersClient({ rows }: { rows: UserRow[] }) {
                     </span>
                   </td>
                   <td className={td}>
-                    <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-xs text-soft">
+                    <span className="rounded-full bg-violet-50 px-2.5 py-0.5 text-xs text-soft">
                       {r.role}
                     </span>
                   </td>
                   <td className={`${td} text-right`}>
                     <button
                       onClick={() => setEditing(r)}
-                      className="flex min-h-[44px] items-center rounded-lg border border-line px-3 py-1 text-xs text-soft hover:bg-white/5 active:bg-white/10"
+                      className="flex min-h-[44px] items-center rounded-lg border border-line px-3 py-1 text-xs text-soft hover:bg-violet-50 active:bg-violet-100"
                     >
                       Edit
                     </button>

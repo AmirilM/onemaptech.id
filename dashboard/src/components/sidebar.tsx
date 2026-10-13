@@ -46,8 +46,8 @@ export default function SidebarNav({
               collapsed ? "justify-center px-0" : "gap-3 px-4"
             } ${
               active
-                ? "bg-primary/15 font-semibold text-primary-bright"
-                : "text-muted hover:bg-white/5 hover:text-ink"
+                ? "bg-primary/10 font-semibold text-primary"
+                : "text-muted hover:bg-violet-50 hover:text-ink"
             }`}
           >
             <Icon size={18} strokeWidth={2} aria-hidden className="shrink-0" />

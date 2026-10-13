@@ -76,7 +76,7 @@ export default function ReportExport({ rows, filename }: Props) {
       <button
         onClick={exportExcel}
         disabled={!rows.length || !!busy}
-        className={`${btn} bg-surface text-primary-bright ring-1 ring-inset ring-primary/30 hover:bg-white/5`}
+        className={`${btn} bg-surface text-primary ring-1 ring-inset ring-primary/30 hover:bg-violet-50`}
       >
         {busy === "xlsx" ? "..." : `Excel (${rows.length})`}
       </button>
