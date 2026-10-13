@@ -10,8 +10,23 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "OneMapTech Dashboard",
+  title: "OneMaptech Dashboard",
   description: "Sales performance dashboard — Digiplus",
+  icons: {
+    icon: [{ url: "/icon.png" }, { url: "/favicon.ico" }],
+    apple: [{ url: "/apple-icon.png" }],
+  },
+  openGraph: {
+    title: "OneMaptech Dashboard",
+    description: "Sales performance dashboard — Digiplus",
+    images: [{ url: "/logo/logo-512.png", width: 512, height: 339 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "OneMaptech Dashboard",
+    description: "Sales performance dashboard — Digiplus",
+    images: ["/logo/logo-512.png"],
+  },
 };
 
 export const viewport: Viewport = {

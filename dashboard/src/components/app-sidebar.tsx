@@ -44,14 +44,31 @@ export default function AppSidebar({ name, role, avatarUrl, isAdmin }: Props) {
         collapsed ? "w-[76px]" : "w-60"
       }`}
     >
-      <div className={`flex items-center py-3 ${collapsed ? "justify-center px-0" : "justify-between px-2"}`}>
+      <div className={`flex items-center py-3 ${collapsed ? "flex-col gap-2 px-0" : "justify-between px-2"}`}>
         {!collapsed && (
-          <div>
-            <p className="text-sm font-bold tracking-[0.18em] text-ink">
-              ONEMAPTECH
-            </p>
-            <p className="text-[11px] text-muted">Sales Performance Platform</p>
+          <div className="flex items-center gap-2.5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo/logo-192.png"
+              alt="Logo OneMaptech"
+              className="h-9 w-9 shrink-0 object-contain"
+            />
+            <div>
+              <p className="text-sm font-bold tracking-[0.18em] text-ink">
+                ONEMAPTECH
+              </p>
+              <p className="text-[11px] text-muted">Sales Performance Platform</p>
+            </div>
           </div>
+        )}
+        {collapsed && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src="/logo/logo-192.png"
+            alt="Logo OneMaptech"
+            title="OneMaptech"
+            className="h-10 w-10 shrink-0 object-contain"
+          />
         )}
         <button
           type="button"

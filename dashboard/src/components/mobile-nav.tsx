@@ -43,9 +43,17 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
   return (
     <>
       <div className="sticky top-0 z-40 flex w-full items-center justify-between border-b border-line bg-surface/90 px-4 py-3 backdrop-blur [padding-top:env(safe-area-inset-top)] md:hidden">
-        <p className="text-sm font-bold tracking-[0.18em] text-ink">
-          ONEMAPTECH
-        </p>
+        <div className="flex items-center gap-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo/logo-192.png"
+            alt="Logo OneMaptech"
+            className="h-8 w-8 shrink-0 object-contain"
+          />
+          <p className="text-sm font-bold tracking-[0.18em] text-ink">
+            ONEMAPTECH
+          </p>
+        </div>
         <button
           onClick={() => setOpen(true)}
           aria-label="Buka menu"
@@ -68,13 +76,21 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
             className="absolute left-0 top-0 flex h-full max-h-dvh w-72 max-w-[85vw] flex-col border-r border-line bg-surface p-4 [padding-bottom:env(safe-area-inset-bottom)]"
           >
             <div className="flex items-center justify-between px-2 py-3">
-              <div>
-                <p className="text-sm font-bold tracking-[0.18em] text-ink">
-                  ONEMAPTECH
-                </p>
-                <p className="text-[11px] text-muted">
-                  Sales Performance Platform
-                </p>
+              <div className="flex items-center gap-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/logo/logo-192.png"
+                  alt="Logo OneMaptech"
+                  className="h-8 w-8 shrink-0 object-contain"
+                />
+                <div>
+                  <p className="text-sm font-bold tracking-[0.18em] text-ink">
+                    ONEMAPTECH
+                  </p>
+                  <p className="text-[11px] text-muted">
+                    Sales Performance Platform
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => setOpen(false)}
