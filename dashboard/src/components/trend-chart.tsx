@@ -31,6 +31,52 @@ function compact(v: number): string {
   return v.toLocaleString("id-ID");
 }
 
+function TrendTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: ReadonlyArray<{
+    name?: unknown;
+    value?: unknown;
+    color?: unknown;
+  }>;
+  label?: string | number;
+}) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div
+      style={{
+        background: "#14141F",
+        border: "1px solid #262638",
+        borderRadius: 12,
+        fontSize: 12,
+        maxWidth: "80vw",
+        padding: "8px 12px",
+        boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+      }}
+    >
+      <p style={{ color: "#EDE9FE", margin: 0, fontWeight: 600 }}>{label}</p>
+      {payload.map((row, i) => (
+        <p key={i} style={{ color: "#C9C5DB", margin: "4px 0 0" }}>
+          <span
+            style={{
+              display: "inline-block",
+              width: 8,
+              height: 8,
+              borderRadius: 9999,
+              background: String(row.color ?? "#fff"),
+              marginRight: 6,
+            }}
+          />
+          {String(row.name)}: Rp{Number(row.value ?? 0).toLocaleString("id-ID")}
+        </p>
+      ))}
+    </div>
+  );
+}
+
 export default function TrendChart({ data }: { data: Point[] }) {
   const [reducedMotion, setReducedMotion] = useState(false);
   useEffect(() => {
@@ -65,45 +111,34 @@ export default function TrendChart({ data }: { data: Point[] }) {
           data={data}
           margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
         >
-          <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+          <CartesianGrid stroke="#262638" vertical={false} />
           <XAxis
             dataKey="date"
-            tick={{ fill: "var(--color-zinc-400)", fontSize: 11 }}
+            tick={{ fill: "#9AA0B2", fontSize: 11 }}
             tickLine={false}
-            axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+            axisLine={{ stroke: "#262638" }}
             tickFormatter={(d: string) => d.slice(5)}
             interval="preserveStartEnd"
             minTickGap={28}
           />
           <YAxis
-            tick={{ fill: "var(--color-zinc-400)", fontSize: 11 }}
+            tick={{ fill: "#9AA0B2", fontSize: 11 }}
             tickLine={false}
             axisLine={false}
             tickFormatter={compact}
             width={52}
           />
           <Tooltip
-            contentStyle={{
-              background: "var(--color-panel)",
-              border: "1px solid rgba(255,255,255,0.12)",
-              borderRadius: 12,
-              fontSize: 12,
-              maxWidth: "80vw",
-            }}
-            labelStyle={{ color: "var(--color-zinc-200)" }}
-            cursor={{ stroke: "rgba(255,255,255,0.2)" }}
-            formatter={(value, name) => [
-              `Rp${Number(value).toLocaleString("id-ID")}`,
-              name,
-            ]}
+            content={<TrendTooltip />}
+            cursor={{ stroke: "rgba(139,92,246,0.4)" }}
           />
-          <Legend wrapperStyle={{ fontSize: 12 }} iconSize={8} iconType="circle" />
+          <Legend wrapperStyle={{ fontSize: 12, color: "#9AA0B2" }} iconSize={8} iconType="circle" />
           <Line
             type="monotone"
             dataKey="revenue_apple"
             name="Apple"
-            stroke="#22d3ee"
-            strokeWidth={2}
+            stroke="#8B5CF6"
+            strokeWidth={2.5}
             dot={false}
             isAnimationActive={!reducedMotion}
           />
@@ -111,7 +146,7 @@ export default function TrendChart({ data }: { data: Point[] }) {
             type="monotone"
             dataKey="revenue_android"
             name="Android"
-            stroke="#a78bfa"
+            stroke="#22D3EE"
             strokeWidth={2}
             strokeDasharray="7 4"
             dot={false}
@@ -121,7 +156,7 @@ export default function TrendChart({ data }: { data: Point[] }) {
             type="monotone"
             dataKey="revenue_accessories"
             name="Accessories"
-            stroke="#fbbf24"
+            stroke="#34D399"
             strokeWidth={2}
             strokeDasharray="2 3"
             dot={false}
@@ -131,7 +166,7 @@ export default function TrendChart({ data }: { data: Point[] }) {
             type="monotone"
             dataKey="revenue_vas"
             name="VAS"
-            stroke="#34d399"
+            stroke="#94A3B8"
             strokeWidth={2}
             strokeDasharray="9 3 2 3"
             dot={false}

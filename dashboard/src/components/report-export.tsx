@@ -69,14 +69,14 @@ export default function ReportExport({ rows, filename }: Props) {
       <button
         onClick={exportCsv}
         disabled={!rows.length || !!busy}
-        className={`${btn} bg-cyan-400 text-slate-950 hover:bg-cyan-300`}
+        className={`${btn} bg-primary text-white hover:bg-primary-hover`}
       >
         {busy === "csv" ? "..." : `CSV (${rows.length})`}
       </button>
       <button
         onClick={exportExcel}
         disabled={!rows.length || !!busy}
-        className={`${btn} bg-emerald-400 text-slate-950 hover:bg-emerald-300`}
+        className={`${btn} bg-surface text-primary-bright ring-1 ring-inset ring-primary/30 hover:bg-white/5`}
       >
         {busy === "xlsx" ? "..." : `Excel (${rows.length})`}
       </button>

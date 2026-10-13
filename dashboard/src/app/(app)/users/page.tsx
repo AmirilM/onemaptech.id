@@ -9,7 +9,7 @@ export default function UsersPage() {
   return (
     <Suspense
       fallback={
-        <main className="mx-auto max-w-7xl p-8 text-sm text-zinc-500">
+        <main className="mx-auto max-w-7xl p-8 text-sm text-muted">
           Memuat users...
         </main>
       }
@@ -29,10 +29,10 @@ async function UsersContent() {
   if (!session?.isAdmin) {
     return (
       <main className="mx-auto max-w-7xl p-4 md:p-8">
-        <p className="text-xs font-semibold tracking-[0.2em] text-cyan-300">
+        <p className="text-xs font-semibold tracking-[0.2em] text-primary-bright">
           USER MANAGEMENT
         </p>
-        <div className="mt-4 rounded-2xl border border-amber-400/30 bg-amber-400/10 p-6 text-sm text-amber-100">
+        <div className="mt-4 rounded-2xl border border-warning/30 bg-warning/10 p-6 text-sm text-[#FCD34D]">
           Halaman ini khusus role Admin. Akun kamu ({session?.profile?.role ?? "-"})
           tidak punya akses.
         </div>
@@ -47,13 +47,13 @@ async function UsersContent() {
 
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-8">
-      <p className="text-xs font-semibold tracking-[0.2em] text-cyan-300">
+      <p className="text-xs font-semibold tracking-[0.2em] text-primary-bright">
         USER MANAGEMENT
       </p>
-      <h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">
+      <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink md:text-3xl">
         Kelola User
       </h1>
-      <p className="mt-1 text-xs text-zinc-500">
+      <p className="mt-1 text-xs text-muted">
         {rows.length} user · menulis ke profiles + Auth sekaligus
       </p>
       <UsersClient rows={rows} />

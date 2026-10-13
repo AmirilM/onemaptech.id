@@ -27,7 +27,7 @@ export default function DailyPage({
   return (
     <Suspense
       fallback={
-        <main className="mx-auto max-w-7xl p-8 text-sm text-zinc-500">
+        <main className="mx-auto max-w-7xl p-8 text-sm text-muted">
           Memuat daily summary...
         </main>
       }
@@ -107,19 +107,19 @@ async function DailyContent({
   };
 
   const th =
-    "px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500";
-  const td = "px-3 py-2.5 text-sm tabular-nums";
-  const card = "rounded-2xl border border-white/10 bg-white/[0.03] p-4 md:p-5";
+    "px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-muted";
+  const td = "px-3 py-2.5 text-sm tabular-nums text-soft";
+  const card = "rounded-2xl border border-line bg-surface p-4 shadow-sm md:p-5";
 
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-8">
-      <p className="text-xs font-semibold tracking-[0.2em] text-cyan-300">
+      <p className="text-xs font-semibold tracking-[0.2em] text-primary-bright">
         DAILY SUMMARY
       </p>
-      <h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">
+      <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink md:text-3xl">
         Ringkasan Harian
       </h1>
-      <p className="mt-1 text-xs text-zinc-500">
+      <p className="mt-1 text-xs text-muted">
         {store ? `Store ${store}` : "Semua store"} · {month || "-"}
       </p>
 
@@ -133,12 +133,12 @@ async function DailyContent({
       </div>
 
       <section className={`mt-4 ${card}`}>
-        <h2 className="text-sm font-semibold">Daily Trend</h2>
+        <h2 className="text-sm font-semibold text-ink">Daily Trend</h2>
         <div className="mt-3">
           {rows.length ? (
             <TrendChart data={rows} />
           ) : (
-            <p className="py-10 text-center text-sm text-zinc-500">
+            <p className="py-10 text-center text-sm text-muted">
               Tidak ada data pada bulan ini.
             </p>
           )}
@@ -146,12 +146,12 @@ async function DailyContent({
       </section>
 
       <section className={`mt-4 ${card}`}>
-        <h2 className="text-sm font-semibold">Tabel Harian (tgl 1 – akhir bulan)</h2>
+        <h2 className="text-sm font-semibold text-ink">Tabel Harian (tgl 1 – akhir bulan)</h2>
         <div className="mt-2 overflow-x-auto">
           <table className="w-full min-w-[720px] border-collapse">
             <thead>
-              <tr className="border-b border-white/10">
-                <th className={`${th} sticky left-0 bg-panel`}>Date</th>
+              <tr className="border-b border-line">
+                <th className={`${th} sticky left-0 bg-surface`}>Date</th>
                 <th className={`${th} text-right`}>Total Revenue</th>
                 <th className={`${th} text-right`}>Apple</th>
                 <th className={`${th} text-right`}>Android</th>
@@ -166,9 +166,9 @@ async function DailyContent({
                 return (
                   <tr
                     key={r.date}
-                    className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]"
+                    className="border-b border-line/60 last:border-0 hover:bg-white/5"
                   >
-                    <td className={`${td} sticky left-0 bg-panel font-medium`}>{r.date}</td>
+                    <td className={`${td} sticky left-0 bg-surface font-medium text-ink`}>{r.date}</td>
                     <td className={`${td} text-right`}>
                       {rupiah(r.revenue_total)}
                     </td>
@@ -185,10 +185,10 @@ async function DailyContent({
                     <td
                       className={`px-3 py-2.5 text-right text-sm font-semibold ${
                         g === null
-                          ? "text-zinc-600"
+                          ? "text-faint"
                           : g >= 0
-                            ? "text-emerald-300"
-                            : "text-red-300"
+                            ? "text-[#6EE7B7]"
+                            : "text-[#FDA4AF]"
                       }`}
                     >
                       {g === null ? "-" : `${g >= 0 ? "▲" : "▼"} ${pct(Math.abs(g))}`}
@@ -198,7 +198,7 @@ async function DailyContent({
               })}
               {!rows.length && (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-sm text-zinc-500">
+                  <td colSpan={7} className="py-8 text-center text-sm text-muted">
                     Tidak ada data.
                   </td>
                 </tr>

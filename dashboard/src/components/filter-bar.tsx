@@ -166,11 +166,11 @@ export default function FilterBar({
   }
 
   const input =
-    "min-h-[44px] rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base text-zinc-100 outline-none focus:border-cyan-400/60 md:text-sm";
+    "min-h-[44px] rounded-lg border border-line bg-canvas px-3 py-2 text-base text-ink outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/30 md:text-sm";
 
   return (
-    <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-      <label className="flex w-full flex-col gap-1 text-xs text-zinc-400 sm:w-auto">
+    <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-line bg-surface p-4 shadow-sm">
+      <label className="flex w-full flex-col gap-1 text-xs text-muted sm:w-auto">
         Store
         <select
           value={store}
@@ -189,9 +189,9 @@ export default function FilterBar({
 
       {showDate && (
       <div ref={panelRef} className="relative w-full sm:w-auto">
-        <span id="periode-label" className="mb-1 flex items-center gap-2 text-xs text-zinc-400">
+        <span id="periode-label" className="mb-1 flex items-center gap-2 text-xs text-muted">
           Periode
-          {isPending && <span className="text-cyan-300">Memuat…</span>}
+          {isPending && <span className="text-primary-bright">Memuat…</span>}
         </span>
         <button
           type="button"
@@ -203,7 +203,7 @@ export default function FilterBar({
         >
           <span
             id="periode-value"
-            className={range?.from ? "text-zinc-100" : "text-zinc-500"}
+            className={range?.from ? "text-ink" : "text-faint"}
           >
             {rangeLabel(range)}
           </span>
@@ -217,7 +217,7 @@ export default function FilterBar({
             strokeLinecap="round"
             strokeLinejoin="round"
             aria-hidden
-            className="shrink-0 text-zinc-400"
+            className="shrink-0 text-muted"
           >
             <rect x="3" y="4" width="18" height="18" rx="2" />
             <line x1="16" y1="2" x2="16" y2="6" />
@@ -227,7 +227,7 @@ export default function FilterBar({
         </button>
 
         {open && (
-          <div className="absolute left-0 top-full z-50 mt-2 max-w-[calc(100vw-2rem)] overflow-x-auto rounded-2xl border border-white/10 bg-panel p-3 shadow-2xl shadow-black/60">
+          <div className="absolute left-0 top-full z-50 mt-2 max-w-[calc(100vw-2rem)] overflow-x-auto rounded-2xl border border-line bg-surface p-3 shadow-xl">
             <DayPicker
               mode="range"
               locale={id}
@@ -236,10 +236,10 @@ export default function FilterBar({
               onSelect={handleSelect}
               numberOfMonths={months}
               showOutsideDays
-              className="rdp-dark"
+              className="rdp-premium"
             />
-            <div className="mt-2 flex items-center justify-between gap-2 border-t border-white/10 pt-2">
-              <span className="px-1 text-xs text-zinc-400">
+            <div className="mt-2 flex items-center justify-between gap-2 border-t border-line pt-2">
+              <span className="px-1 text-xs text-muted">
                 {range?.from && !range.to
                   ? "Pilih tanggal kedua untuk rentang"
                   : rangeLabel(range)}
@@ -249,7 +249,7 @@ export default function FilterBar({
                   <button
                     type="button"
                     onClick={clearRange}
-                    className="min-h-[36px] rounded-lg px-3 py-1 text-xs text-zinc-300 hover:bg-white/5 active:bg-white/10"
+                    className="min-h-[36px] rounded-lg px-3 py-1 text-xs text-muted hover:bg-white/5 active:bg-white/10"
                   >
                     Hapus
                   </button>
@@ -257,7 +257,7 @@ export default function FilterBar({
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="min-h-[36px] rounded-lg bg-cyan-400 px-3 py-1 text-xs font-semibold text-slate-950 hover:bg-cyan-300 active:bg-cyan-500"
+                  className="min-h-[36px] rounded-lg bg-primary px-3 py-1 text-xs font-semibold text-white hover:bg-primary-hover"
                 >
                   Tutup
                 </button>
@@ -271,12 +271,12 @@ export default function FilterBar({
       <button
         type="button"
         onClick={reset}
-        className="min-h-[44px] rounded-lg border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 active:bg-white/10"
+        className="min-h-[44px] rounded-lg border border-line px-4 py-2 text-sm text-soft hover:bg-white/5 active:bg-white/10"
       >
         Reset
       </button>
       {lockedStore && (
-        <span className="w-full text-xs text-amber-300/90 sm:w-auto">
+        <span className="w-full text-xs text-warning sm:w-auto">
           Terkunci ke store {lockedStore} (role kamu).
         </span>
       )}

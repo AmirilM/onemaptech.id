@@ -33,19 +33,19 @@ export default function LoginPage() {
   }
 
   const input =
-    "min-h-[44px] w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-base text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-400/60 md:text-sm";
+    "min-h-[44px] w-full rounded-lg border border-line bg-canvas px-3 py-2.5 text-base text-ink outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/30 md:text-sm";
 
   return (
-    <main className="flex min-h-dvh items-center justify-center p-6 [padding-bottom:env(safe-area-inset-bottom)]">
+    <main className="flex min-h-dvh items-center justify-center bg-canvas p-6 [padding-bottom:env(safe-area-inset-bottom)]">
       <form
         onSubmit={onSubmit}
-        className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl shadow-black/50 backdrop-blur sm:p-8"
+        className="w-full max-w-sm rounded-2xl border border-line bg-surface p-6 shadow-lg sm:p-8"
       >
-        <p className="text-xs font-semibold tracking-[0.2em] text-cyan-300">
+        <p className="text-xs font-semibold tracking-[0.2em] text-primary-bright">
           ONEMAPTECH
         </p>
-        <h1 className="mt-2 text-2xl font-bold">Sales Dashboard</h1>
-        <p className="mt-1 text-sm text-zinc-400">
+        <h1 className="mt-2 text-2xl font-bold text-ink">Sales Dashboard</h1>
+        <p className="mt-1 text-sm text-muted">
           Masuk dengan Sales ID dan password.
         </p>
         <div className="mt-6 flex flex-col gap-3">
@@ -66,14 +66,14 @@ export default function LoginPage() {
           />
         </div>
         {error && (
-          <p className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+          <p className="mt-3 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-[#FDA4AF]">
             {error}
           </p>
         )}
         <button
           type="submit"
           disabled={loading}
-          className="mt-5 min-h-[44px] w-full rounded-lg bg-cyan-400 py-2.5 text-sm font-semibold text-slate-950 hover:bg-cyan-300 active:bg-cyan-500 disabled:opacity-60"
+          className="mt-5 min-h-[44px] w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
         >
           {loading ? "Masuk..." : "Masuk"}
         </button>

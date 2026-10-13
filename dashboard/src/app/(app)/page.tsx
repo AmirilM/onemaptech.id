@@ -14,7 +14,9 @@ import type {
 import FilterBar from "@/components/filter-bar";
 import GreetHead from "@/components/greet-head";
 import QtyBarChart, { type QtyBarItem } from "@/components/qty-bar-chart";
-import TrendChart from "@/components/trend-chart";
+import BrandShareDonut, {
+  type BrandShareItem,
+} from "@/components/brand-share-donut";
 import {
   Apple,
   Headphones,
@@ -73,11 +75,11 @@ function kpiCard(
   return (
     <div
       key={label}
-      className="relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 min-h-[272px]"
+      className="relative flex flex-col overflow-hidden rounded-2xl border border-line bg-surface p-5 shadow-sm min-h-[272px]"
     >
       <div className={`absolute inset-x-0 top-0 h-[3px] ${bar} opacity-100`} />
       <div className="flex items-center justify-between gap-3">
-        <p className="min-w-0 truncate text-[13px] font-medium leading-5 tracking-wide text-zinc-400">
+        <p className="min-w-0 truncate text-[13px] font-medium leading-5 tracking-wide text-muted">
           {label}
         </p>
         <span
@@ -87,57 +89,57 @@ function kpiCard(
           <Icon size={16} strokeWidth={2} />
         </span>
       </div>
-      <p className="mt-3 text-[11px] font-semibold uppercase leading-4 tracking-[0.16em] text-zinc-500">
+      <p className="mt-3 text-[11px] font-semibold uppercase leading-4 tracking-[0.16em] text-muted">
         Actual Sales
       </p>
-      <p className="mt-1 text-[22px] font-bold leading-none tracking-tight text-zinc-50 tabular-nums">
+      <p className="mt-1 text-[22px] font-bold leading-none tracking-tight text-ink tabular-nums">
         {rupiahCompact(actual)}
       </p>
       <dl className="mt-4 space-y-2">
         <div className={row}>
-          <dt className="text-zinc-500">Target</dt>
-          <dd className="font-medium text-zinc-100">{rupiahCompact(target)}</dd>
+          <dt className="text-muted">Target</dt>
+          <dd className="font-medium text-ink">{rupiahCompact(target)}</dd>
         </div>
         <div className={row}>
-          <dt className="text-zinc-500">Variance</dt>
+          <dt className="text-muted">Variance</dt>
           <dd
             className={`rounded-full px-2.5 py-[3px] text-xs leading-4 font-semibold tabular-nums ${
               shortfall
-                ? "bg-red-400/10 text-red-300 ring-1 ring-inset ring-red-400/20"
+                ? "bg-danger/15 text-[#FDA4AF] ring-1 ring-inset ring-danger/30"
                 : covered
-                  ? "bg-emerald-400/10 text-emerald-300 ring-1 ring-inset ring-emerald-400/20"
-                  : "bg-white/5 text-zinc-100"
+                  ? "bg-accent/15 text-[#6EE7B7] ring-1 ring-inset ring-accent/30"
+                  : "bg-white/5 text-ink"
             }`}
           >
             {rupiahCompact(variance)}
           </dd>
         </div>
         <div className={row}>
-          <dt className="text-zinc-500">Estimated</dt>
-          <dd className="font-medium text-zinc-100">
+          <dt className="text-muted">Estimated</dt>
+          <dd className="font-medium text-ink">
             {rupiahCompact(estimated)}
           </dd>
         </div>
       </dl>
-      <div className="my-4 border-t border-white/[0.08]" />
+      <div className="my-4 border-t border-line" />
       <div className="space-y-2">
         <div className={row}>
-          <span className="text-zinc-500">Achievement</span>
+          <span className="text-muted">Achievement</span>
           <span
-            className={`text-[15px] leading-5 font-bold tabular-nums ${reached ? "text-emerald-300" : accent}`}
+            className={`text-[15px] leading-5 font-bold tabular-nums ${reached ? "text-[#6EE7B7]" : accent}`}
           >
             {pct(ach)}
           </span>
         </div>
         <div className={row}>
-          <span className="text-zinc-500">Estimated</span>
-          <span className="text-[13px] font-medium text-zinc-300 tabular-nums">
+          <span className="text-muted">Estimated</span>
+          <span className="text-[13px] font-medium text-soft tabular-nums">
             {pct(estPct)}
           </span>
         </div>
       </div>
       <div
-        className="relative mt-3 h-2 overflow-hidden rounded-full bg-white/[0.08]"
+        className="relative mt-3 h-2 overflow-hidden rounded-full bg-track"
         role="img"
         aria-label={`${label}: actual ${rupiahCompact(actual)}, target ${rupiahCompact(target)}, achievement ${pct(ach)}, estimated ${pct(estPct)}`}
       >
@@ -151,16 +153,16 @@ function kpiCard(
           className={`absolute inset-y-0 left-0 rounded-full ${bar}`}
           style={{
             width: `${Math.min(100, ach ?? 0)}%`,
-            boxShadow: "0 0 12px -3px rgba(255,255,255,0.35)",
+            boxShadow: "0 0 10px -4px rgba(139,92,246,0.45)",
           }}
         />
         {(ach ?? 0) < 100 && (
-          <div className="absolute inset-y-0 right-0 w-0.5 bg-white/70" />
+          <div className="absolute inset-y-0 right-0 w-0.5 bg-primary/40" />
         )}
       </div>
       <div className="mt-2 h-4">
         {over && (
-          <p className="text-[11px] leading-4 font-medium text-emerald-300">
+          <p className="text-[11px] leading-4 font-medium text-[#6EE7B7]">
             Melebihi target
           </p>
         )}
@@ -182,9 +184,9 @@ export default function DashboardPage({
 }
 
 function DashboardSkeleton() {
-  const pulse = "animate-pulse rounded-2xl border border-white/10 bg-white/[0.03]";
+  const pulse = "animate-pulse rounded-2xl border border-line bg-surface";
   return (
-    <main aria-busy="true" aria-label="Memuat dashboard" className="mx-auto max-w-7xl p-4 md:p-8">
+    <main aria-busy="true" aria-label="Memuat dashboard" className="mx-auto max-w-7xl bg-canvas p-4 md:p-8">
       <div className="h-3 w-24 rounded bg-white/10" />
       <div className="mt-2 h-8 w-64 max-w-full rounded bg-white/10" />
       <div className={`mt-4 h-[76px] ${pulse}`} />
@@ -213,9 +215,9 @@ async function DashContent({
   ) {
     return (
       <main className="mx-auto max-w-xl p-8">
-        <div className="rounded-2xl border border-amber-400/30 bg-amber-400/10 p-6 text-sm">
-          <p className="font-semibold text-amber-200">Supabase belum dikonfigurasi</p>
-          <p className="mt-2 text-zinc-300">
+        <div className="rounded-2xl border border-warning/30 bg-warning/10 p-6 text-sm">
+          <p className="font-semibold text-[#FCD34D]">Supabase belum dikonfigurasi</p>
+          <p className="mt-2 text-muted">
             Copy <code>dashboard/.env.example</code> ke{" "}
             <code>dashboard/.env.local</code> lalu isi{" "}
             <code>NEXT_PUBLIC_SUPABASE_URL</code> dan{" "}
@@ -332,56 +334,64 @@ async function DashContent({
     {
       label: "iPhone",
       qty: trend.reduce((a, p) => a + p.qty_iphone, 0),
-      fill: "#38bdf8",
+      fill: "#8B5CF6",
     },
     {
       label: "Mac",
       qty: trend.reduce((a, p) => a + p.qty_mac, 0),
-      fill: "#22d3ee",
+      fill: "#22D3EE",
     },
     {
       label: "iPad",
       qty: trend.reduce((a, p) => a + p.qty_ipad, 0),
-      fill: "#a78bfa",
+      fill: "#818CF8",
     },
     {
       label: "Watch",
       qty: trend.reduce((a, p) => a + p.qty_apple_watch, 0),
-      fill: "#34d399",
+      fill: "#34D399",
     },
   ]);
   const androidQty = byQtyDesc([
     {
       label: "Samsung",
       qty: trend.reduce((a, p) => a + p.qty_samsung, 0),
-      fill: "#818cf8",
+      fill: "#8B5CF6",
     },
     {
       label: "Oppo",
       qty: trend.reduce((a, p) => a + p.qty_oppo, 0),
-      fill: "#34d399",
+      fill: "#22D3EE",
     },
     {
       label: "Xiaomi",
       qty: trend.reduce((a, p) => a + p.qty_xiaomi, 0),
-      fill: "#fb923c",
+      fill: "#818CF8",
     },
     {
       label: "Huawei",
       qty: trend.reduce((a, p) => a + p.qty_huawei, 0),
-      fill: "#fb7185",
+      fill: "#34D399",
     },
     {
       label: "Infinix",
       qty: trend.reduce((a, p) => a + p.qty_infinix, 0),
-      fill: "#fbbf24",
+      fill: "#A78BFA",
     },
     {
       label: "Motorola",
       qty: trend.reduce((a, p) => a + p.qty_motorola, 0),
-      fill: "#22d3ee",
+      fill: "#64748B",
     },
   ]);
+
+  const appleTotalQty = appleQty.reduce((a, d) => a + d.qty, 0);
+  const androidTotalQty = androidQty.reduce((a, d) => a + d.qty, 0);
+  const brandShare: BrandShareItem[] = [
+    { name: "Apple", qty: appleTotalQty, fill: "#8B5CF6" },
+    { name: "Android", qty: androidTotalQty, fill: "#22D3EE" },
+  ];
+  const brandShareTotal = appleTotalQty + androidTotalQty;
 
   // Top product (global — MV tanpa dimensi store)
   const { data: topRaw } = await supabase
@@ -465,9 +475,9 @@ async function DashContent({
   const { elapsed, daysInMonth } = getWibPeriod();
 
   const th =
-    "px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500";
-  const td = "px-3 py-2.5 text-sm tabular-nums";
-  const card = "rounded-2xl border border-white/10 bg-white/[0.03] p-4 md:p-5";
+    "px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-muted";
+  const td = "px-3 py-2.5 text-sm tabular-nums text-soft";
+  const card = "rounded-2xl border border-line bg-surface p-4 shadow-sm md:p-5";
 
   // Deep-link ke tampilan 1 store
   function storeHref(code: string) {
@@ -479,11 +489,11 @@ async function DashContent({
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-8">
       <header>
-        <p className="text-xs font-semibold tracking-[0.2em] text-cyan-300">
+        <p className="text-xs font-semibold tracking-[0.2em] text-primary-bright">
           DASHBOARD
         </p>
         <GreetHead name={prof?.sales_name ?? user.email ?? "?"} />
-        <p className="mt-1 text-xs text-zinc-500">
+        <p className="mt-1 text-xs text-muted">
           {prof
             ? `${prof.role}${prof.store_code ? ` · ${prof.store_code} — ${prof.store_name ?? ""}` : " · semua store"}`
             : user.email}{" "}
@@ -502,44 +512,46 @@ async function DashContent({
 
       <section aria-label="Ringkasan revenue" className="mt-4">
         <h2 className="sr-only">Ringkasan revenue</h2>
-        <p className="mb-3 text-xs text-zinc-500">
+        <p className="mb-3 text-xs text-muted">
           Revenue periode berjalan · vs target
         </p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 items-stretch">
-          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, "text-cyan-300", "bg-cyan-400", elapsed, daysInMonth, Wallet, "bg-cyan-400/10 text-cyan-300 ring-1 ring-inset ring-cyan-400/20")}
-          {kpiCard("Apple Revenue", kpi.revenue_apple, kpi.apple_target, "text-sky-300", "bg-sky-400", elapsed, daysInMonth, Apple, "bg-sky-400/10 text-sky-300 ring-1 ring-inset ring-sky-400/20")}
-          {kpiCard("Android Revenue", kpi.revenue_android, kpi.android_target, "text-violet-300", "bg-violet-400", elapsed, daysInMonth, Smartphone, "bg-violet-400/10 text-violet-300 ring-1 ring-inset ring-violet-400/20")}
-          {kpiCard("Accessories Revenue", kpi.revenue_accessories, kpi.accessories_target, "text-amber-300", "bg-amber-400", elapsed, daysInMonth, Headphones, "bg-amber-400/10 text-amber-300 ring-1 ring-inset ring-amber-400/20")}
-          {kpiCard("VAS Revenue", kpi.revenue_vas, kpi.vas_target, "text-emerald-300", "bg-emerald-400", elapsed, daysInMonth, Sparkles, "bg-emerald-400/10 text-emerald-300 ring-1 ring-inset ring-emerald-400/20")}
+          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, "text-primary-bright", "bg-primary", elapsed, daysInMonth, Wallet, "bg-primary/15 text-primary-bright ring-1 ring-inset ring-primary/40")}
+          {kpiCard("Apple Revenue", kpi.revenue_apple, kpi.apple_target, "text-secondary", "bg-secondary", elapsed, daysInMonth, Apple, "bg-secondary/15 text-secondary ring-1 ring-inset ring-secondary/40")}
+          {kpiCard("Android Revenue", kpi.revenue_android, kpi.android_target, "text-[#CBD5E1]", "bg-[#94A3B8]", elapsed, daysInMonth, Smartphone, "bg-white/5 text-[#CBD5E1] ring-1 ring-inset ring-white/20")}
+          {kpiCard("Accessories Revenue", kpi.revenue_accessories, kpi.accessories_target, "text-[#A5B4FC]", "bg-[#818CF8]", elapsed, daysInMonth, Headphones, "bg-[#818CF8]/15 text-[#A5B4FC] ring-1 ring-inset ring-[#818CF8]/40")}
+          {kpiCard("VAS Revenue", kpi.revenue_vas, kpi.vas_target, "text-[#6EE7B7]", "bg-accent", elapsed, daysInMonth, Sparkles, "bg-accent/15 text-[#6EE7B7] ring-1 ring-inset ring-accent/40")}
         </div>
       </section>
 
-      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <section className={card} aria-label="Tren revenue harian">
-          <h2 className="text-sm font-semibold">Tren Revenue Harian</h2>
-          <p className="mb-3 text-xs text-zinc-500">
-            {store ? `Store ${store}` : "Semua store"} · s.d. {latestDate} ·
-            sumbu dalam Rp
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
+        <section className={`${card} lg:col-span-3`} aria-label="Brand share by qty">
+          <h2 className="text-sm font-semibold text-ink">Brand Share</h2>
+          <p className="mb-3 text-xs text-muted">
+            {store ? `Store ${store}` : "Semua store"} · total periode · unit
           </p>
-          {trend.length ? (
+          {brandShareTotal ? (
             <div
               role="img"
-              aria-label={`Grafik tren revenue harian, ${trend.length} titik data`}
+              aria-label={`Grafik brand share by qty, Apple vs Android`}
             >
-              <TrendChart data={trend} />
+              <BrandShareDonut
+                data={brandShare}
+                ariaLabel="Grafik brand share by qty: Apple vs Android"
+              />
             </div>
           ) : (
             <div className="py-10 text-center">
-              <p className="text-sm text-zinc-500">
+              <p className="text-sm text-muted">
                 Tidak ada data pada periode ini.
               </p>
             </div>
           )}
         </section>
 
-        <section className={card} aria-label="Apple qty total">
-          <h2 className="text-sm font-semibold">Apple Qty</h2>
-          <p className="mb-3 text-xs text-zinc-500">
+        <section className={`${card} lg:col-span-4`} aria-label="Apple qty total">
+          <h2 className="text-sm font-semibold text-ink">Apple Qty</h2>
+          <p className="mb-3 text-xs text-muted">
             {store ? `Store ${store}` : "Semua store"} · total periode · unit
           </p>
           {trend.length ? (
@@ -549,16 +561,16 @@ async function DashContent({
             />
           ) : (
             <div className="py-10 text-center">
-              <p className="text-sm text-zinc-500">
+              <p className="text-sm text-muted">
                 Tidak ada data pada periode ini.
               </p>
             </div>
           )}
         </section>
 
-        <section className={card} aria-label="Android qty total">
-          <h2 className="text-sm font-semibold">Android Qty</h2>
-          <p className="mb-3 text-xs text-zinc-500">
+        <section className={`${card} lg:col-span-5`} aria-label="Android qty total">
+          <h2 className="text-sm font-semibold text-ink">Android Qty</h2>
+          <p className="mb-3 text-xs text-muted">
             {store ? `Store ${store}` : "Semua store"} · total periode · unit
           </p>
           {trend.length ? (
@@ -568,7 +580,7 @@ async function DashContent({
             />
           ) : (
             <div className="py-10 text-center">
-              <p className="text-sm text-zinc-500">
+              <p className="text-sm text-muted">
                 Tidak ada data pada periode ini.
               </p>
             </div>
@@ -578,8 +590,8 @@ async function DashContent({
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <section className={card}>
-          <h2 className="text-sm font-semibold">Leaderboard Store</h2>
-          <p className="mb-2 text-xs text-zinc-500">
+          <h2 className="text-sm font-semibold text-ink">Leaderboard Store</h2>
+          <p className="mb-2 text-xs text-muted">
             Peringkat berdasarkan achievement & revenue · snapshot periode
             berjalan
           </p>
@@ -589,8 +601,8 @@ async function DashContent({
                 Peringkat store berdasarkan achievement dan revenue
               </caption>
               <thead>
-                <tr className="border-b border-white/10">
-                  <th className={`${th} sticky left-0 bg-panel`}>#Ach</th>
+                <tr className="border-b border-line">
+                  <th className={`${th} sticky left-0 bg-surface`}>#Ach</th>
                   <th className={th}>Store</th>
                   <th className={`${th} text-right`}>Revenue</th>
                   <th className={`${th} text-right`}>Ach</th>
@@ -600,10 +612,10 @@ async function DashContent({
                 {lb.map((r) => (
                   <tr
                     key={r.store_code}
-                    className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]"
+                    className="border-b border-line/60 last:border-0 hover:bg-white/5"
                   >
                     <td
-                      className={`${td} sticky left-0 bg-panel text-zinc-400`}
+                      className={`${td} sticky left-0 bg-surface text-muted`}
                     >
                       {r.rank_achievement}
                     </td>
@@ -611,25 +623,25 @@ async function DashContent({
                       <Link
                         href={storeHref(r.store_code)}
                         title={`Lihat store ${r.store_code}`}
-                        className="font-medium text-cyan-200 underline-offset-4 hover:underline"
+                        className="font-medium text-primary-bright underline-offset-4 hover:underline"
                       >
                         {r.store_code}
                       </Link>
-                      <span className="block max-w-48 truncate text-xs text-zinc-500">
+                      <span className="block max-w-48 truncate text-xs text-muted">
                         {r.store_name}
                       </span>
                     </td>
                     <td className={`${td} text-right`}>
                       {rupiahCompact(r.revenue_total)}
                     </td>
-                    <td className="px-3 py-2.5 text-right text-sm font-semibold text-cyan-300">
+                    <td className="px-3 py-2.5 text-right text-sm font-semibold text-ink">
                       {pct(r.ach_total_pct)}
                     </td>
                   </tr>
                 ))}
                 {!lb.length && (
                   <tr>
-                    <td colSpan={4} className="py-8 text-center text-sm text-zinc-500">
+                    <td colSpan={4} className="py-8 text-center text-sm text-muted">
                       Tidak ada data.
                     </td>
                   </tr>
@@ -640,11 +652,11 @@ async function DashContent({
         </section>
 
         <section className={card}>
-          <h2 className="text-sm font-semibold">Top Product</h2>
+          <h2 className="text-sm font-semibold text-ink">Top Product</h2>
           <div className="mb-2 flex flex-wrap items-center gap-2">
-            <p className="text-xs text-zinc-500">Berdasarkan sublob · global</p>
+            <p className="text-xs text-muted">Berdasarkan sublob · global</p>
             {store && (
-              <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[11px] font-medium text-amber-200">
+              <span className="rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-[11px] font-medium text-[#FCD34D]">
                 Tidak ikut filter store
               </span>
             )}
@@ -655,8 +667,8 @@ async function DashContent({
                 Produk teratas berdasarkan revenue
               </caption>
               <thead>
-                <tr className="border-b border-white/10">
-                  <th className={`${th} sticky left-0 bg-panel`}>#</th>
+                <tr className="border-b border-line">
+                  <th className={`${th} sticky left-0 bg-surface`}>#</th>
                   <th className={th}>Product</th>
                   <th className={`${th} text-right`}>Qty</th>
                   <th className={`${th} text-right`}>Revenue</th>
@@ -666,14 +678,14 @@ async function DashContent({
                 {top.map((r) => (
                   <tr
                     key={r.product}
-                    className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]"
+                    className="border-b border-line/60 last:border-0 hover:bg-white/5"
                   >
                     <td
-                      className={`${td} sticky left-0 bg-panel text-zinc-400`}
+                      className={`${td} sticky left-0 bg-surface text-muted`}
                     >
                       {r.rank_revenue}
                     </td>
-                    <td className={`${td} max-w-[200px] break-words font-medium sm:max-w-none`}>{r.product}</td>
+                    <td className={`${td} max-w-[200px] break-words font-medium text-ink sm:max-w-none`}>{r.product}</td>
                     <td className={`${td} text-right`}>{num(r.total_qty)}</td>
                     <td className={`${td} text-right`}>
                       {rupiahCompact(r.revenue_total)}
@@ -682,7 +694,7 @@ async function DashContent({
                 ))}
                 {!top.length && (
                   <tr>
-                    <td colSpan={4} className="py-8 text-center text-sm text-zinc-500">
+                    <td colSpan={4} className="py-8 text-center text-sm text-muted">
                       Tidak ada data.
                     </td>
                   </tr>
@@ -693,7 +705,7 @@ async function DashContent({
         </section>
       </div>
 
-      <footer className="mt-6 text-center text-xs text-zinc-500">
+      <footer className="mt-6 text-center text-xs text-muted">
         OneMapTech · refresh harian
       </footer>
     </main>

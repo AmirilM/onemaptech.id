@@ -35,8 +35,8 @@ export default function SidebarNav({ isAdmin }: { isAdmin: boolean }) {
             href={i.href}
             className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm transition ${
               active
-                ? "bg-cyan-400/15 font-semibold text-cyan-200"
-                : "text-zinc-400 hover:bg-white/5 hover:text-zinc-100"
+                ? "bg-primary/15 font-semibold text-primary-bright"
+                : "text-muted hover:bg-white/5 hover:text-ink"
             }`}
           >
             <Icon size={18} strokeWidth={2} aria-hidden className="shrink-0" />

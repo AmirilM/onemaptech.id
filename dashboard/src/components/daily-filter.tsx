@@ -41,14 +41,14 @@ export default function DailyFilter({
   }
 
   const input =
-    "min-h-[44px] rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base text-zinc-100 outline-none focus:border-cyan-400/60 md:text-sm";
+    "min-h-[44px] rounded-lg border border-line bg-canvas px-3 py-2 text-base text-ink outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/30 md:text-sm";
 
   return (
     <form
       onSubmit={apply}
-      className="flex flex-wrap items-end gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4"
+      className="flex flex-wrap items-end gap-3 rounded-2xl border border-line bg-surface p-4 shadow-sm"
     >
-      <label className="flex w-full flex-col gap-1 text-xs text-zinc-400 sm:w-auto">
+      <label className="flex w-full flex-col gap-1 text-xs text-muted sm:w-auto">
         Store
         <select
           value={store}
@@ -64,7 +64,7 @@ export default function DailyFilter({
           ))}
         </select>
       </label>
-      <label className="flex w-full flex-col gap-1 text-xs text-zinc-400 sm:w-auto">
+      <label className="flex w-full flex-col gap-1 text-xs text-muted sm:w-auto">
         Bulan
         <input
           type="month"
@@ -76,12 +76,12 @@ export default function DailyFilter({
       <button
         type="submit"
         disabled={isPending}
-        className="min-h-[44px] rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300 active:bg-cyan-500 disabled:opacity-60"
+        className="min-h-[44px] rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
       >
         {isPending ? "..." : "Terapkan"}
       </button>
       {lockedStore && (
-        <span className="w-full text-xs text-amber-300/90 sm:w-auto">
+        <span className="w-full text-xs text-warning sm:w-auto">
           Terkunci ke store {lockedStore} (role kamu).
         </span>
       )}

@@ -3,9 +3,30 @@
 @theme {
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
 
-  --color-abyss: #070b14;
-  --color-panel: #0b1220;
-  --color-accent: #22d3ee;
+  --color-canvas: #0b0b14;
+  --color-surface: #14141f;
+  --color-elevated: #1b1b2a;
+  --color-line: #262638;
+  --color-track: #1e1e2e;
+  --color-ink: #ede9fe;
+  --color-muted: #9aa0b2;
+  --color-soft: #c9c5db;
+  --color-faint: #6d7186;
+  --color-primary: #8b5cf6;
+  --color-primary-hover: #7c3aed;
+  --color-primary-bright: #a78bfa;
+  --color-primary-dim: rgba(139, 92, 246, 0.14);
+  --color-secondary: #22d3ee;
+  --color-accent: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger: #fb7185;
+  --color-success: #34d399;
+
+  /* Compat lama: navy -> violet, gold -> amber */
+  --color-navy: #8b5cf6;
+  --color-navy-hover: #7c3aed;
+  --color-gold: #fbbf24;
+  --color-gold-deep: #fcd34d;
 }
 
 html {
@@ -15,10 +36,10 @@ html {
 
 body {
   background:
-    radial-gradient(1200px 500px at 15% -10%, rgba(34, 211, 238, 0.12), transparent 60%),
-    radial-gradient(900px 500px at 90% 0%, rgba(167, 139, 250, 0.12), transparent 55%),
-    var(--color-abyss);
-  color: var(--color-zinc-100);
+    radial-gradient(1000px 420px at 12% -10%, rgba(139, 92, 246, 0.14), transparent 60%),
+    radial-gradient(900px 420px at 88% -8%, rgba(34, 211, 238, 0.08), transparent 55%),
+    var(--color-canvas);
+  color: var(--color-ink);
   font-family: var(--font-sans);
   min-height: 100dvh;
   overflow-x: clip;
@@ -29,43 +50,48 @@ body {
 .overflow-x-auto {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  scrollbar-color: rgba(237, 233, 254, 0.25) transparent;
 }
 
-input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(0.7);
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
+  filter: invert(0.75);
 }
 
 select option {
-  background-color: var(--color-panel);
+  background-color: var(--color-surface);
+  color: var(--color-ink);
 }
 
-/* react-day-picker — dark theme override */
-.rdp-dark {
-  --rdp-accent-color: var(--color-accent);
-  --rdp-accent-background-color: rgba(34, 211, 238, 0.16);
-  --rdp-today-color: var(--color-accent);
-  --rdp-range_middle-background-color: rgba(34, 211, 238, 0.12);
-  --rdp-range_middle-color: var(--color-zinc-100);
+/* react-day-picker — violet dark theme override */
+.rdp-premium {
+  --rdp-accent-color: var(--color-primary);
+  --rdp-accent-background-color: rgba(139, 92, 246, 0.18);
+  --rdp-today-color: var(--color-primary-bright);
+  --rdp-range_middle-background-color: rgba(139, 92, 246, 0.18);
+  --rdp-range_middle-color: var(--color-ink);
   --rdp-day-width: 40px;
   --rdp-day-height: 40px;
+  --rdp-selected-border: 1px solid var(--color-primary);
+  color: var(--color-ink);
+  --rdp-background-color: var(--color-surface);
 }
-.rdp-dark .rdp-month_caption {
-  color: var(--color-zinc-100);
+.rdp-premium .rdp-month_caption {
+  color: var(--color-ink);
 }
-.rdp-dark .rdp-weekday {
-  color: var(--color-zinc-500);
+.rdp-premium .rdp-weekday {
+  color: var(--color-muted);
 }
-.rdp-dark .rdp-day_button {
+.rdp-premium .rdp-day_button {
   border-radius: 10px;
 }
-.rdp-dark .rdp-outside .rdp-day_button {
-  color: var(--color-zinc-600);
+.rdp-premium .rdp-outside .rdp-day_button {
+  color: var(--color-faint);
 }
-.rdp-dark .rdp-button_previous .rdp-chevron,
-.rdp-dark .rdp-button_next .rdp-chevron {
-  fill: var(--color-zinc-400);
+.rdp-premium .rdp-button_previous .rdp-chevron,
+.rdp-premium .rdp-button_next .rdp-chevron {
+  fill: var(--color-muted);
 }
 
 /* Focus terlihat untuk semua kontrol interaktif */
@@ -73,7 +99,7 @@ button:focus-visible,
 a:focus-visible,
 select:focus-visible,
 input:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--color-accent) 70%, transparent);
+  outline: 2px solid rgba(139, 92, 246, 0.6);
   outline-offset: 2px;
 }
 

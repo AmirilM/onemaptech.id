@@ -75,15 +75,15 @@ export default function UserForm({
   }
 
   const input =
-    "min-h-[44px] w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base text-zinc-100 outline-none focus:border-cyan-400/60 md:text-sm";
+    "min-h-[44px] w-full rounded-lg border border-line bg-canvas px-3 py-2 text-base text-ink outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/30 md:text-sm";
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-black/70 p-4 [padding-bottom:env(safe-area-inset-bottom)]">
       <form
         onSubmit={submit}
-        className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-white/10 bg-panel p-6"
+        className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-line bg-surface p-6 shadow-xl"
       >
-        <h3 className="text-lg font-bold">
+        <h3 className="text-lg font-bold text-ink">
           {isEdit ? `Edit ${initial!.sales_id}` : "Tambah User"}
         </h3>
         <div className="mt-4 flex flex-col gap-3">
@@ -133,7 +133,7 @@ export default function UserForm({
           />
         </div>
         {error && (
-          <p className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+          <p className="mt-3 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-[#FDA4AF]">
             {error}
           </p>
         )}
@@ -144,7 +144,7 @@ export default function UserForm({
                 type="button"
                 onClick={remove}
                 disabled={loading}
-                className="min-h-[44px] rounded-lg border border-red-500/40 px-4 py-2 text-sm text-red-300 hover:bg-red-500/10 active:bg-red-500/20"
+                className="min-h-[44px] rounded-lg border border-danger/40 px-4 py-2 text-sm text-[#FDA4AF] hover:bg-danger/10"
               >
                 Hapus
               </button>
@@ -154,14 +154,14 @@ export default function UserForm({
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[44px] rounded-lg border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 active:bg-white/10"
+              className="min-h-[44px] rounded-lg border border-line px-4 py-2 text-sm text-soft hover:bg-white/5 active:bg-white/10"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="min-h-[44px] rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300 active:bg-cyan-500 disabled:opacity-60"
+              className="min-h-[44px] rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
             >
               {loading ? "..." : "Simpan"}
             </button>

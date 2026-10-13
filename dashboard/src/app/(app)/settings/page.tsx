@@ -8,7 +8,7 @@ export default function SettingsPage() {
   return (
     <Suspense
       fallback={
-        <main className="mx-auto max-w-7xl p-8 text-sm text-zinc-500">
+        <main className="mx-auto max-w-7xl p-8 text-sm text-muted">
           Memuat settings...
         </main>
       }
@@ -41,10 +41,10 @@ async function SettingsContent() {
 
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-8">
-      <p className="text-xs font-semibold tracking-[0.2em] text-cyan-300">
+      <p className="text-xs font-semibold tracking-[0.2em] text-primary-bright">
         SETTINGS
       </p>
-      <h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">
+      <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink md:text-3xl">
         Pengaturan
       </h1>
       <SettingsClient

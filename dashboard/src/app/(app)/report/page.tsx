@@ -18,7 +18,7 @@ export default function ReportPage({
   return (
     <Suspense
       fallback={
-        <main className="mx-auto max-w-7xl p-8 text-sm text-zinc-500">
+        <main className="mx-auto max-w-7xl p-8 text-sm text-muted">
           Memuat report...
         </main>
       }
@@ -63,18 +63,18 @@ async function ReportContent({
   const cols = rows.length ? Object.keys(rows[0]) : [];
 
   const th =
-    "px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500";
-  const td = "px-3 py-2 text-xs tabular-nums whitespace-nowrap";
+    "px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-muted";
+  const td = "px-3 py-2 text-xs tabular-nums whitespace-nowrap text-soft";
 
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-8">
-      <p className="text-xs font-semibold tracking-[0.2em] text-cyan-300">
+      <p className="text-xs font-semibold tracking-[0.2em] text-primary-bright">
         REPORT
       </p>
-      <h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">
+      <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink md:text-3xl">
         Export Transaksi
       </h1>
-      <p className="mt-1 text-xs text-zinc-500">
+      <p className="mt-1 text-xs text-muted">
         {rows.length} baris sesuai filter · preview 100 pertama
         {rows.length >= ROW_LIMIT ? ` · dibatasi ${ROW_LIMIT} baris (persempit filter)` : ""}
       </p>
@@ -96,13 +96,13 @@ async function ReportContent({
         />
       </div>
 
-      <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 md:p-5">
+      <section className="mt-4 rounded-2xl border border-line bg-surface p-4 shadow-sm md:p-5">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1200px] border-collapse">
             <thead>
-              <tr className="border-b border-white/10">
+              <tr className="border-b border-line">
                 {cols.map((c, ci) => (
-                  <th key={c} className={`${th}${ci === 0 ? " sticky left-0 bg-panel" : ""}`}>
+                  <th key={c} className={`${th}${ci === 0 ? " sticky left-0 bg-surface" : ""}`}>
                     {c}
                   </th>
                 ))}
@@ -112,18 +112,18 @@ async function ReportContent({
               {preview.map((r, i) => (
                 <tr
                   key={i}
-                  className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]"
+                  className="border-b border-line/60 last:border-0 hover:bg-white/5"
                 >
                   {cols.map((c, ci) => (
-                    <td key={c} className={`${td}${ci === 0 ? " sticky left-0 bg-panel" : ""}`}>
-                      {r[c] ?? <span className="text-zinc-600">NULL</span>}
+                    <td key={c} className={`${td}${ci === 0 ? " sticky left-0 bg-surface" : ""}`}>
+                      {r[c] ?? <span className="text-faint">NULL</span>}
                     </td>
                   ))}
                 </tr>
               ))}
               {!preview.length && (
                 <tr>
-                  <td className="py-8 text-center text-sm text-zinc-500">
+                  <td className="py-8 text-center text-sm text-muted">
                     Tidak ada data.
                   </td>
                 </tr>

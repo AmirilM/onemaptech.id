@@ -107,8 +107,8 @@ export default function SettingsClient(p: Props) {
   }
 
   const input =
-    "min-h-[44px] w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base text-zinc-100 outline-none focus:border-cyan-400/60 md:text-sm";
-  const card = "rounded-2xl border border-white/10 bg-white/[0.03] p-5";
+    "min-h-[44px] w-full rounded-lg border border-line bg-canvas px-3 py-2 text-base text-ink outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/30 md:text-sm";
+  const card = "rounded-2xl border border-line bg-surface p-5 shadow-sm";
 
   return (
     <div className="mt-5 flex max-w-2xl flex-col gap-4">
@@ -122,17 +122,17 @@ export default function SettingsClient(p: Props) {
               className="h-16 w-16 shrink-0 rounded-full object-cover"
             />
           ) : (
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-violet-500 text-lg font-bold text-slate-950">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary/20 text-lg font-bold text-primary-bright">
               {initials(p.salesName)}
             </div>
           )}
           <div className="min-w-0 flex-1 basis-40">
-            <p className="truncate font-semibold">{p.salesName}</p>
-            <p className="text-xs text-zinc-500">
+            <p className="truncate font-semibold text-ink">{p.salesName}</p>
+            <p className="text-xs text-muted">
               {p.role}
               {p.storeCode ? ` · ${p.storeCode}` : ""}
             </p>
-            <label className="mt-2 inline-block cursor-pointer rounded-lg border border-white/10 px-3 py-1.5 text-xs text-zinc-300 hover:bg-white/5">
+            <label className="mt-2 inline-block cursor-pointer rounded-lg border border-line px-3 py-1.5 text-xs text-soft hover:bg-white/5">
               Ganti foto
               <input
                 type="file"
@@ -148,7 +148,7 @@ export default function SettingsClient(p: Props) {
       <section className={card}>
         <h2 className="text-sm font-semibold">Profil</h2>
         <form onSubmit={saveProfile} className="mt-3 flex flex-col gap-3">
-          <label className="flex flex-col gap-1 text-xs text-zinc-400">
+          <label className="flex flex-col gap-1 text-xs text-muted">
             Nama lengkap
             <input
               value={name}
@@ -159,7 +159,7 @@ export default function SettingsClient(p: Props) {
           <button
             type="submit"
             disabled={loading}
-            className="w-fit min-h-[44px] rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300 active:bg-cyan-500 disabled:opacity-60"
+            className="w-fit min-h-[44px] rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
           >
             Simpan profil
           </button>
@@ -186,7 +186,7 @@ export default function SettingsClient(p: Props) {
           <button
             type="submit"
             disabled={loading}
-            className="w-fit min-h-[44px] rounded-lg border border-white/10 px-4 py-2 text-sm text-zinc-200 hover:bg-white/5 active:bg-white/10 disabled:opacity-60"
+            className="w-fit min-h-[44px] rounded-lg border border-line px-4 py-2 text-sm text-soft hover:bg-white/5 active:bg-white/10 disabled:opacity-60"
           >
             Ganti password
           </button>
@@ -194,7 +194,7 @@ export default function SettingsClient(p: Props) {
       </section>
 
       {msg && (
-        <p className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-zinc-300">
+        <p className="rounded-lg border border-line bg-canvas px-3 py-2 text-xs text-soft">
           {msg}
         </p>
       )}

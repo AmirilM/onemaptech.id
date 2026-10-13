@@ -5,18 +5,53 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  LabelList,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
-import { num } from "@/lib/format";
+import { num, pct } from "@/lib/format";
 
 export type QtyBarItem = {
   label: string;
   qty: number;
   fill: string;
 };
+
+function QtyTooltip({
+  active,
+  payload,
+  label,
+  total,
+}: {
+  active?: boolean;
+  payload?: ReadonlyArray<{ value?: unknown }>;
+  label?: string | number;
+  total: number;
+}) {
+  if (!active || !payload?.length) return null;
+  const qty = Number(payload[0]?.value ?? 0);
+  const share = total ? (100 * qty) / total : null;
+  return (
+    <div
+      style={{
+        background: "#14141F",
+        border: "1px solid #262638",
+        borderRadius: 12,
+        fontSize: 12,
+        maxWidth: "80vw",
+        padding: "8px 12px",
+        boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+      }}
+    >
+      <p style={{ color: "#EDE9FE", margin: 0, fontWeight: 600 }}>{label}</p>
+      <p style={{ color: "#C9C5DB", margin: "4px 0 0" }}>
+        {num(qty)} unit ({pct(share)})
+      </p>
+    </div>
+  );
+}
 
 export default function QtyBarChart({
   data,
@@ -25,8 +60,10 @@ export default function QtyBarChart({
   data: QtyBarItem[];
   ariaLabel: string;
 }) {
+  const total = data.reduce((a, d) => a + d.qty, 0);
+  const shareOf = (qty: number) => (total ? (100 * qty) / total : null);
   const summary = data.length
-    ? data.map((d) => `${d.label} ${num(d.qty)} unit`).join("; ")
+    ? data.map((d) => `${d.label} ${num(d.qty)} unit (${pct(shareOf(d.qty))})`).join("; ")
     : "Tidak ada data.";
   return (
     <div className="h-64 w-full sm:h-72">
@@ -34,17 +71,17 @@ export default function QtyBarChart({
         {ariaLabel}: {summary}.
       </p>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-          <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+        <BarChart data={data} margin={{ top: 20, right: 8, left: 0, bottom: 0 }}>
+          <CartesianGrid stroke="#262638" vertical={false} />
           <XAxis
             dataKey="label"
-            tick={{ fill: "var(--color-zinc-400)", fontSize: 10 }}
+            tick={{ fill: "#9AA0B2", fontSize: 10 }}
             tickLine={false}
-            axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+            axisLine={{ stroke: "#262638" }}
             interval={0}
           />
           <YAxis
-            tick={{ fill: "var(--color-zinc-400)", fontSize: 11 }}
+            tick={{ fill: "#9AA0B2", fontSize: 11 }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(v: number) => num(v)}
@@ -52,21 +89,26 @@ export default function QtyBarChart({
             allowDecimals={false}
           />
           <Tooltip
-            contentStyle={{
-              background: "var(--color-panel)",
-              border: "1px solid rgba(255,255,255,0.12)",
-              borderRadius: 12,
-              fontSize: 12,
-              maxWidth: "80vw",
-            }}
-            labelStyle={{ color: "var(--color-zinc-200)" }}
-            cursor={{ fill: "rgba(255,255,255,0.06)" }}
-            formatter={(value) => [`${num(Number(value))} unit`, "Qty"]}
+            content={(props) => <QtyTooltip {...props} total={total} />}
+            cursor={{ fill: "rgba(139,92,246,0.12)" }}
           />
           <Bar dataKey="qty" name="Qty" radius={[6, 6, 0, 0]} maxBarSize={44}>
             {data.map((d) => (
               <Cell key={d.label} fill={d.fill} />
             ))}
+            <LabelList
+              dataKey="qty"
+              position="top"
+              formatter={(value: unknown) => {
+                const qty = Number(value);
+                if (!qty) return "";
+                return num(qty);
+              }}
+              style={{
+                fill: "#9AA0B2",
+                fontSize: 10,
+              }}
+            />
           </Bar>
         </BarChart>
       </ResponsiveContainer>
