@@ -1,7 +1,9 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { DayPicker, type DateRange } from "react-day-picker";
+import "react-day-picker/style.css";
 
 type Props = {
   stores: { store_code: string; store_name: string | null }[];
@@ -10,6 +12,41 @@ type Props = {
   currentFrom: string;
   currentTo: string;
 };
+
+function parseISODate(s: string): Date | undefined {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+  if (!m) return undefined;
+  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  return Number.isNaN(d.getTime()) ? undefined : d;
+}
+
+function toISODate(d: Date): string {
+  const y = d.getFullYear();
+  const m = `${d.getMonth() + 1}`.padStart(2, "0");
+  const day = `${d.getDate()}`.padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function rangeFromParams(from: string, to: string): DateRange | undefined {
+  const f = from ? parseISODate(from) : undefined;
+  const t = to ? parseISODate(to) : undefined;
+  if (!f && !t) return undefined;
+  return { from: f ?? t, to: t ?? f };
+}
+
+const monthShort = new Intl.DateTimeFormat("id-ID", { month: "short" });
+
+function rangeLabel(r: DateRange | undefined): string {
+  if (!r?.from) return "Semua tanggal";
+  const f = r.from;
+  if (!r.to) return `${f.getDate()} ${monthShort.format(f)} ${f.getFullYear()} – …`;
+  const t = r.to;
+  if (toISODate(f) === toISODate(t))
+    return `${f.getDate()} ${monthShort.format(f)} ${f.getFullYear()}`;
+  if (f.getFullYear() === t.getFullYear())
+    return `${f.getDate()} ${monthShort.format(f)} – ${t.getDate()} ${monthShort.format(t)} ${t.getFullYear()}`;
+  return `${f.getDate()} ${monthShort.format(f)} ${f.getFullYear()} – ${t.getDate()} ${monthShort.format(t)} ${t.getFullYear()}`;
+}
 
 export default function FilterBar({
   stores,
@@ -23,50 +60,98 @@ export default function FilterBar({
   const params = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [store, setStore] = useState(currentStore);
-  const [from, setFrom] = useState(currentFrom);
-  const [to, setTo] = useState(currentTo);
+  const [range, setRange] = useState<DateRange | undefined>(() =>
+    rangeFromParams(currentFrom, currentTo),
+  );
+  const [open, setOpen] = useState(false);
+  const [months, setMonths] = useState(1);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   // Sync saat back/forward navigation — render-time adjust (tanpa effect)
   const [prev, setPrev] = useState({ s: currentStore, f: currentFrom, t: currentTo });
   if (currentStore !== prev.s || currentFrom !== prev.f || currentTo !== prev.t) {
     setPrev({ s: currentStore, f: currentFrom, t: currentTo });
     setStore(currentStore);
-    setFrom(currentFrom);
-    setTo(currentTo);
+    setRange(rangeFromParams(currentFrom, currentTo));
   }
 
-  function apply(e: React.FormEvent) {
-    e.preventDefault();
+  // 2 bulan di layar >= md, 1 bulan di mobile
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const sync = () => setMonths(mq.matches ? 2 : 1);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  // Tutup popover saat klik di luar / Escape
+  useEffect(() => {
+    if (!open) return;
+    function onPointerDown(e: PointerEvent) {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open ]);
+
+  function push(storeVal: string, r: DateRange | undefined) {
     const next = new URLSearchParams(params.toString());
-    if (store) next.set("store", store);
+    if (storeVal) next.set("store", storeVal);
     else next.delete("store");
-    if (from) next.set("from", from);
-    else next.delete("from");
-    if (to) next.set("to", to);
-    else next.delete("to");
-    startTransition(() => router.push(`${pathname}?${next.toString()}`));
+    if (r?.from && r?.to) {
+      next.set("from", toISODate(r.from));
+      next.set("to", toISODate(r.to));
+    } else {
+      next.delete("from");
+      next.delete("to");
+    }
+    const qs = next.toString();
+    startTransition(() => router.replace(qs ? `${pathname}?${qs}` : pathname));
+  }
+
+  function handleStore(v: string) {
+    setStore(v);
+    push(v, range);
+  }
+
+  function handleSelect(r: DateRange | undefined) {
+    setRange(r);
+    // Auto-run hanya saat range lengkap; klik pertama (from saja) belum push
+    if (r?.from && r?.to) push(store, { from: r.from, to: r.to });
+  }
+
+  function clearRange() {
+    setRange(undefined);
+    push(store, undefined);
   }
 
   function reset() {
-    setStore(lockedStore ?? "");
-    setFrom("");
-    setTo("");
-    startTransition(() => router.push(pathname));
+    const s = lockedStore ?? "";
+    setStore(s);
+    setRange(undefined);
+    setOpen(false);
+    startTransition(() => router.replace(pathname));
   }
 
   const input =
     "min-h-[44px] rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base text-zinc-100 outline-none focus:border-cyan-400/60 md:text-sm";
 
   return (
-    <form
-      onSubmit={apply}
-      className="flex flex-wrap items-end gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4"
-    >
+    <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
       <label className="flex w-full flex-col gap-1 text-xs text-zinc-400 sm:w-auto">
         Store
         <select
           value={store}
-          onChange={(e) => setStore(e.target.value)}
+          onChange={(e) => handleStore(e.target.value)}
           disabled={!!lockedStore}
           className={`${input} w-full disabled:opacity-60 sm:w-auto sm:min-w-56`}
         >
@@ -78,31 +163,77 @@ export default function FilterBar({
           ))}
         </select>
       </label>
-      <label className="flex w-full flex-col gap-1 text-xs text-zinc-400 sm:w-auto">
-        Dari
-        <input
-          type="date"
-          value={from}
-          onChange={(e) => setFrom(e.target.value)}
-          className={`${input} w-full sm:w-auto`}
-        />
-      </label>
-      <label className="flex w-full flex-col gap-1 text-xs text-zinc-400 sm:w-auto">
-        Sampai
-        <input
-          type="date"
-          value={to}
-          onChange={(e) => setTo(e.target.value)}
-          className={`${input} w-full sm:w-auto`}
-        />
-      </label>
-      <button
-        type="submit"
-        disabled={isPending}
-        className="min-h-[44px] rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300 active:bg-cyan-500 disabled:opacity-60"
-      >
-        {isPending ? "..." : "Terapkan"}
-      </button>
+
+      <div ref={panelRef} className="relative w-full sm:w-auto">
+        <span className="mb-1 flex items-center gap-2 text-xs text-zinc-400">
+          Periode
+          {isPending && <span className="text-cyan-300">Memuat…</span>}
+        </span>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          className={`${input} flex w-full items-center justify-between gap-3 sm:w-auto sm:min-w-64`}
+        >
+          <span className={range?.from ? "text-zinc-100" : "text-zinc-500"}>
+            {rangeLabel(range)}
+          </span>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+            className="shrink-0 text-zinc-400"
+          >
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+        </button>
+
+        {open && (
+          <div className="absolute left-0 top-full z-30 mt-2 max-w-[calc(100vw-2rem)] overflow-x-auto rounded-2xl border border-white/10 bg-[#0b1220] p-3 shadow-2xl shadow-black/60">
+            <DayPicker
+              mode="range"
+              selected={range}
+              onSelect={handleSelect}
+              numberOfMonths={months}
+              showOutsideDays
+              className="rdp-dark"
+            />
+            <div className="mt-2 flex items-center justify-between gap-2 border-t border-white/10 pt-2">
+              <span className="px-1 text-xs text-zinc-400">
+                {rangeLabel(range)}
+              </span>
+              <span className="flex gap-2">
+                {range?.from && (
+                  <button
+                    type="button"
+                    onClick={clearRange}
+                    className="min-h-[36px] rounded-lg px-3 py-1 text-xs text-zinc-300 hover:bg-white/5 active:bg-white/10"
+                  >
+                    Hapus
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="min-h-[36px] rounded-lg bg-cyan-400 px-3 py-1 text-xs font-semibold text-slate-950 hover:bg-cyan-300 active:bg-cyan-500"
+                >
+                  Tutup
+                </button>
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+
       <button
         type="button"
         onClick={reset}
@@ -115,6 +246,6 @@ export default function FilterBar({
           Terkunci ke store {lockedStore} (role kamu).
         </span>
       )}
-    </form>
+    </div>
   );
 }
