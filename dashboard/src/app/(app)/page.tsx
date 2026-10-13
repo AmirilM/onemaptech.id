@@ -14,6 +14,14 @@ import type {
 import FilterBar from "@/components/filter-bar";
 import GreetHead from "@/components/greet-head";
 import TrendChart from "@/components/trend-chart";
+import {
+  Apple,
+  Headphones,
+  Smartphone,
+  Sparkles,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
 
 type Params = { store?: string };
 
@@ -44,6 +52,8 @@ function kpiCard(
   bar: string,
   elapsed: number,
   daysInMonth: number,
+  Icon: LucideIcon,
+  iconWrap: string,
 ) {
   const ach = target ? Math.round((10000 * actual) / target) / 100 : null;
   const estimated =
@@ -54,30 +64,45 @@ function kpiCard(
       : null;
   const variance = target !== null ? target - actual : null;
   const shortfall = variance !== null && variance > 0;
+  const covered = variance !== null && variance <= 0;
   const reached = ach !== null && ach >= 100;
   const over = ach !== null && ach > 100;
   const row = "flex items-baseline justify-between gap-2 text-xs tabular-nums";
   return (
     <div
       key={label}
-      className="rounded-2xl border border-white/10 bg-white/[0.03] p-5"
+      className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5"
     >
-      <p className="text-xs font-medium tracking-wide text-zinc-400">{label}</p>
+      <div className={`absolute inset-x-0 top-0 h-0.5 ${bar} opacity-60`} />
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-xs font-medium tracking-wide text-zinc-400">
+          {label}
+        </p>
+        <span className={`rounded-lg p-1.5 ${iconWrap}`} aria-hidden>
+          <Icon size={16} strokeWidth={2} />
+        </span>
+      </div>
+      <p className="mt-2 text-[11px] font-medium uppercase tracking-[0.14em] text-zinc-500">
+        Actual Sales
+      </p>
+      <p className="mt-0.5 text-xl font-bold tracking-tight text-zinc-50 tabular-nums">
+        {rupiahCompact(actual)}
+      </p>
       <dl className="mt-3 space-y-1.5">
         <div className={row}>
           <dt className="text-zinc-500">Target</dt>
           <dd className="font-medium text-zinc-100">{rupiahCompact(target)}</dd>
         </div>
         <div className={row}>
-          <dt className="text-zinc-500">Actual Sales</dt>
-          <dd className="font-semibold text-zinc-100">
-            {rupiahCompact(actual)}
-          </dd>
-        </div>
-        <div className={row}>
           <dt className="text-zinc-500">Variance</dt>
           <dd
-            className={`font-medium ${shortfall ? "text-red-300" : variance !== null && variance <= 0 ? "text-emerald-300" : "text-zinc-100"}`}
+            className={`rounded-full px-2 py-0.5 font-medium ${
+              shortfall
+                ? "bg-red-400/10 text-red-300"
+                : covered
+                  ? "bg-emerald-400/10 text-emerald-300"
+                  : "bg-white/5 text-zinc-100"
+            }`}
           >
             {rupiahCompact(variance)}
           </dd>
@@ -93,7 +118,7 @@ function kpiCard(
       <div className="space-y-1.5">
         <div className={row}>
           <span className="text-zinc-500">Achievement</span>
-          <span className={`font-semibold ${reached ? "text-emerald-300" : accent}`}>
+          <span className={`text-sm font-bold ${reached ? "text-emerald-300" : accent}`}>
             {pct(ach)}
           </span>
         </div>
@@ -103,7 +128,7 @@ function kpiCard(
         </div>
       </div>
       <div
-        className="relative mt-2 h-1.5 overflow-hidden rounded-full bg-white/10"
+        className="relative mt-2 h-1.5 overflow-hidden rounded-full bg-white/10 ring-1 ring-white/10"
         role="img"
         aria-label={`${label}: actual ${rupiahCompact(actual)}, target ${rupiahCompact(target)}, achievement ${pct(ach)}, estimated ${pct(estPct)}`}
       >
@@ -117,6 +142,7 @@ function kpiCard(
           className={`absolute inset-y-0 left-0 rounded-full ${bar}`}
           style={{
             width: `${Math.min(100, ach ?? 0)}%`,
+            boxShadow: "0 0 12px -3px rgba(255,255,255,0.35)",
           }}
         />
         <div className="absolute inset-y-0 right-0 w-0.5 bg-white/70" />
@@ -151,7 +177,7 @@ function DashboardSkeleton() {
       <div className={`mt-4 h-[76px] ${pulse}`} />
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {["Total", "Apple", "Android", "Accessories", "VAS"].map((l) => (
-          <div key={l} className={`${pulse} h-[252px]`} />
+          <div key={l} className={`${pulse} h-[264px]`} />
         ))}
       </div>
       <div className={`mt-4 h-80 ${pulse}`} />
@@ -399,11 +425,11 @@ async function DashContent({
           Revenue periode berjalan · vs target
         </p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, "text-zinc-100", "bg-cyan-400", elapsed, daysInMonth)}
-          {kpiCard("Apple Revenue", kpi.revenue_apple, kpi.apple_target, "text-sky-300", "bg-sky-400", elapsed, daysInMonth)}
-          {kpiCard("Android Revenue", kpi.revenue_android, kpi.android_target, "text-violet-300", "bg-violet-400", elapsed, daysInMonth)}
-          {kpiCard("Accessories Revenue", kpi.revenue_accessories, kpi.accessories_target, "text-amber-300", "bg-amber-400", elapsed, daysInMonth)}
-          {kpiCard("VAS Revenue", kpi.revenue_vas, kpi.vas_target, "text-emerald-300", "bg-emerald-400", elapsed, daysInMonth)}
+          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, "text-zinc-100", "bg-cyan-400", elapsed, daysInMonth, Wallet, "bg-cyan-400/10 text-cyan-300")}
+          {kpiCard("Apple Revenue", kpi.revenue_apple, kpi.apple_target, "text-sky-300", "bg-sky-400", elapsed, daysInMonth, Apple, "bg-sky-400/10 text-sky-300")}
+          {kpiCard("Android Revenue", kpi.revenue_android, kpi.android_target, "text-violet-300", "bg-violet-400", elapsed, daysInMonth, Smartphone, "bg-violet-400/10 text-violet-300")}
+          {kpiCard("Accessories Revenue", kpi.revenue_accessories, kpi.accessories_target, "text-amber-300", "bg-amber-400", elapsed, daysInMonth, Headphones, "bg-amber-400/10 text-amber-300")}
+          {kpiCard("VAS Revenue", kpi.revenue_vas, kpi.vas_target, "text-emerald-300", "bg-emerald-400", elapsed, daysInMonth, Sparkles, "bg-emerald-400/10 text-emerald-300")}
         </div>
       </section>
 
