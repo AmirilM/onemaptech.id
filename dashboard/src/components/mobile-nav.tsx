@@ -42,7 +42,7 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
 
   return (
     <>
-      <div className="sticky top-0 z-40 flex w-full items-center justify-between border-b border-white/10 bg-[#070b14]/90 px-4 py-3 backdrop-blur [padding-top:env(safe-area-inset-top)] md:hidden">
+      <div className="sticky top-0 z-40 flex w-full items-center justify-between border-b border-white/10 bg-abyss/90 px-4 py-3 backdrop-blur [padding-top:env(safe-area-inset-top)] md:hidden">
         <p className="text-sm font-bold tracking-[0.18em] text-cyan-300">
           ONEMAPTECH
         </p>
@@ -65,7 +65,7 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
           />
           <aside
             id="mobile-drawer"
-            className="absolute left-0 top-0 flex h-full max-h-dvh w-72 max-w-[85vw] flex-col border-r border-white/10 bg-[#0b1220] p-4 [padding-bottom:env(safe-area-inset-bottom)]"
+            className="absolute left-0 top-0 flex h-full max-h-dvh w-72 max-w-[85vw] flex-col border-r border-white/10 bg-panel p-4 [padding-bottom:env(safe-area-inset-bottom)]"
           >
             <div className="flex items-center justify-between px-2 py-3">
               <div>

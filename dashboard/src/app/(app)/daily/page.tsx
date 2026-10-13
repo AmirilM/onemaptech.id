@@ -123,7 +123,7 @@ async function DailyContent({
         {store ? `Store ${store}` : "Semua store"} · {month || "-"}
       </p>
 
-      <div className="mt-5">
+      <div className="mt-4">
         <DailyFilter
           stores={(storeList ?? []) as { store_code: string; store_name: string | null }[]}
           lockedStore={lockedStore}
@@ -151,7 +151,7 @@ async function DailyContent({
           <table className="w-full min-w-[720px] border-collapse">
             <thead>
               <tr className="border-b border-white/10">
-                <th className={`${th} sticky left-0 bg-[#0b1220]`}>Date</th>
+                <th className={`${th} sticky left-0 bg-panel`}>Date</th>
                 <th className={`${th} text-right`}>Total Revenue</th>
                 <th className={`${th} text-right`}>Apple</th>
                 <th className={`${th} text-right`}>Android</th>
@@ -168,7 +168,7 @@ async function DailyContent({
                     key={r.date}
                     className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]"
                   >
-                    <td className={`${td} sticky left-0 bg-[#0b1220] font-medium`}>{r.date}</td>
+                    <td className={`${td} sticky left-0 bg-panel font-medium`}>{r.date}</td>
                     <td className={`${td} text-right`}>
                       {rupiah(r.revenue_total)}
                     </td>

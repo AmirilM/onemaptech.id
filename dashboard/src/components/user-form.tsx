@@ -81,7 +81,7 @@ export default function UserForm({
     <div className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-black/70 p-4 [padding-bottom:env(safe-area-inset-bottom)]">
       <form
         onSubmit={submit}
-        className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-white/10 bg-[#0b1220] p-6"
+        className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-white/10 bg-panel p-6"
       >
         <h3 className="text-lg font-bold">
           {isEdit ? `Edit ${initial!.sales_id}` : "Tambah User"}

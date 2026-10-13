@@ -219,7 +219,7 @@ export default function FilterBar({
         </button>
 
         {open && (
-          <div className="absolute left-0 top-full z-50 mt-2 max-w-[calc(100vw-2rem)] overflow-x-auto rounded-2xl border border-white/10 bg-[#0b1220] p-3 shadow-2xl shadow-black/60">
+          <div className="absolute left-0 top-full z-50 mt-2 max-w-[calc(100vw-2rem)] overflow-x-auto rounded-2xl border border-white/10 bg-panel p-3 shadow-2xl shadow-black/60">
             <DayPicker
               mode="range"
               locale={id}

@@ -1,7 +1,11 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+
+  --color-abyss: #070b14;
+  --color-panel: #0b1220;
+  --color-accent: #22d3ee;
 }
 
 html {
@@ -13,8 +17,8 @@ body {
   background:
     radial-gradient(1200px 500px at 15% -10%, rgba(34, 211, 238, 0.12), transparent 60%),
     radial-gradient(900px 500px at 90% 0%, rgba(167, 139, 250, 0.12), transparent 55%),
-    #070b14;
-  color: #f4f4f5;
+    var(--color-abyss);
+  color: var(--color-zinc-100);
   font-family: var(--font-sans);
   min-height: 100dvh;
   overflow-x: clip;
@@ -34,34 +38,34 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 select option {
-  background-color: #0b1220;
+  background-color: var(--color-panel);
 }
 
 /* react-day-picker — dark theme override */
 .rdp-dark {
-  --rdp-accent-color: #22d3ee;
+  --rdp-accent-color: var(--color-accent);
   --rdp-accent-background-color: rgba(34, 211, 238, 0.16);
-  --rdp-today-color: #22d3ee;
+  --rdp-today-color: var(--color-accent);
   --rdp-range_middle-background-color: rgba(34, 211, 238, 0.12);
-  --rdp-range_middle-color: #f4f4f5;
+  --rdp-range_middle-color: var(--color-zinc-100);
   --rdp-day-width: 40px;
   --rdp-day-height: 40px;
 }
 .rdp-dark .rdp-month_caption {
-  color: #f4f4f5;
+  color: var(--color-zinc-100);
 }
 .rdp-dark .rdp-weekday {
-  color: #71717a;
+  color: var(--color-zinc-500);
 }
 .rdp-dark .rdp-day_button {
   border-radius: 10px;
 }
 .rdp-dark .rdp-outside .rdp-day_button {
-  color: #52525b;
+  color: var(--color-zinc-600);
 }
 .rdp-dark .rdp-button_previous .rdp-chevron,
 .rdp-dark .rdp-button_next .rdp-chevron {
-  fill: #a1a1aa;
+  fill: var(--color-zinc-400);
 }
 
 /* Focus terlihat untuk semua kontrol interaktif */
@@ -69,7 +73,7 @@ button:focus-visible,
 a:focus-visible,
 select:focus-visible,
 input:focus-visible {
-  outline: 2px solid rgba(34, 211, 238, 0.7);
+  outline: 2px solid color-mix(in srgb, var(--color-accent) 70%, transparent);
   outline-offset: 2px;
 }
 

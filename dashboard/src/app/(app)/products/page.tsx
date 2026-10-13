@@ -108,7 +108,7 @@ async function ProductsContent({
         {store ? `Store ${store}` : "Semua store"} · by sublob (tanpa NULL/0)
       </p>
 
-      <section className={`mt-5 ${card}`}>
+      <section className={`mt-4 ${card}`}>
         <h2 className="text-sm font-semibold">Share Kategori</h2>
         <div className="mt-3 flex flex-col gap-3">
           {cat.map((c, i) => (

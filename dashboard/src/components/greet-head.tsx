@@ -10,7 +10,7 @@ export default function GreetHead({ name }: { name: string }) {
   return (
     <h1
       suppressHydrationWarning
-      className="mt-1 break-words text-2xl font-bold tracking-tight md:text-3xl"
+      className="mt-1 break-words text-xl font-bold tracking-tight md:text-2xl"
     >
       {greet}, {name}
     </h1>

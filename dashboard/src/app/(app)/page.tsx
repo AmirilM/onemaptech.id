@@ -25,6 +25,7 @@ function kpiCard(
   ach: number | null,
   accent: string,
   bar: string,
+  delta: number | null,
 ) {
   const reached = ach !== null && ach >= 100;
   const over = ach !== null && ach > 100;
@@ -63,6 +64,19 @@ function kpiCard(
           Melebihi target
         </p>
       )}
+      <p
+        className={`mt-1 text-[11px] font-medium tabular-nums ${
+          delta === null
+            ? "text-zinc-500"
+            : delta >= 0
+              ? "text-emerald-300"
+              : "text-rose-300"
+        }`}
+      >
+        {delta === null
+          ? "– vs rerata 7 hari"
+          : `${delta >= 0 ? "▲" : "▼"} ${pct(Math.abs(delta))} vs rerata 7 hari`}
+      </p>
     </div>
   );
 }
@@ -307,6 +321,35 @@ async function DashContent({
   // Sembunyikan achievement saat filter tanggal aktif (lihat komentar di atas)
   const showAch = !hasDateFilter;
 
+  // DoD: kemarin vs rerata 7 hari sebelumnya (per kategori) —
+  // hanya saat filter tanggal nonaktif
+  const DOD_COLS =
+    "date,revenue_total,revenue_apple,revenue_android,revenue_accessories,revenue_vas";
+  let dod: TrendPoint[] = [];
+  if (store) {
+    const { data } = await supabase
+      .from("mv_dashboard_store_daily")
+      .select(DOD_COLS)
+      .eq("store_code", store)
+      .order("date", { ascending: false })
+      .limit(8);
+    dod = (data ?? []) as TrendPoint[];
+  } else {
+    const { data } = await supabase
+      .from("mv_dashboard_daily")
+      .select(DOD_COLS)
+      .order("date", { ascending: false })
+      .limit(8);
+    dod = (data ?? []) as TrendPoint[];
+  }
+  const dodDelta = (f: (p: TrendPoint) => number): number | null => {
+    if (hasDateFilter || dod.length < 2) return null;
+    const prev = dod.slice(1);
+    const avg = prev.reduce((a, p) => a + f(p), 0) / prev.length;
+    if (!avg) return null;
+    return Math.round((10000 * (f(dod[0]) - avg)) / avg) / 100;
+  };
+
   const th =
     "px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500";
   const td = "px-3 py-2.5 text-sm tabular-nums";
@@ -354,11 +397,11 @@ async function DashContent({
             : "Revenue periode berjalan · vs target"}
         </p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, showAch ? ach(kpi.revenue_total, kpi.total_target) : null, "text-zinc-100", "bg-cyan-400")}
-          {kpiCard("Apple", kpi.revenue_apple, kpi.apple_target, showAch ? ach(kpi.revenue_apple, kpi.apple_target) : null, "text-sky-300", "bg-sky-400")}
-          {kpiCard("Android", kpi.revenue_android, kpi.android_target, showAch ? ach(kpi.revenue_android, kpi.android_target) : null, "text-violet-300", "bg-violet-400")}
-          {kpiCard("Accessories", kpi.revenue_accessories, kpi.accessories_target, showAch ? ach(kpi.revenue_accessories, kpi.accessories_target) : null, "text-amber-300", "bg-amber-400")}
-          {kpiCard("VAS", kpi.revenue_vas, kpi.vas_target, showAch ? ach(kpi.revenue_vas, kpi.vas_target) : null, "text-emerald-300", "bg-emerald-400")}
+          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, showAch ? ach(kpi.revenue_total, kpi.total_target) : null, "text-zinc-100", "bg-cyan-400", dodDelta((p) => p.revenue_total))}
+          {kpiCard("Apple", kpi.revenue_apple, kpi.apple_target, showAch ? ach(kpi.revenue_apple, kpi.apple_target) : null, "text-sky-300", "bg-sky-400", dodDelta((p) => p.revenue_apple))}
+          {kpiCard("Android", kpi.revenue_android, kpi.android_target, showAch ? ach(kpi.revenue_android, kpi.android_target) : null, "text-violet-300", "bg-violet-400", dodDelta((p) => p.revenue_android))}
+          {kpiCard("Accessories", kpi.revenue_accessories, kpi.accessories_target, showAch ? ach(kpi.revenue_accessories, kpi.accessories_target) : null, "text-amber-300", "bg-amber-400", dodDelta((p) => p.revenue_accessories))}
+          {kpiCard("VAS", kpi.revenue_vas, kpi.vas_target, showAch ? ach(kpi.revenue_vas, kpi.vas_target) : null, "text-emerald-300", "bg-emerald-400", dodDelta((p) => p.revenue_vas))}
         </div>
       </section>
 
@@ -402,7 +445,7 @@ async function DashContent({
               </caption>
               <thead>
                 <tr className="border-b border-white/10">
-                  <th className={`${th} sticky left-0 bg-[#0b1220]`}>#Ach</th>
+                  <th className={`${th} sticky left-0 bg-panel`}>#Ach</th>
                   <th className={th}>Store</th>
                   <th className={`${th} text-right`}>Revenue</th>
                   <th className={`${th} text-right`}>Ach</th>
@@ -415,7 +458,7 @@ async function DashContent({
                     className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]"
                   >
                     <td
-                      className={`${td} sticky left-0 bg-[#0b1220] text-zinc-400`}
+                      className={`${td} sticky left-0 bg-panel text-zinc-400`}
                     >
                       {r.rank_achievement}
                     </td>
@@ -468,7 +511,7 @@ async function DashContent({
               </caption>
               <thead>
                 <tr className="border-b border-white/10">
-                  <th className={`${th} sticky left-0 bg-[#0b1220]`}>#</th>
+                  <th className={`${th} sticky left-0 bg-panel`}>#</th>
                   <th className={th}>Product</th>
                   <th className={`${th} text-right`}>Qty</th>
                   <th className={`${th} text-right`}>Revenue</th>
@@ -481,7 +524,7 @@ async function DashContent({
                     className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]"
                   >
                     <td
-                      className={`${td} sticky left-0 bg-[#0b1220] text-zinc-400`}
+                      className={`${td} sticky left-0 bg-panel text-zinc-400`}
                     >
                       {r.rank_revenue}
                     </td>

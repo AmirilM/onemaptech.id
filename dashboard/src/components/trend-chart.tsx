@@ -68,7 +68,7 @@ export default function TrendChart({ data }: { data: Point[] }) {
           <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
           <XAxis
             dataKey="date"
-            tick={{ fill: "#a1a1aa", fontSize: 11 }}
+            tick={{ fill: "var(--color-zinc-400)", fontSize: 11 }}
             tickLine={false}
             axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
             tickFormatter={(d: string) => d.slice(5)}
@@ -76,7 +76,7 @@ export default function TrendChart({ data }: { data: Point[] }) {
             minTickGap={28}
           />
           <YAxis
-            tick={{ fill: "#a1a1aa", fontSize: 11 }}
+            tick={{ fill: "var(--color-zinc-400)", fontSize: 11 }}
             tickLine={false}
             axisLine={false}
             tickFormatter={compact}
@@ -84,13 +84,13 @@ export default function TrendChart({ data }: { data: Point[] }) {
           />
           <Tooltip
             contentStyle={{
-              background: "#0b1220",
+              background: "var(--color-panel)",
               border: "1px solid rgba(255,255,255,0.12)",
               borderRadius: 12,
               fontSize: 12,
               maxWidth: "80vw",
             }}
-            labelStyle={{ color: "#e4e4e7" }}
+            labelStyle={{ color: "var(--color-zinc-200)" }}
             cursor={{ stroke: "rgba(255,255,255,0.2)" }}
             formatter={(value, name) => [
               `Rp${Number(value).toLocaleString("id-ID")}`,
