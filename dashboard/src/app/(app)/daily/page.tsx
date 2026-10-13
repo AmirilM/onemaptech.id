@@ -109,7 +109,7 @@ async function DailyContent({
   const th =
     "px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500";
   const td = "px-3 py-2.5 text-sm tabular-nums";
-  const card = "rounded-2xl border border-white/10 bg-white/[0.03] p-5";
+  const card = "rounded-2xl border border-white/10 bg-white/[0.03] p-4 md:p-5";
 
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-8">
@@ -148,10 +148,10 @@ async function DailyContent({
       <section className={`mt-4 ${card}`}>
         <h2 className="text-sm font-semibold">Tabel Harian (tgl 1 – akhir bulan)</h2>
         <div className="mt-2 overflow-x-auto">
-          <table className="w-full border-collapse">
+          <table className="w-full min-w-[720px] border-collapse">
             <thead>
               <tr className="border-b border-white/10">
-                <th className={th}>Date</th>
+                <th className={`${th} sticky left-0 bg-[#0b1220]`}>Date</th>
                 <th className={`${th} text-right`}>Total Revenue</th>
                 <th className={`${th} text-right`}>Apple</th>
                 <th className={`${th} text-right`}>Android</th>
@@ -168,7 +168,7 @@ async function DailyContent({
                     key={r.date}
                     className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]"
                   >
-                    <td className={`${td} font-medium`}>{r.date}</td>
+                    <td className={`${td} sticky left-0 bg-[#0b1220] font-medium`}>{r.date}</td>
                     <td className={`${td} text-right`}>
                       {rupiah(r.revenue_total)}
                     </td>

@@ -38,6 +38,8 @@ export default function TrendChart({ data }: { data: Point[] }) {
             tickLine={false}
             axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
             tickFormatter={(d: string) => d.slice(5)}
+            interval="preserveStartEnd"
+            minTickGap={28}
           />
           <YAxis
             tick={{ fill: "#a1a1aa", fontSize: 11 }}
@@ -52,14 +54,16 @@ export default function TrendChart({ data }: { data: Point[] }) {
               border: "1px solid rgba(255,255,255,0.12)",
               borderRadius: 12,
               fontSize: 12,
+              maxWidth: "80vw",
             }}
             labelStyle={{ color: "#e4e4e7" }}
+            cursor={{ stroke: "rgba(255,255,255,0.2)" }}
             formatter={(value, name) => [
               `Rp${Number(value).toLocaleString("id-ID")}`,
               name,
             ]}
           />
-          <Legend wrapperStyle={{ fontSize: 12 }} />
+          <Legend wrapperStyle={{ fontSize: 12 }} iconSize={8} iconType="circle" />
           <Line
             type="monotone"
             dataKey="revenue_apple"

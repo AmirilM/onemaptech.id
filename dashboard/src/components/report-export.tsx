@@ -62,10 +62,10 @@ export default function ReportExport({ rows, filename }: Props) {
   }
 
   const btn =
-    "rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-60";
+    "min-h-[44px] rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-60 active:brightness-90";
 
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-wrap gap-2">
       <button
         onClick={exportCsv}
         disabled={!rows.length || !!busy}

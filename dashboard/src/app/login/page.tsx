@@ -33,10 +33,10 @@ export default function LoginPage() {
   }
 
   const input =
-    "w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-400/60";
+    "min-h-[44px] w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-base text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-cyan-400/60 md:text-sm";
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-6">
+    <main className="flex min-h-dvh items-center justify-center p-6 [padding-bottom:env(safe-area-inset-bottom)]">
       <form
         onSubmit={onSubmit}
         className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl shadow-black/50 backdrop-blur sm:p-8"
@@ -73,7 +73,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="mt-5 w-full rounded-lg bg-cyan-400 py-2.5 text-sm font-semibold text-slate-950 hover:bg-cyan-300 disabled:opacity-60"
+          className="mt-5 min-h-[44px] w-full rounded-lg bg-cyan-400 py-2.5 text-sm font-semibold text-slate-950 hover:bg-cyan-300 active:bg-cyan-500 disabled:opacity-60"
         >
           {loading ? "Masuk..." : "Masuk"}
         </button>

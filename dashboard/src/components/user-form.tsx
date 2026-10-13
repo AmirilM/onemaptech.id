@@ -75,13 +75,13 @@ export default function UserForm({
   }
 
   const input =
-    "w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-cyan-400/60";
+    "min-h-[44px] w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base text-zinc-100 outline-none focus:border-cyan-400/60 md:text-sm";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-black/70 p-4 [padding-bottom:env(safe-area-inset-bottom)]">
       <form
         onSubmit={submit}
-        className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0b1220] p-6"
+        className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-white/10 bg-[#0b1220] p-6"
       >
         <h3 className="text-lg font-bold">
           {isEdit ? `Edit ${initial!.sales_id}` : "Tambah User"}
@@ -144,7 +144,7 @@ export default function UserForm({
                 type="button"
                 onClick={remove}
                 disabled={loading}
-                className="rounded-lg border border-red-500/40 px-4 py-2 text-sm text-red-300 hover:bg-red-500/10"
+                className="min-h-[44px] rounded-lg border border-red-500/40 px-4 py-2 text-sm text-red-300 hover:bg-red-500/10 active:bg-red-500/20"
               >
                 Hapus
               </button>
@@ -154,14 +154,14 @@ export default function UserForm({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5"
+              className="min-h-[44px] rounded-lg border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 active:bg-white/10"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300 disabled:opacity-60"
+              className="min-h-[44px] rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300 active:bg-cyan-500 disabled:opacity-60"
             >
               {loading ? "..." : "Simpan"}
             </button>

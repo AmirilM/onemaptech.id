@@ -273,7 +273,7 @@ async function DashContent({
   const th =
     "px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500";
   const td = "px-3 py-2.5 text-sm tabular-nums";
-  const card = "rounded-2xl border border-white/10 bg-white/[0.03] p-5";
+  const card = "rounded-2xl border border-white/10 bg-white/[0.03] p-4 md:p-5";
 
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-8">
@@ -329,7 +329,7 @@ async function DashContent({
             Rank by achievement & revenue
           </p>
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+            <table className="w-full min-w-[480px] border-collapse">
               <thead>
                 <tr className="border-b border-white/10">
                   <th className={th}>#Ach</th>
@@ -379,7 +379,7 @@ async function DashContent({
             By sublob · global{store ? " (tidak ikut filter store)" : ""}
           </p>
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+            <table className="w-full min-w-[480px] border-collapse">
               <thead>
                 <tr className="border-b border-white/10">
                   <th className={th}>#</th>
@@ -395,7 +395,7 @@ async function DashContent({
                     className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]"
                   >
                     <td className={`${td} text-zinc-400`}>{r.rank_revenue}</td>
-                    <td className={`${td} font-medium`}>{r.product}</td>
+                    <td className={`${td} max-w-[200px] break-words font-medium sm:max-w-none`}>{r.product}</td>
                     <td className={`${td} text-right`}>{num(r.total_qty)}</td>
                     <td className={`${td} text-right`}>
                       {rupiah(r.revenue_total)}

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { initials } from "@/lib/names";
 import LogoutButton from "@/components/logout-button";
 import SidebarNav from "@/components/sidebar";
@@ -14,29 +15,57 @@ type Props = {
 
 export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Tutup drawer saat pindah route (render-time sync, bukan effect)
+  const [prevPath, setPrevPath] = useState(pathname);
+  if (pathname !== prevPath) {
+    setPrevPath(pathname);
+    setOpen(false);
+  }
+
+  // Lock body scroll + Escape to close
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open ]);
 
   return (
     <>
-      <div className="sticky top-0 z-40 flex items-center justify-between border-b border-white/10 bg-[#070b14]/90 px-4 py-3 backdrop-blur md:hidden">
+      <div className="sticky top-0 z-40 flex w-full items-center justify-between border-b border-white/10 bg-[#070b14]/90 px-4 py-3 backdrop-blur [padding-top:env(safe-area-inset-top)] md:hidden">
         <p className="text-sm font-bold tracking-[0.18em] text-cyan-300">
           ONEMAPTECH
         </p>
         <button
           onClick={() => setOpen(true)}
           aria-label="Buka menu"
-          className="rounded-lg border border-white/10 px-3 py-1.5 text-lg leading-none text-zinc-200"
+          aria-expanded={open}
+          aria-controls="mobile-drawer"
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-white/10 px-3 py-1.5 text-lg leading-none text-zinc-200 active:bg-white/10"
         >
           ☰
         </button>
       </div>
 
       {open && (
-        <div className="fixed inset-0 z-50 md:hidden">
+        <div className="fixed inset-0 z-[60] md:hidden">
           <div
             className="absolute inset-0 bg-black/70"
             onClick={() => setOpen(false)}
           />
-          <aside className="absolute left-0 top-0 flex h-full w-72 max-w-[85vw] flex-col border-r border-white/10 bg-[#0b1220] p-4">
+          <aside
+            id="mobile-drawer"
+            className="absolute left-0 top-0 flex h-full max-h-dvh w-72 max-w-[85vw] flex-col border-r border-white/10 bg-[#0b1220] p-4 [padding-bottom:env(safe-area-inset-bottom)]"
+          >
             <div className="flex items-center justify-between px-2 py-3">
               <div>
                 <p className="text-sm font-bold tracking-[0.18em] text-cyan-300">
@@ -49,7 +78,7 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
               <button
                 onClick={() => setOpen(false)}
                 aria-label="Tutup menu"
-                className="rounded-lg border border-white/10 px-3 py-1.5 text-zinc-300"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-white/10 px-3 py-1.5 text-zinc-300 active:bg-white/10"
               >
                 ✕
               </button>

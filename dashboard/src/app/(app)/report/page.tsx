@@ -50,7 +50,10 @@ async function ReportContent({
     .select("store_code,store_name")
     .order("store_code");
 
-  let q = supabase.from("store_transactions").select(COLS).order("date").limit(10000);
+  // Dibatasi 2000 baris agar tidak crash di browser HP (RAM + XLSX di client).
+  // Persempit filter store/tanggal untuk data penuh.
+  const ROW_LIMIT = 2000;
+  let q = supabase.from("store_transactions").select(COLS).order("date").limit(ROW_LIMIT);
   if (store) q = q.eq("store_code", store);
   if (from) q = q.gte("date", from);
   if (to) q = q.lte("date", to);
@@ -73,6 +76,7 @@ async function ReportContent({
       </h1>
       <p className="mt-1 text-xs text-zinc-500">
         {rows.length} baris sesuai filter · preview 100 pertama
+        {rows.length >= ROW_LIMIT ? ` · dibatasi ${ROW_LIMIT} baris (persempit filter)` : ""}
       </p>
 
       <div className="mt-5">
@@ -92,13 +96,13 @@ async function ReportContent({
         />
       </div>
 
-      <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+      <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 md:p-5">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
+          <table className="w-full min-w-[1200px] border-collapse">
             <thead>
               <tr className="border-b border-white/10">
-                {cols.map((c) => (
-                  <th key={c} className={th}>
+                {cols.map((c, ci) => (
+                  <th key={c} className={`${th}${ci === 0 ? " sticky left-0 bg-[#0b1220]" : ""}`}>
                     {c}
                   </th>
                 ))}
@@ -110,8 +114,8 @@ async function ReportContent({
                   key={i}
                   className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]"
                 >
-                  {cols.map((c) => (
-                    <td key={c} className={td}>
+                  {cols.map((c, ci) => (
+                    <td key={c} className={`${td}${ci === 0 ? " sticky left-0 bg-[#0b1220]" : ""}`}>
                       {r[c] ?? <span className="text-zinc-600">NULL</span>}
                     </td>
                   ))}

@@ -107,27 +107,27 @@ export default function SettingsClient(p: Props) {
   }
 
   const input =
-    "w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-cyan-400/60";
+    "min-h-[44px] w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base text-zinc-100 outline-none focus:border-cyan-400/60 md:text-sm";
   const card = "rounded-2xl border border-white/10 bg-white/[0.03] p-5";
 
   return (
     <div className="mt-5 flex max-w-2xl flex-col gap-4">
       <section className={card}>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           {p.avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={p.avatarUrl}
               alt="Foto profil"
-              className="h-16 w-16 rounded-full object-cover"
+              className="h-16 w-16 shrink-0 rounded-full object-cover"
             />
           ) : (
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-violet-500 text-lg font-bold text-slate-950">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-violet-500 text-lg font-bold text-slate-950">
               {initials(p.salesName)}
             </div>
           )}
-          <div>
-            <p className="font-semibold">{p.salesName}</p>
+          <div className="min-w-0 flex-1 basis-40">
+            <p className="truncate font-semibold">{p.salesName}</p>
             <p className="text-xs text-zinc-500">
               {p.role}
               {p.storeCode ? ` · ${p.storeCode}` : ""}
@@ -159,7 +159,7 @@ export default function SettingsClient(p: Props) {
           <button
             type="submit"
             disabled={loading}
-            className="w-fit rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300 disabled:opacity-60"
+            className="w-fit min-h-[44px] rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300 active:bg-cyan-500 disabled:opacity-60"
           >
             Simpan profil
           </button>
@@ -186,7 +186,7 @@ export default function SettingsClient(p: Props) {
           <button
             type="submit"
             disabled={loading}
-            className="w-fit rounded-lg border border-white/10 px-4 py-2 text-sm text-zinc-200 hover:bg-white/5 disabled:opacity-60"
+            className="w-fit min-h-[44px] rounded-lg border border-white/10 px-4 py-2 text-sm text-zinc-200 hover:bg-white/5 active:bg-white/10 disabled:opacity-60"
           >
             Ganti password
           </button>

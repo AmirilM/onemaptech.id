@@ -12,10 +12,10 @@ export default function AppLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-dvh flex-col md:flex-row">
       <Suspense
         fallback={
-          <aside className="sticky top-0 hidden h-screen w-60 shrink-0 border-r border-white/10 bg-black/30 p-4 text-sm text-zinc-500 md:block">
+          <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 border-r border-white/10 bg-black/30 p-4 text-sm text-zinc-500 md:block">
             Memuat...
           </aside>
         }
@@ -40,7 +40,7 @@ async function AppShell({ children }: { children: React.ReactNode }) {
         avatarUrl={session.profile?.avatar_url ?? null}
         isAdmin={session.isAdmin}
       />
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-white/10 bg-black/30 p-4 md:flex">
+      <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-white/10 bg-black/30 p-4 md:flex">
         <div className="px-2 py-3">
           <p className="text-sm font-bold tracking-[0.18em] text-cyan-300">
             ONEMAPTECH
@@ -70,7 +70,7 @@ async function AppShell({ children }: { children: React.ReactNode }) {
           <LogoutButton />
         </div>
       </aside>
-      <div className="min-w-0 flex-1">{children}</div>
+      <div className="min-w-0 w-full flex-1 md:w-auto">{children}</div>
     </>
   );
 }

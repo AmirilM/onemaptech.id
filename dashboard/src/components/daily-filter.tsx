@@ -22,6 +22,14 @@ export default function DailyFilter({
   const [store, setStore] = useState(currentStore);
   const [month, setMonth] = useState(currentMonth);
 
+  // Sync saat back/forward navigation — render-time adjust (tanpa effect)
+  const [prev, setPrev] = useState({ s: currentStore, m: currentMonth });
+  if (currentStore !== prev.s || currentMonth !== prev.m) {
+    setPrev({ s: currentStore, m: currentMonth });
+    setStore(currentStore);
+    setMonth(currentMonth);
+  }
+
   function apply(e: React.FormEvent) {
     e.preventDefault();
     const next = new URLSearchParams(params.toString());
@@ -33,14 +41,14 @@ export default function DailyFilter({
   }
 
   const input =
-    "rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-cyan-400/60";
+    "min-h-[44px] rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base text-zinc-100 outline-none focus:border-cyan-400/60 md:text-sm";
 
   return (
     <form
       onSubmit={apply}
       className="flex flex-wrap items-end gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4"
     >
-      <label className="flex flex-col gap-1 text-xs text-zinc-400">
+      <label className="flex w-full flex-col gap-1 text-xs text-zinc-400 sm:w-auto">
         Store
         <select
           value={store}
@@ -56,24 +64,24 @@ export default function DailyFilter({
           ))}
         </select>
       </label>
-      <label className="flex flex-col gap-1 text-xs text-zinc-400">
+      <label className="flex w-full flex-col gap-1 text-xs text-zinc-400 sm:w-auto">
         Bulan
         <input
           type="month"
           value={month}
           onChange={(e) => setMonth(e.target.value)}
-          className={input}
+          className={`${input} w-full sm:w-auto`}
         />
       </label>
       <button
         type="submit"
         disabled={isPending}
-        className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300 disabled:opacity-60"
+        className="min-h-[44px] rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300 active:bg-cyan-500 disabled:opacity-60"
       >
         {isPending ? "..." : "Terapkan"}
       </button>
       {lockedStore && (
-        <span className="text-xs text-amber-300/90">
+        <span className="w-full text-xs text-amber-300/90 sm:w-auto">
           Terkunci ke store {lockedStore} (role kamu).
         </span>
       )}

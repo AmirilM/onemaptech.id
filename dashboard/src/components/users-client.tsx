@@ -22,9 +22,9 @@ export default function UsersClient({ rows }: { rows: UserRow[] }) {
           + Tambah User
         </button>
       </div>
-      <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+      <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 md:p-5">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
+          <table className="w-full min-w-[560px] border-collapse">
             <thead>
               <tr className="border-b border-white/10">
                 <th className={th}>Sales ID</th>
@@ -56,7 +56,7 @@ export default function UsersClient({ rows }: { rows: UserRow[] }) {
                   <td className={`${td} text-right`}>
                     <button
                       onClick={() => setEditing(r)}
-                      className="rounded-lg border border-white/10 px-3 py-1 text-xs text-zinc-300 hover:bg-white/5"
+                      className="flex min-h-[44px] items-center rounded-lg border border-white/10 px-3 py-1 text-xs text-zinc-300 hover:bg-white/5 active:bg-white/10"
                     >
                       Edit
                     </button>
