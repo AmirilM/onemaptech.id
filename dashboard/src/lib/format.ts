@@ -1,15 +1,19 @@
 export function rupiah(n: number | null | undefined): string {
   if (n === null || n === undefined) return "-";
-  return "Rp" + Number(n).toLocaleString("id-ID");
+  const v = Number(n);
+  if (v < 0) return "-Rp" + Math.abs(v).toLocaleString("id-ID");
+  return "Rp" + v.toLocaleString("id-ID");
 }
 
 export function rupiahCompact(n: number | null | undefined): string {
   if (n === null || n === undefined) return "-";
   const v = Number(n);
-  if (Math.abs(v) >= 1_000_000_000)
-    return `Rp${(v / 1_000_000_000).toLocaleString("id-ID", { maximumFractionDigits: 2 })} M`;
-  if (Math.abs(v) >= 1_000_000)
-    return `Rp${(v / 1_000_000).toLocaleString("id-ID", { maximumFractionDigits: 1 })} jt`;
+  const sign = v < 0 ? "-" : "";
+  const a = Math.abs(v);
+  if (a >= 1_000_000_000)
+    return `${sign}Rp${(a / 1_000_000_000).toLocaleString("id-ID", { maximumFractionDigits: 2 })} M`;
+  if (a >= 1_000_000)
+    return `${sign}Rp${(a / 1_000_000).toLocaleString("id-ID", { maximumFractionDigits: 1 })} jt`;
   return rupiah(v);
 }
 

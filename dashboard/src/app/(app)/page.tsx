@@ -62,9 +62,9 @@ function kpiCard(
     estimated !== null && target
       ? Math.round((10000 * estimated) / target) / 100
       : null;
-  const variance = target !== null ? target - actual : null;
-  const shortfall = variance !== null && variance > 0;
-  const covered = variance !== null && variance <= 0;
+  const variance = target !== null ? actual - target : null;
+  const shortfall = variance !== null && variance < 0;
+  const covered = variance !== null && variance >= 0;
   const reached = ach !== null && ach >= 100;
   const over = ach !== null && ach > 100;
   const row =
