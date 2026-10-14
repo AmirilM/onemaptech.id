@@ -51,12 +51,9 @@ function kpiCard(
   label: string,
   actual: number,
   target: number | null,
-  accent: string,
-  bar: string,
   elapsed: number,
   daysInMonth: number,
   Icon: LucideIcon,
-  iconWrap: string,
 ) {
   const ach = target ? Math.round((10000 * actual) / target) / 100 : null;
   const estimated =
@@ -71,31 +68,31 @@ function kpiCard(
   const reached = ach !== null && ach >= 100;
   const over = ach !== null && ach > 100;
   const row =
-    "flex items-center justify-between gap-3 text-xs leading-5 tabular-nums";
+    "flex items-center justify-between gap-3 text-xs leading-4 tabular-nums";
   return (
     <div
       key={label}
-      className="relative flex flex-col overflow-hidden rounded-2xl border border-line bg-surface p-5 shadow-sm min-h-[272px]"
+      className="relative flex flex-col overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-sm"
     >
-      <div className={`absolute inset-x-0 top-0 h-[3px] ${bar} opacity-100`} />
+      <div className="absolute inset-x-0 top-0 h-[3px] bg-primary opacity-100" />
       <div className="flex items-center justify-between gap-3">
-        <p className="min-w-0 truncate text-[13px] font-medium leading-5 tracking-wide text-muted">
+        <p className="min-w-0 truncate text-xs font-medium leading-4 tracking-wide text-muted">
           {label}
         </p>
         <span
-          className={`shrink-0 rounded-[10px] p-2 ${iconWrap}`}
+          className="shrink-0 rounded-[10px] bg-primary/10 p-1.5 text-primary ring-1 ring-inset ring-primary/25"
           aria-hidden
         >
-          <Icon size={16} strokeWidth={2} />
+          <Icon size={14} strokeWidth={2} />
         </span>
       </div>
-      <p className="mt-3 text-[11px] font-semibold uppercase leading-4 tracking-[0.16em] text-muted">
+      <p className="mt-2.5 text-[11px] font-semibold uppercase leading-4 tracking-[0.16em] text-muted">
         Actual Sales
       </p>
-      <p className="mt-1 text-[22px] font-bold leading-none tracking-tight text-ink tabular-nums" title={rupiah(actual)}>
+      <p className="mt-1 text-[20px] font-bold leading-none tracking-tight text-ink tabular-nums" title={rupiah(actual)}>
         {rupiahCompact(actual)}
       </p>
-      <dl className="mt-4 space-y-2">
+      <dl className="mt-3 space-y-1.5">
         <div className={row}>
           <dt className="text-muted">Target</dt>
           <dd className="font-medium text-ink" title={rupiah(target)}>{rupiahCompact(target)}</dd>
@@ -122,36 +119,36 @@ function kpiCard(
           </dd>
         </div>
       </dl>
-      <div className="my-4 border-t border-line" />
-      <div className="space-y-2">
+      <div className="my-3 border-t border-line" />
+      <div className="space-y-1">
         <div className={row}>
           <span className="text-muted">Achievement</span>
           <span
-            className={`text-[15px] leading-5 font-bold tabular-nums ${reached ? "text-accent" : accent}`}
+            className={`text-[14px] leading-5 font-bold tabular-nums ${reached ? "text-accent" : "text-ink"}`}
           >
             {pct(ach)}
           </span>
         </div>
         <div className={row}>
           <span className="text-muted">Estimated</span>
-          <span className="text-[13px] font-medium text-soft tabular-nums">
+          <span className="text-xs font-medium text-soft tabular-nums">
             {pct(estPct)}
           </span>
         </div>
       </div>
       <div
-        className="relative mt-3 h-2 overflow-hidden rounded-full bg-track"
+        className="relative mt-2.5 h-1.5 overflow-hidden rounded-full bg-track"
         role="img"
         aria-label={`${label}: actual ${rupiah(actual)}, target ${rupiah(target)}, achievement ${pct(ach)}, estimated ${pct(estPct)}`}
       >
         <div
-          className={`absolute inset-y-0 left-0 rounded-full ${bar} opacity-25`}
+          className="absolute inset-y-0 left-0 rounded-full bg-primary opacity-25"
           style={{
             width: `${Math.min(100, estPct ?? 0)}%`,
           }}
         />
         <div
-          className={`absolute inset-y-0 left-0 rounded-full ${bar}`}
+          className="absolute inset-y-0 left-0 rounded-full bg-primary"
           style={{
             width: `${Math.min(100, ach ?? 0)}%`,
           }}
@@ -160,7 +157,7 @@ function kpiCard(
           <div className="absolute inset-y-0 right-0 w-0.5 bg-primary/30" />
         )}
       </div>
-      <div className="mt-2 h-4">
+      <div className="mt-1.5 h-4">
         {over && (
           <p className="text-[11px] leading-4 font-medium text-accent">
             Melebihi target
@@ -192,7 +189,7 @@ function DashboardSkeleton() {
       <div className={`mt-4 h-[76px] ${pulse}`} />
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {["Total", "Apple", "Android", "Accessories", "VAS"].map((l) => (
-          <div key={l} className={`${pulse} h-[272px]`} />
+          <div key={l} className={`${pulse} h-[232px]`} />
         ))}
       </div>
       <div className={`mt-4 h-80 ${pulse}`} />
@@ -598,11 +595,11 @@ async function DashContent({
           Revenue periode berjalan · vs target
         </p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 items-stretch">
-          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, "text-primary", "bg-primary", elapsed, daysInMonth, Wallet, "bg-primary/10 text-primary ring-1 ring-inset ring-primary/25")}
-          {kpiCard("Apple Revenue", kpi.revenue_apple, kpi.apple_target, "text-primary", "bg-primary", elapsed, daysInMonth, Apple, "bg-primary/10 text-primary ring-1 ring-inset ring-primary/25")}
-          {kpiCard("Android Revenue", kpi.revenue_android, kpi.android_target, "text-primary", "bg-[#8B5CF6]", elapsed, daysInMonth, Smartphone, "bg-primary/10 text-primary ring-1 ring-inset ring-primary/25")}
-          {kpiCard("Accessories Revenue", kpi.revenue_accessories, kpi.accessories_target, "text-primary", "bg-[#A78BFA]", elapsed, daysInMonth, Headphones, "bg-primary/10 text-primary ring-1 ring-inset ring-primary/25")}
-          {kpiCard("VAS Revenue", kpi.revenue_vas, kpi.vas_target, "text-accent", "bg-accent", elapsed, daysInMonth, Sparkles, "bg-accent/10 text-accent ring-1 ring-inset ring-accent/25")}
+          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, elapsed, daysInMonth, Wallet)}
+          {kpiCard("Apple Revenue", kpi.revenue_apple, kpi.apple_target, elapsed, daysInMonth, Apple)}
+          {kpiCard("Android Revenue", kpi.revenue_android, kpi.android_target, elapsed, daysInMonth, Smartphone)}
+          {kpiCard("Accessories Revenue", kpi.revenue_accessories, kpi.accessories_target, elapsed, daysInMonth, Headphones)}
+          {kpiCard("VAS Revenue", kpi.revenue_vas, kpi.vas_target, elapsed, daysInMonth, Sparkles)}
         </div>
       </section>
 
