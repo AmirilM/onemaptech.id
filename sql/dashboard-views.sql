@@ -286,6 +286,12 @@ select
     s.revenue_total,
     s.total_target,
     s.ach_total_pct,
+    s.revenue_apple,
+    s.apple_target,
+    s.ach_apple_pct,
+    s.revenue_android,
+    s.android_target,
+    s.ach_android_pct,
     rank() over (order by s.ach_total_pct desc nulls last) as rank_achievement,
     rank() over (order by s.revenue_total desc) as rank_revenue
 from public.mv_dashboard_store s

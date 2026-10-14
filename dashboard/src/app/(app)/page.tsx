@@ -1,17 +1,16 @@
 import { Suspense } from "react";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { num, pct, rupiahCompact } from "@/lib/format";
+import { pct, rupiah, rupiahCompact } from "@/lib/format";
 import type {
   DailyRow,
   LeaderboardRow,
   Profile,
   StoreDailyRow,
   StoreRow,
-  TopProductRow,
 } from "@/lib/types";
 import FilterBar from "@/components/filter-bar";
+import LeaderboardTable from "@/components/leaderboard-table";
 import { distinctAMs, effectiveAM, getStoreMap, storeInScope } from "@/lib/scope";
 import GreetHead from "@/components/greet-head";
 import QtyBarChart, { type QtyBarItem } from "@/components/qty-bar-chart";
@@ -93,17 +92,18 @@ function kpiCard(
       <p className="mt-3 text-[11px] font-semibold uppercase leading-4 tracking-[0.16em] text-muted">
         Actual Sales
       </p>
-      <p className="mt-1 text-[22px] font-bold leading-none tracking-tight text-ink tabular-nums">
+      <p className="mt-1 text-[22px] font-bold leading-none tracking-tight text-ink tabular-nums" title={rupiah(actual)}>
         {rupiahCompact(actual)}
       </p>
       <dl className="mt-4 space-y-2">
         <div className={row}>
           <dt className="text-muted">Target</dt>
-          <dd className="font-medium text-ink">{rupiahCompact(target)}</dd>
+          <dd className="font-medium text-ink" title={rupiah(target)}>{rupiahCompact(target)}</dd>
         </div>
         <div className={row}>
           <dt className="text-muted">Variance</dt>
           <dd
+            title={rupiah(variance)}
             className={`rounded-full px-2.5 py-[3px] text-xs leading-4 font-semibold tabular-nums ${
               shortfall
                 ? "bg-danger/10 text-danger ring-1 ring-inset ring-danger/25"
@@ -117,7 +117,7 @@ function kpiCard(
         </div>
         <div className={row}>
           <dt className="text-muted">Estimated</dt>
-          <dd className="font-medium text-ink">
+          <dd className="font-medium text-ink" title={rupiah(estimated)}>
             {rupiahCompact(estimated)}
           </dd>
         </div>
@@ -142,7 +142,7 @@ function kpiCard(
       <div
         className="relative mt-3 h-2 overflow-hidden rounded-full bg-track"
         role="img"
-        aria-label={`${label}: actual ${rupiahCompact(actual)}, target ${rupiahCompact(target)}, achievement ${pct(ach)}, estimated ${pct(estPct)}`}
+        aria-label={`${label}: actual ${rupiah(actual)}, target ${rupiah(target)}, achievement ${pct(ach)}, estimated ${pct(estPct)}`}
       >
         <div
           className={`absolute inset-y-0 left-0 rounded-full ${bar} opacity-25`}
@@ -196,10 +196,7 @@ function DashboardSkeleton() {
         ))}
       </div>
       <div className={`mt-4 h-80 ${pulse}`} />
-      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className={`${pulse} h-72`} />
-        <div className={`${pulse} h-72`} />
-      </div>
+      <div className={`mt-4 h-96 ${pulse}`} />
     </main>
   );
 }
@@ -419,14 +416,6 @@ async function DashContent({
   ];
   const brandShareTotal = appleTotalQty + androidTotalQty;
 
-  // Top product (global — MV tanpa dimensi store)
-  const { data: topRaw } = await supabase
-    .from("mv_top_product")
-    .select("*")
-    .order("rank_revenue")
-    .limit(10);
-  const top = (topRaw ?? []) as TopProductRow[];
-
   // KPI: revenue dijumlahkan dari tren periode berjalan penuh
   // (ikut filter store, abaikan filter tanggal). Target = periode
   // penuh (snapshot, tanpa dimensi harian).
@@ -536,18 +525,7 @@ async function DashContent({
   const kpi = { ...kpiRevenue, ...kpiTargets };
   const { elapsed, daysInMonth } = getWibPeriod();
 
-  const th =
-    "px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-muted";
-  const td = "px-3 py-2.5 text-sm tabular-nums text-soft";
   const card = "rounded-2xl border border-line bg-surface p-4 shadow-sm md:p-5";
-
-  // Deep-link ke tampilan 1 store (pertahankan filter AM)
-  function storeHref(code: string) {
-    const q = new URLSearchParams();
-    if (am) q.set("am", am);
-    q.set("store", code);
-    return `/?${q.toString()}`;
-  }
 
   const scopeLabel = store ? `Store ${store}` : am ? `Area ${am}` : "Semua store";
 
@@ -692,122 +670,14 @@ async function DashContent({
         </section>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <section className={card}>
-          <h2 className="text-sm font-semibold text-ink">Leaderboard Store</h2>
-          <p className="mb-2 text-xs text-muted">
-            Peringkat berdasarkan achievement & revenue · snapshot periode
-            berjalan
-          </p>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[480px] border-collapse">
-              <caption className="sr-only">
-                Peringkat store berdasarkan achievement dan revenue
-              </caption>
-              <thead>
-                <tr className="border-b border-line">
-                  <th className={`${th} sticky left-0 bg-surface`}>#Ach</th>
-                  <th className={th}>Store</th>
-                  <th className={`${th} text-right`}>Revenue</th>
-                  <th className={`${th} text-right`}>Ach</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lb.map((r) => (
-                  <tr
-                    key={r.store_code}
-                    className="border-b border-line/60 last:border-0 hover:bg-violet-50"
-                  >
-                    <td
-                      className={`${td} sticky left-0 bg-surface text-muted`}
-                    >
-                      {r.rank_achievement}
-                    </td>
-                    <td className={td}>
-                      <Link
-                        href={storeHref(r.store_code)}
-                        title={`Lihat store ${r.store_code}`}
-                        className="font-medium text-primary underline-offset-4 hover:underline"
-                      >
-                        {r.store_code}
-                      </Link>
-                      <span className="block max-w-48 truncate text-xs text-muted">
-                        {r.store_name}
-                      </span>
-                    </td>
-                    <td className={`${td} text-right`}>
-                      {rupiahCompact(r.revenue_total)}
-                    </td>
-                    <td className="px-3 py-2.5 text-right text-sm font-semibold text-ink">
-                      {pct(r.ach_total_pct)}
-                    </td>
-                  </tr>
-                ))}
-                {!lb.length && (
-                  <tr>
-                    <td colSpan={4} className="py-8 text-center text-sm text-muted">
-                      Tidak ada data.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section className={card}>
-          <h2 className="text-sm font-semibold text-ink">Top Product</h2>
-          <div className="mb-2 flex flex-wrap items-center gap-2">
-            <p className="text-xs text-muted">Berdasarkan sublob · global</p>
-            {store && (
-              <span className="rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-[11px] font-medium text-warning">
-                Tidak ikut filter store
-              </span>
-            )}
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[480px] border-collapse">
-              <caption className="sr-only">
-                Produk teratas berdasarkan revenue
-              </caption>
-              <thead>
-                <tr className="border-b border-line">
-                  <th className={`${th} sticky left-0 bg-surface`}>#</th>
-                  <th className={th}>Product</th>
-                  <th className={`${th} text-right`}>Qty</th>
-                  <th className={`${th} text-right`}>Revenue</th>
-                </tr>
-              </thead>
-              <tbody>
-                {top.map((r) => (
-                  <tr
-                    key={r.product}
-                    className="border-b border-line/60 last:border-0 hover:bg-violet-50"
-                  >
-                    <td
-                      className={`${td} sticky left-0 bg-surface text-muted`}
-                    >
-                      {r.rank_revenue}
-                    </td>
-                    <td className={`${td} max-w-[200px] break-words font-medium text-ink sm:max-w-none`}>{r.product}</td>
-                    <td className={`${td} text-right`}>{num(r.total_qty)}</td>
-                    <td className={`${td} text-right`}>
-                      {rupiahCompact(r.revenue_total)}
-                    </td>
-                  </tr>
-                ))}
-                {!top.length && (
-                  <tr>
-                    <td colSpan={4} className="py-8 text-center text-sm text-muted">
-                      Tidak ada data.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </div>
+      <section className={`${card} mt-4`}>
+        <h2 className="text-sm font-semibold text-ink">Leaderboard Store</h2>
+        <p className="mb-2 text-xs text-muted">
+          Peringkat berdasarkan achievement Total Sales vs Total Target ·
+          snapshot periode berjalan
+        </p>
+        <LeaderboardTable rows={lb} am={am} />
+      </section>
 
       <footer className="mt-6 text-center text-xs text-muted">
         OneMapTech · refresh harian

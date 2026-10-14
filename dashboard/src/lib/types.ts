@@ -5,6 +5,12 @@ export type LeaderboardRow = {
   revenue_total: number;
   total_target: number | null;
   ach_total_pct: number | null;
+  revenue_apple: number;
+  apple_target: number | null;
+  ach_apple_pct: number | null;
+  revenue_android: number;
+  android_target: number | null;
+  ach_android_pct: number | null;
   rank_achievement: number;
   rank_revenue: number;
 };

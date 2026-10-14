@@ -23,11 +23,11 @@ type Point = {
 function compact(v: number): string {
   const a = Math.abs(v);
   if (a >= 1_000_000_000)
-    return `${(v / 1_000_000_000).toLocaleString("id-ID", { maximumFractionDigits: 1 })} M`;
+    return `${(v / 1_000_000_000).toLocaleString("id-ID", { maximumFractionDigits: 1 })} M`;
   if (a >= 1_000_000)
-    return `${(v / 1_000_000).toLocaleString("id-ID", { maximumFractionDigits: 1 })} jt`;
+    return `${(v / 1_000_000).toLocaleString("id-ID", { maximumFractionDigits: 1 })} Jt`;
   if (a >= 1_000)
-    return `${(v / 1_000).toLocaleString("id-ID", { maximumFractionDigits: 0 })} rb`;
+    return `${(v / 1_000).toLocaleString("id-ID", { maximumFractionDigits: 0 })} Rb`;
   return v.toLocaleString("id-ID");
 }
 
@@ -70,7 +70,7 @@ function TrendTooltip({
               marginRight: 6,
             }}
           />
-          {String(row.name)}: Rp{Number(row.value ?? 0).toLocaleString("id-ID")}
+          {String(row.name)}: Rp {Number(row.value ?? 0).toLocaleString("id-ID")}
         </p>
       ))}
     </div>
@@ -91,7 +91,7 @@ export default function TrendChart({ data }: { data: Point[] }) {
     if (!data.length) return "Tidak ada data.";
     const total = (f: (p: Point) => number) =>
       data.reduce((a, p) => a + f(p), 0);
-    const fmtRp = (v: number) => `Rp${v.toLocaleString("id-ID")}`;
+    const fmtRp = (v: number) => `Rp ${v.toLocaleString("id-ID")}`;
     const parts: [string, (p: Point) => number][] = [
       ["Apple", (p) => p.revenue_apple],
       ["Android", (p) => p.revenue_android],
