@@ -9,6 +9,8 @@ export type UserRow = {
   store_code: string | null;
   store_name: string | null;
   role: string;
+  last_login: string | null;
+  avatar_url: string | null;
 };
 
 const ROLES = ["Store Supervisor", "Area Manager", "Regional Head", "Admin"];
@@ -83,9 +85,17 @@ export default function UserForm({
         onSubmit={submit}
         className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-line bg-surface p-6 shadow-xl"
       >
-        <h3 className="text-lg font-bold text-ink">
+        <p className="text-[11px] font-semibold tracking-[0.2em] text-primary">
+          USER MANAGEMENT
+        </p>
+        <h3 className="mt-1 text-lg font-bold text-ink">
           {isEdit ? `Edit ${initial!.sales_id}` : "Tambah User"}
         </h3>
+        <p className="mt-0.5 text-xs text-muted">
+          {isEdit
+            ? "Ubah data profiles + Auth sekaligus."
+            : "Menulis ke profiles + Auth sekaligus."}
+        </p>
         <div className="mt-4 flex flex-col gap-3">
           {!isEdit && (
             <input
