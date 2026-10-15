@@ -100,6 +100,7 @@ async function ReportContent({
           currentStore={store}
           currentFrom={from}
           currentTo={to}
+          dateMode="range"
           areaManagers={lockedAM ? [] : amList}
           lockedAM={lockedAM}
           currentAM={am}

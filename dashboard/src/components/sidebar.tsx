@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   CalendarDays,
   ClipboardList,
@@ -11,6 +11,9 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
+
+// Halaman yang memakai filter scope global (FilterBar).
+const FILTER_PAGES = new Set(["/", "/daily", "/products", "/report"]);
 
 const ITEMS: { href: string; label: string; icon: LucideIcon; admin?: boolean }[] = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -29,6 +32,26 @@ export default function SidebarNav({
   collapsed?: boolean;
 }) {
   const pathname = usePathname();
+  const params = useSearchParams();
+
+  // Scope global (?store=&am=) ikut saat pindah halaman filter.
+  // Klik link halaman aktif: pertahankan query apa adanya (no-op).
+  // ?from/?to milik Report tidak ikut — sifatnya lokal per halaman.
+  function hrefFor(href: string): string {
+    if (href === pathname) {
+      const qs = params.toString();
+      return qs ? `${href}?${qs}` : href;
+    }
+    if (!FILTER_PAGES.has(href)) return href;
+    const q = new URLSearchParams();
+    const store = params.get("store");
+    const am = params.get("am");
+    if (store) q.set("store", store);
+    if (am) q.set("am", am);
+    const qs = q.toString();
+    return qs ? `${href}?${qs}` : href;
+  }
+
   return (
     <nav className="flex flex-col gap-1" aria-label="Navigasi utama">
       {ITEMS.filter((i) => !i.admin || isAdmin).map((i) => {
@@ -38,7 +61,7 @@ export default function SidebarNav({
         return (
           <Link
             key={i.href}
-            href={i.href}
+            href={hrefFor(i.href)}
             title={collapsed ? i.label : undefined}
             aria-label={collapsed ? i.label : undefined}
             aria-current={active ? "page" : undefined}

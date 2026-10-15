@@ -548,7 +548,7 @@ async function DashContent({
               stores={(storeList ?? []) as { store_code: string; store_name: string | null }[]}
               lockedStore={lockedStore}
               currentStore={store}
-              showDate={false}
+              dateMode="none"
               areaManagers={lockedAM ? [] : amList}
               lockedAM={lockedAM}
               currentAM={am}

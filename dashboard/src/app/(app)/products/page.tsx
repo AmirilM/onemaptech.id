@@ -4,7 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth";
 import { num, pct, rupiah } from "@/lib/format";
 import type { TopProductRow } from "@/lib/types";
-import { effectiveAM, getStoresOfAM, storeInScope } from "@/lib/scope";
+import FilterBar from "@/components/filter-bar";
+import { distinctAMs, effectiveAM, getStoreMap, storeInScope } from "@/lib/scope";
 
 type Params = { store?: string; am?: string };
 
@@ -41,10 +42,23 @@ async function ProductsContent({
   const lockedStore = session?.lockedStore ?? null;
   const lockedAM = session?.lockedAM ?? null;
   const am = effectiveAM(lockedAM, params.am || "");
-  const amStores = await getStoresOfAM(supabase, am);
+  const storeMap = await getStoreMap(supabase);
+  const amList = distinctAMs(storeMap);
+  const amStores = am
+    ? storeMap.filter((r) => r.area_manager === am).map((r) => r.store_code)
+    : [];
   const amScopeBroken = am !== "" && amStores.length === 0;
   const store = storeInScope(lockedStore ?? (params.store || ""), am, amStores);
   const scopeLabel = store ? `Store ${store}` : am ? `Area ${am}` : "Semua store";
+
+  // Daftar store untuk filter (ketat: AM hanya lihat store miliknya)
+  const { data: storeListRaw } = await supabase
+    .from("mv_leaderboard_store")
+    .select("store_code,store_name")
+    .order("store_code");
+  const storeList = (
+    (storeListRaw ?? []) as { store_code: string; store_name: string | null }[]
+  ).filter((s) => !am || amStores.includes(s.store_code));
 
   // Top product global (MV tanpa dimensi store)
   const { data: topRaw } = await supabase
@@ -139,6 +153,18 @@ async function ProductsContent({
       <p className="mt-1 text-xs text-muted">
         {scopeLabel} · by sublob (tanpa NULL/0)
       </p>
+
+      <div className="mt-4">
+        <FilterBar
+          stores={(storeList ?? []) as { store_code: string; store_name: string | null }[]}
+          lockedStore={lockedStore}
+          currentStore={store}
+          dateMode="none"
+          areaManagers={lockedAM ? [] : amList}
+          lockedAM={lockedAM}
+          currentAM={am}
+        />
+      </div>
 
       {amScopeBroken && (
         <div className="mt-4 rounded-2xl border border-warning/30 bg-warning/10 p-4 text-sm">

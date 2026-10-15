@@ -3,11 +3,11 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth";
 import { pct, rupiah } from "@/lib/format";
-import DailyFilter from "@/components/daily-filter";
+import FilterBar from "@/components/filter-bar";
 import TrendChart from "@/components/trend-chart";
 import { distinctAMs, effectiveAM, getStoreMap, storeInScope } from "@/lib/scope";
 
-type Params = { store?: string; month?: string; am?: string };
+type Params = { store?: string; am?: string };
 type Row = {
   date: string;
   revenue_total: number;
@@ -61,14 +61,15 @@ async function DailyContent({
   const amScopeBroken = am !== "" && amStores.length === 0;
   const store = storeInScope(lockedStore ?? (params.store || ""), am, amStores);
 
-  // Bulan default = bulan dari tanggal data terakhir
+  // Bulan berjalan otomatis dari tanggal data terakhir (month-to-date).
+  // Param ?month= lama diabaikan bila masih ada di URL.
   const { data: latest } = await supabase
     .from("mv_dashboard_daily")
     .select("date")
     .order("date", { ascending: false })
     .limit(1);
   const latestDate = (latest?.[0] as { date: string } | undefined)?.date ?? "";
-  const month = params.month || latestDate.slice(0, 7);
+  const month = latestDate.slice(0, 7);
   const start = month ? `${month}-01` : "";
   const end = month
     ? `${month}-${new Date(
@@ -163,11 +164,11 @@ async function DailyContent({
       </p>
 
       <div className="mt-4">
-        <DailyFilter
+        <FilterBar
           stores={(storeList ?? []) as { store_code: string; store_name: string | null }[]}
           lockedStore={lockedStore}
           currentStore={store}
-          currentMonth={month}
+          dateMode="none"
           areaManagers={lockedAM ? [] : amList}
           lockedAM={lockedAM}
           currentAM={am}

@@ -13,7 +13,7 @@ type Props = {
   currentStore: string;
   currentFrom?: string;
   currentTo?: string;
-  showDate?: boolean;
+  dateMode?: "none" | "range";
   areaManagers?: string[];
   lockedAM?: string | null;
   currentAM?: string;
@@ -70,7 +70,7 @@ export default function FilterBar({
   currentStore,
   currentFrom = "",
   currentTo = "",
-  showDate = true,
+  dateMode = "range",
   areaManagers = [],
   lockedAM = null,
   currentAM = "",
@@ -82,7 +82,7 @@ export default function FilterBar({
   const [store, setStore] = useState(currentStore);
   const [am, setAm] = useState(lockedAM ?? currentAM);
   const [range, setRange] = useState<DateRange | undefined>(() =>
-    showDate ? rangeFromParams(currentFrom, currentTo) : undefined,
+    dateMode !== "none" ? rangeFromParams(currentFrom, currentTo) : undefined,
   );
   const [open, setOpen] = useState(false);
   const [months, setMonths] = useState(() =>
@@ -95,11 +95,11 @@ export default function FilterBar({
 
   // Sync saat back/forward navigation — render-time adjust (tanpa effect)
   const [prev, setPrev] = useState({ s: currentStore, f: currentFrom, t: currentTo, a: lockedAM ?? currentAM });
-  if (currentStore !== prev.s || (showDate && (currentFrom !== prev.f || currentTo !== prev.t)) || (lockedAM ?? currentAM) !== prev.a) {
+  if (currentStore !== prev.s || (dateMode !== "none" && (currentFrom !== prev.f || currentTo !== prev.t)) || (lockedAM ?? currentAM) !== prev.a) {
     setPrev({ s: currentStore, f: currentFrom, t: currentTo, a: lockedAM ?? currentAM });
     setStore(currentStore);
     setAm(lockedAM ?? currentAM);
-    if (showDate) setRange(rangeFromParams(currentFrom, currentTo));
+    if (dateMode !== "none") setRange(rangeFromParams(currentFrom, currentTo));
   }
 
   // 2 bulan di layar >= md, 1 bulan di mobile
@@ -136,7 +136,7 @@ export default function FilterBar({
     else next.delete("store");
     if (amVal) next.set("am", amVal);
     else next.delete("am");
-    if (showDate) {
+    if (dateMode !== "none") {
       if (r?.from && r?.to) {
         next.set("from", toISODate(r.from));
         next.set("to", toISODate(r.to));
@@ -248,7 +248,7 @@ export default function FilterBar({
         </span>
       </label>
 
-      {showDate && (
+      {dateMode !== "none" && (
       <div ref={panelRef} className="relative w-full sm:w-auto">
         <span id="periode-label" className="mb-1 flex items-center gap-2 text-xs text-muted">
           Periode
