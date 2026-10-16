@@ -521,6 +521,8 @@ async function DashContent({
   }
   const kpi = { ...kpiRevenue, ...kpiTargets };
   const { elapsed, daysInMonth } = getWibPeriod();
+  const pacePct =
+    daysInMonth > 0 ? Math.round((10000 * elapsed) / daysInMonth) / 100 : 0;
 
   const card = "rounded-2xl border border-line bg-surface p-4 shadow-sm md:p-5";
 
@@ -671,9 +673,9 @@ async function DashContent({
         <h2 className="text-sm font-semibold text-ink">Leaderboard Store</h2>
         <p className="mb-2 text-xs text-muted">
           Peringkat berdasarkan achievement Total Sales vs Total Target ·
-          snapshot periode berjalan
+          snapshot periode berjalan · pace {pct(pacePct)}
         </p>
-        <LeaderboardTable rows={lb} am={am} />
+        <LeaderboardTable rows={lb} am={am} pacePct={pacePct} />
       </section>
 
       <footer className="mt-6 text-center text-xs text-muted">

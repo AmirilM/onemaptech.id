@@ -105,10 +105,33 @@ function rankBadge(rank: number): string {
   return "bg-canvas text-muted";
 }
 
-function achCell(v: number | null): string {
-  if (v !== null && v > 100)
+function achStatus(v: number | null, pace: number): string {
+  if (v === null || v === undefined) return "no-target";
+  if (v >= 100) return "exceed";
+  if (v >= pace) return "on-track";
+  return "critical";
+}
+
+function achCell(v: number | null, pace: number): string {
+  const s = achStatus(v, pace);
+  if (s === "exceed")
     return "bg-accent/10 text-accent ring-1 ring-inset ring-accent/25";
-  return "text-ink";
+  if (s === "on-track")
+    return "bg-warning/10 text-warning ring-1 ring-inset ring-warning/25";
+  if (s === "critical")
+    return "bg-danger/10 text-danger ring-1 ring-inset ring-danger/25";
+  return "text-muted";
+}
+
+function achTitle(
+  v: number | null,
+  pace: number,
+): string {
+  const s = achStatus(v, pace);
+  if (s === "no-target") return "Tanpa target";
+  if (s === "exceed") return `Exceed target (${pct(v)})`;
+  if (s === "on-track") return `On-track vs pace ${pct(pace)} (${pct(v)})`;
+  return `Critical vs pace ${pct(pace)} (${pct(v)})`;
 }
 
 function ariaSort(
@@ -123,9 +146,11 @@ function ariaSort(
 export default function LeaderboardTable({
   rows,
   am,
+  pacePct,
 }: {
   rows: LeaderboardRow[];
   am: string;
+  pacePct: number;
 }) {
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("rank");
@@ -219,6 +244,24 @@ export default function LeaderboardTable({
           {sorted.length} toko
           {query.trim() ? ` · hasil cari "${query.trim()}"` : ""}
         </p>
+      </div>
+      <div
+        className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted"
+        aria-label={`Level achievement: pace periode berjalan ${pct(pacePct)}`}
+      >
+        <span className="tabular-nums">Pace {pct(pacePct)}</span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block size-2 rounded-full bg-accent" aria-hidden />
+          Exceed ≥100%
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block size-2 rounded-full bg-warning" aria-hidden />
+          On-track ≥pace
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block size-2 rounded-full bg-danger" aria-hidden />
+          Critical &lt;pace
+        </span>
       </div>
 
       <div className="overflow-x-auto">
@@ -343,7 +386,8 @@ export default function LeaderboardTable({
                 </td>
                 <td className={`${td} text-right`}>
                   <span
-                    className={`inline-block rounded-full px-1.5 py-px text-[10px] leading-4 font-semibold tabular-nums ${achCell(r.ach_total_pct)}`}
+                    title={achTitle(r.ach_total_pct, pacePct)}
+                    className={`inline-block rounded-full px-1.5 py-px text-[10px] leading-4 font-semibold tabular-nums ${achCell(r.ach_total_pct, pacePct)}`}
                   >
                     {pct(r.ach_total_pct)}
                   </span>
@@ -356,7 +400,8 @@ export default function LeaderboardTable({
                 </td>
                 <td className={`${td} text-right`}>
                   <span
-                    className={`inline-block rounded-full px-1.5 py-px text-[10px] leading-4 font-semibold tabular-nums ${achCell(r.ach_apple_pct)}`}
+                    title={achTitle(r.ach_apple_pct, pacePct)}
+                    className={`inline-block rounded-full px-1.5 py-px text-[10px] leading-4 font-semibold tabular-nums ${achCell(r.ach_apple_pct, pacePct)}`}
                   >
                     {pct(r.ach_apple_pct)}
                   </span>
@@ -369,7 +414,8 @@ export default function LeaderboardTable({
                 </td>
                 <td className={`${td} border-r border-line text-right`}>
                   <span
-                    className={`inline-block rounded-full px-1.5 py-px text-[10px] leading-4 font-semibold tabular-nums ${achCell(r.ach_android_pct)}`}
+                    title={achTitle(r.ach_android_pct, pacePct)}
+                    className={`inline-block rounded-full px-1.5 py-px text-[10px] leading-4 font-semibold tabular-nums ${achCell(r.ach_android_pct, pacePct)}`}
                   >
                     {pct(r.ach_android_pct)}
                   </span>
