@@ -82,7 +82,7 @@ export default function BrandShareDonut({
     : "Tidak ada data.";
 
   return (
-    <div className="flex h-64 w-full flex-col sm:h-72">
+    <div className="flex h-40 w-full flex-col sm:h-44">
       <p className="sr-only">
         {ariaLabel}: {summary}.
       </p>

@@ -4,9 +4,9 @@ import { formatDayMonth } from "@/lib/format";
 
 import { useEffect, useState } from "react";
 import {
+  Area,
+  AreaChart,
   CartesianGrid,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -43,6 +43,7 @@ function TrendTooltip({
   label?: string | number;
 }) {
   if (!active || !payload?.length) return null;
+  const value = Number(payload[0]?.value ?? 0);
   return (
     <div
       style={{
@@ -53,26 +54,31 @@ function TrendTooltip({
         maxWidth: "80vw",
         padding: "8px 12px",
         boxShadow: "0 8px 24px rgba(23,23,28,0.12)",
+        whiteSpace: "nowrap",
       }}
     >
       <p style={{ color: "#17171C", margin: 0, fontWeight: 600 }}>
         {formatDayMonth(String(label ?? ""))}
       </p>
-      {payload.map((row, i) => (
-        <p key={i} style={{ color: "#4B5563", margin: "4px 0 0" }}>
-          <span
-            style={{
-              display: "inline-block",
-              width: 8,
-              height: 8,
-              borderRadius: 9999,
-              background: String(row.color ?? "#fff"),
-              marginRight: 6,
-            }}
-          />
-          {String(row.name)}: Rp {Number(row.value ?? 0).toLocaleString("id-ID")}
-        </p>
-      ))}
+      <p
+        style={{
+          color: "#4B5563",
+          margin: "4px 0 0",
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
+        <span
+          style={{
+            display: "inline-block",
+            width: 8,
+            height: 8,
+            borderRadius: 9999,
+            background: "#7C3AED",
+            marginRight: 6,
+          }}
+        />
+        Total: Rp {value.toLocaleString("id-ID")}
+      </p>
     </div>
   );
 }
@@ -97,11 +103,22 @@ export default function TrendChart({ data }: { data: Point[] }) {
     <div className="h-64 w-full sm:h-72">
       <p className="sr-only">Ringkasan tren: {summary}.</p>
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart
+        <AreaChart
           data={data}
           margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
         >
-          <CartesianGrid stroke="#E8E8EF" vertical={false} />
+          <defs>
+            <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#7C3AED" stopOpacity={0.28} />
+              <stop offset="100%" stopColor="#7C3AED" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid
+            stroke="#E8E8EF"
+            strokeDasharray="4 4"
+            strokeOpacity={0.7}
+            vertical={false}
+          />
           <XAxis
             dataKey="date"
             tick={{ fill: "#6B7280", fontSize: 11 }}
@@ -120,18 +137,32 @@ export default function TrendChart({ data }: { data: Point[] }) {
           />
           <Tooltip
             content={<TrendTooltip />}
-            cursor={{ stroke: "rgba(124,58,237,0.35)" }}
+            cursor={{
+              stroke: "#7C3AED",
+              strokeOpacity: 0.35,
+              strokeDasharray: "4 4",
+            }}
           />
-          <Line
+          <Area
             type="monotone"
             dataKey="revenue_total"
             name="Total"
             stroke="#7C3AED"
             strokeWidth={2.5}
+            fill="url(#trendFill)"
             dot={false}
+            activeDot={{
+              r: 4,
+              fill: "#7C3AED",
+              stroke: "#FFFFFF",
+              strokeWidth: 2,
+            }}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            connectNulls
             isAnimationActive={!reducedMotion}
           />
-        </LineChart>
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   );

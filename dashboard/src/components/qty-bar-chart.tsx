@@ -66,7 +66,7 @@ export default function QtyBarChart({
     ? data.map((d) => `${d.label} ${num(d.qty)} unit (${pctExact(shareOf(d.qty))})`).join("; ")
     : "Tidak ada data.";
   return (
-    <div className="h-64 w-full sm:h-72">
+    <div className="h-40 w-full sm:h-44">
       <p className="sr-only">
         {ariaLabel}: {summary}.
       </p>

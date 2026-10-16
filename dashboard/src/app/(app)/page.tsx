@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { pct, pctExact, rupiah } from "@/lib/format";
+import { num, pct, pctExact, rupiah } from "@/lib/format";
 import type {
   DailyRow,
   LeaderboardRow,
@@ -380,62 +380,72 @@ async function DashContent({
     fetchTrend(),
     fetchTargets(),
   ]);
-  const byQtyDesc = (items: QtyBarItem[]) =>
+  const byQtyDesc = (items: Omit<QtyBarItem, "fill">[]) =>
     [...items].sort((a, b) => b.qty - a.qty);
-  const appleQty = byQtyDesc([
-    {
-      label: "iPhone",
-      qty: trend.reduce((a, p) => a + p.qty_iphone, 0),
-      fill: "#7C3AED",
-    },
-    {
-      label: "Mac",
-      qty: trend.reduce((a, p) => a + p.qty_mac, 0),
-      fill: "#8B5CF6",
-    },
-    {
-      label: "iPad",
-      qty: trend.reduce((a, p) => a + p.qty_ipad, 0),
-      fill: "#A78BFA",
-    },
-    {
-      label: "Watch",
-      qty: trend.reduce((a, p) => a + p.qty_apple_watch, 0),
-      fill: "#C4B5FD",
-    },
-  ]);
-  const androidQty = byQtyDesc([
-    {
-      label: "Samsung",
-      qty: trend.reduce((a, p) => a + p.qty_samsung, 0),
-      fill: "#6D28D9",
-    },
-    {
-      label: "Oppo",
-      qty: trend.reduce((a, p) => a + p.qty_oppo, 0),
-      fill: "#7C3AED",
-    },
-    {
-      label: "Xiaomi",
-      qty: trend.reduce((a, p) => a + p.qty_xiaomi, 0),
-      fill: "#8B5CF6",
-    },
-    {
-      label: "Huawei",
-      qty: trend.reduce((a, p) => a + p.qty_huawei, 0),
-      fill: "#A78BFA",
-    },
-    {
-      label: "Infinix",
-      qty: trend.reduce((a, p) => a + p.qty_infinix, 0),
-      fill: "#C4B5FD",
-    },
-    {
-      label: "Motorola",
-      qty: trend.reduce((a, p) => a + p.qty_motorola, 0),
-      fill: "#DDD6FE",
-    },
-  ]);
+  const APPLE_FILLS = ["#7C3AED", "#8B5CF6", "#A78BFA", "#C4B5FD"];
+  const ANDROID_FILLS = [
+    "#6D28D9",
+    "#7C3AED",
+    "#8B5CF6",
+    "#A78BFA",
+    "#C4B5FD",
+    "#DDD6FE",
+  ];
+  const withRankFills = (
+    items: Omit<QtyBarItem, "fill">[],
+    fills: string[],
+  ): QtyBarItem[] =>
+    byQtyDesc(items).map((d, i) => ({ ...d, fill: fills[i] ?? fills[fills.length - 1] }));
+  const appleQty = withRankFills(
+    [
+      {
+        label: "iPhone",
+        qty: trend.reduce((a, p) => a + p.qty_iphone, 0),
+      },
+      {
+        label: "Mac",
+        qty: trend.reduce((a, p) => a + p.qty_mac, 0),
+      },
+      {
+        label: "iPad",
+        qty: trend.reduce((a, p) => a + p.qty_ipad, 0),
+      },
+      {
+        label: "Watch",
+        qty: trend.reduce((a, p) => a + p.qty_apple_watch, 0),
+      },
+    ],
+    APPLE_FILLS,
+  );
+  const androidQty = withRankFills(
+    [
+      {
+        label: "Samsung",
+        qty: trend.reduce((a, p) => a + p.qty_samsung, 0),
+      },
+      {
+        label: "Oppo",
+        qty: trend.reduce((a, p) => a + p.qty_oppo, 0),
+      },
+      {
+        label: "Xiaomi",
+        qty: trend.reduce((a, p) => a + p.qty_xiaomi, 0),
+      },
+      {
+        label: "Huawei",
+        qty: trend.reduce((a, p) => a + p.qty_huawei, 0),
+      },
+      {
+        label: "Infinix",
+        qty: trend.reduce((a, p) => a + p.qty_infinix, 0),
+      },
+      {
+        label: "Motorola",
+        qty: trend.reduce((a, p) => a + p.qty_motorola, 0),
+      },
+    ],
+    ANDROID_FILLS,
+  );
 
   const appleTotalQty = appleQty.reduce((a, d) => a + d.qty, 0);
   const androidTotalQty = androidQty.reduce((a, d) => a + d.qty, 0);
@@ -673,11 +683,22 @@ async function DashContent({
           )}
         </section>
 
-        <section className={`${card} lg:col-span-4`} aria-label="Apple qty total">
-          <h2 className="text-sm font-semibold text-ink">Apple Qty</h2>
-          <p className="mb-3 text-xs text-muted">
-            {scopeLabel} · total periode · unit
-          </p>
+        <section className={`${card} lg:col-span-4`} aria-label={`Apple qty total ${appleTotalQty} unit`}>
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="text-sm font-semibold text-ink">Apple Qty</h2>
+              <p className="text-xs text-muted">{scopeLabel}</p>
+            </div>
+            <div className="shrink-0 text-right">
+              <p className="text-[11px] font-semibold uppercase leading-4 tracking-[0.16em] text-muted">
+                Total
+              </p>
+              <p className="mt-0.5 text-xl font-bold tracking-tight text-ink tabular-nums">
+                {num(appleTotalQty)}{" "}
+                <span className="text-xs font-medium text-muted">unit</span>
+              </p>
+            </div>
+          </div>
           {trend.length ? (
             <QtyBarChart
               data={appleQty}
@@ -692,11 +713,22 @@ async function DashContent({
           )}
         </section>
 
-        <section className={`${card} lg:col-span-5`} aria-label="Android qty total">
-          <h2 className="text-sm font-semibold text-ink">Android Qty</h2>
-          <p className="mb-3 text-xs text-muted">
-            {scopeLabel} · total periode · unit
-          </p>
+        <section className={`${card} lg:col-span-5`} aria-label={`Android qty total ${androidTotalQty} unit`}>
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="text-sm font-semibold text-ink">Android Qty</h2>
+              <p className="text-xs text-muted">{scopeLabel}</p>
+            </div>
+            <div className="shrink-0 text-right">
+              <p className="text-[11px] font-semibold uppercase leading-4 tracking-[0.16em] text-muted">
+                Total
+              </p>
+              <p className="mt-0.5 text-xl font-bold tracking-tight text-ink tabular-nums">
+                {num(androidTotalQty)}{" "}
+                <span className="text-xs font-medium text-muted">unit</span>
+              </p>
+            </div>
+          </div>
           {trend.length ? (
             <QtyBarChart
               data={androidQty}
