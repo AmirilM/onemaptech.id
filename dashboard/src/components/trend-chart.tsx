@@ -1,9 +1,10 @@
 "use client";
 
+import { formatDayMonth } from "@/lib/format";
+
 import { useEffect, useState } from "react";
 import {
   CartesianGrid,
-  Legend,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -14,10 +15,7 @@ import {
 
 type Point = {
   date: string;
-  revenue_apple: number;
-  revenue_android: number;
-  revenue_accessories: number;
-  revenue_vas: number;
+  revenue_total: number;
 };
 
 function compact(v: number): string {
@@ -57,7 +55,9 @@ function TrendTooltip({
         boxShadow: "0 8px 24px rgba(23,23,28,0.12)",
       }}
     >
-      <p style={{ color: "#17171C", margin: 0, fontWeight: 600 }}>{label}</p>
+      <p style={{ color: "#17171C", margin: 0, fontWeight: 600 }}>
+        {formatDayMonth(String(label ?? ""))}
+      </p>
       {payload.map((row, i) => (
         <p key={i} style={{ color: "#4B5563", margin: "4px 0 0" }}>
           <span
@@ -89,18 +89,8 @@ export default function TrendChart({ data }: { data: Point[] }) {
 
   const summary = (() => {
     if (!data.length) return "Tidak ada data.";
-    const total = (f: (p: Point) => number) =>
-      data.reduce((a, p) => a + f(p), 0);
-    const fmtRp = (v: number) => `Rp ${v.toLocaleString("id-ID")}`;
-    const parts: [string, (p: Point) => number][] = [
-      ["Apple", (p) => p.revenue_apple],
-      ["Android", (p) => p.revenue_android],
-      ["Accessories", (p) => p.revenue_accessories],
-      ["VAS", (p) => p.revenue_vas],
-    ];
-    return parts
-      .map(([name, f]) => `${name} total ${fmtRp(total(f))}`)
-      .join("; ");
+    const total = data.reduce((a, p) => a + p.revenue_total, 0);
+    return `Total revenue Rp ${total.toLocaleString("id-ID")} dari ${data.length} hari.`;
   })();
 
   return (
@@ -117,7 +107,7 @@ export default function TrendChart({ data }: { data: Point[] }) {
             tick={{ fill: "#6B7280", fontSize: 11 }}
             tickLine={false}
             axisLine={{ stroke: "#E8E8EF" }}
-            tickFormatter={(d: string) => d.slice(5)}
+            tickFormatter={(d: string) => formatDayMonth(d)}
             interval="preserveStartEnd"
             minTickGap={28}
           />
@@ -132,43 +122,12 @@ export default function TrendChart({ data }: { data: Point[] }) {
             content={<TrendTooltip />}
             cursor={{ stroke: "rgba(124,58,237,0.35)" }}
           />
-          <Legend wrapperStyle={{ fontSize: 12, color: "#6B7280" }} iconSize={8} iconType="circle" />
           <Line
             type="monotone"
-            dataKey="revenue_apple"
-            name="Apple"
+            dataKey="revenue_total"
+            name="Total"
             stroke="#7C3AED"
             strokeWidth={2.5}
-            dot={false}
-            isAnimationActive={!reducedMotion}
-          />
-          <Line
-            type="monotone"
-            dataKey="revenue_android"
-            name="Android"
-            stroke="#0891B2"
-            strokeWidth={2}
-            strokeDasharray="7 4"
-            dot={false}
-            isAnimationActive={!reducedMotion}
-          />
-          <Line
-            type="monotone"
-            dataKey="revenue_accessories"
-            name="Accessories"
-            stroke="#059669"
-            strokeWidth={2}
-            strokeDasharray="2 3"
-            dot={false}
-            isAnimationActive={!reducedMotion}
-          />
-          <Line
-            type="monotone"
-            dataKey="revenue_vas"
-            name="VAS"
-            stroke="#94A3B8"
-            strokeWidth={2}
-            strokeDasharray="9 3 2 3"
             dot={false}
             isAnimationActive={!reducedMotion}
           />
