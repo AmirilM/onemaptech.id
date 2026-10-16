@@ -29,14 +29,15 @@ const th =
   "border-b border-line px-3 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-muted";
 const tdBase = "border-b border-line/60 px-3 py-2.5 text-sm tabular-nums";
 const td = `${tdBase} text-soft`;
-// Single source untuk lebar kolom Date = offset sticky kolom Day.
+// Single source untuk lebar kolom Date = offset sticky kolom Day (desktop saja).
 // (Literal class dijaga agar terdeteksi Tailwind; jangan jadikan dinamis.)
+// Opsi B: tanpa freeze di mobile — sticky Date + Day hanya aktif di md+.
 const DATE_MIN_W = "min-w-[84px]";
-const DAY_STICKY_LEFT = "left-[84px]";
-const dateCell = `${tdBase} sticky left-0 bg-surface font-medium text-ink group-hover:bg-violet-50 ${DATE_MIN_W}`;
-const dateHead = `${th} sticky left-0 bg-surface ${DATE_MIN_W}`;
-const dayCell = `${tdBase} sticky border-r border-line bg-surface text-soft group-hover:bg-violet-50 ${DAY_STICKY_LEFT}`;
-const dayHead = `${th} sticky border-r border-line bg-surface ${DAY_STICKY_LEFT}`;
+const DAY_STICKY_LEFT = "md:left-[84px]";
+const dateCell = `${tdBase} md:sticky md:left-0 md:bg-surface font-medium text-ink group-hover:bg-violet-50 ${DATE_MIN_W}`;
+const dateHead = `${th} md:sticky md:left-0 md:bg-surface ${DATE_MIN_W}`;
+const dayCell = `${tdBase} md:sticky md:border-r md:border-line md:bg-surface text-soft group-hover:bg-violet-50 ${DAY_STICKY_LEFT}`;
+const dayHead = `${th} md:sticky md:border-r md:border-line md:bg-surface ${DAY_STICKY_LEFT}`;
 
 function dayName(date: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
