@@ -1,23 +1,21 @@
 import { Suspense } from "react";
+import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionProfile } from "@/lib/auth";
 import { num, pct, pctExact, rupiah } from "@/lib/format";
 import type {
   DailyRow,
   LeaderboardRow,
-  Profile,
   StoreDailyRow,
   StoreRow,
 } from "@/lib/types";
 import FilterBar from "@/components/filter-bar";
-import LeaderboardTable from "@/components/leaderboard-table";
 import { distinctAMs, effectiveAM, getStoreMap, storeInScope } from "@/lib/scope";
 import GreetHead from "@/components/greet-head";
 import PaceCard from "@/components/pace-card";
-import QtyBarChart, { type QtyBarItem } from "@/components/qty-bar-chart";
-import BrandShareDonut, {
-  type BrandShareItem,
-} from "@/components/brand-share-donut";
+import type { QtyBarItem } from "@/components/qty-bar-chart";
+import type { BrandShareItem } from "@/components/brand-share-donut";
 import {
   Apple,
   Headphones,
@@ -26,6 +24,28 @@ import {
   Wallet,
   type LucideIcon,
 } from "lucide-react";
+
+// Recharts + tabel berat di-code-split (dynamic di Server Component:
+// tanpa ssr:false agar bisa SSR + streaming per section).
+const QtyBarChart = dynamic(() => import("@/components/qty-bar-chart"), {
+  loading: () => <div className="h-40 sm:h-44 animate-pulse rounded-xl bg-canvas" />,
+});
+const BrandShareDonut = dynamic(
+  () => import("@/components/brand-share-donut"),
+  {
+    loading: () => (
+      <div className="h-40 sm:h-44 animate-pulse rounded-xl bg-canvas" />
+    ),
+  },
+);
+const LeaderboardTable = dynamic(
+  () => import("@/components/leaderboard-table"),
+  {
+    loading: () => (
+      <div className="h-48 animate-pulse rounded-xl bg-canvas" />
+    ),
+  },
+);
 
 type Params = { store?: string; am?: string };
 
@@ -238,10 +258,13 @@ async function DashContent({
     );
   }
   const params = await searchParams;
+  const session = await getSessionProfile();
+  if (!session) redirect("/login");
   const supabase = await createClient();
-  // Query independen (auth, mapping, filter list, freshness) jalan satu batch.
-  const [userRes, storeMap, storeListRes, latestRes] = await Promise.all([
-    supabase.auth.getUser(),
+  // Batch 1: mapping + filter list + freshness (independen dari sesi).
+  // Auth/profile tidak di-query ulang di sini (sudah via getSessionProfile
+  // yang di-cache per request dan dipakai juga oleh layout).
+  const [storeMap, storeListRes, latestRes] = await Promise.all([
     getStoreMap(supabase),
     supabase
       .from("mv_leaderboard_store")
@@ -253,25 +276,11 @@ async function DashContent({
       .order("date", { ascending: false })
       .limit(1),
   ]);
-  const {
-    data: { user },
-  } = userRes;
-  if (!user) redirect("/login");
+  const prof = session.profile;
+  const userEmail = session.email;
 
-  const salesId = (user.user_metadata?.sales_id as string | undefined) ?? "";
-  const { data: profile } = salesId
-    ? await supabase
-        .from("profiles")
-        .select("sales_id,sales_name,store_code,store_name,role")
-        .eq("sales_id", salesId)
-        .maybeSingle()
-    : { data: null };
-  const prof = profile as Profile | null;
-
-  const lockedStore =
-    prof?.role === "Store Supervisor" ? (prof?.store_code ?? null) : null;
-  const lockedAM =
-    prof?.role === "Area Manager" ? (prof?.sales_name ?? null) : null;
+  const lockedStore = session.lockedStore;
+  const lockedAM = session.lockedAM;
   // Scope AM (ketat): peta store → AM dari master_stores.
   const storeListRaw = storeListRes.data;
   const amList = distinctAMs(storeMap);
@@ -294,10 +303,12 @@ async function DashContent({
   const latestDate =
     (latest?.[0] as { date: string } | undefined)?.date ?? "-";
 
-  // Leaderboard
+  // Leaderboard: hanya kolom yang dirender tabel (hemat payload vs select *).
+  const LB_SELECT =
+    "store_code,store_name,total_target,revenue_total,ach_total_pct,apple_target,revenue_apple,ach_apple_pct,android_target,revenue_android,ach_android_pct,rank_achievement";
   let lbQuery = supabase
     .from("mv_leaderboard_store")
-    .select("*")
+    .select(LB_SELECT)
     .order("ach_total_pct", { ascending: false, nullsFirst: false });
   if (store) lbQuery = lbQuery.eq("store_code", store);
   else if (am && amStores.length) lbQuery = lbQuery.in("store_code", amStores);
@@ -305,6 +316,14 @@ async function DashContent({
   const lbPromise = lbQuery.then(
     (r) => (r.data ?? []) as LeaderboardRow[],
   );
+
+  // Tren month-to-date: batasi ke bulan data terakhir agar baris yang
+  // ditransfer = hari × store dalam 1 bulan (bukan seluruh histori).
+  // KPI/target adalah snapshot bulanan, jadi semantik tetap sama.
+  const monthStart =
+    latestDate && latestDate !== "-"
+      ? `${latestDate.slice(0, 7)}-01`
+      : null;
 
   // Tren: per store bila filter store, global harian bila tidak —
   // periode berjalan penuh (tanpa filter tanggal)
@@ -350,26 +369,32 @@ async function DashContent({
   // Logic cabang dipertahankan persis seperti semula.
   async function fetchTrend(): Promise<TrendPoint[]> {
     if (store) {
-      const { data } = await supabase
+      let q = supabase
         .from("mv_dashboard_store_daily")
         .select(QTY_SELECT)
         .eq("store_code", store)
         .order("date");
+      if (monthStart) q = q.gte("date", monthStart);
+      const { data } = await q;
       return ((data ?? []) as StoreDailyRow[]).map(toTrendPoint);
     } else if (am && amStores.length) {
-      const { data } = await supabase
+      let q = supabase
         .from("mv_dashboard_store_daily")
         .select(QTY_SELECT)
         .in("store_code", amStores)
         .order("date");
+      if (monthStart) q = q.gte("date", monthStart);
+      const { data } = await q;
       return ((data ?? []) as StoreDailyRow[]).map(toTrendPoint);
     } else if (am) {
       return [];
     } else {
-      const { data } = await supabase
+      let q = supabase
         .from("mv_dashboard_daily")
         .select(QTY_SELECT)
         .order("date");
+      if (monthStart) q = q.gte("date", monthStart);
+      const { data } = await q;
       return ((data ?? []) as DailyRow[]).map(toTrendPoint);
     }
   }
@@ -380,6 +405,41 @@ async function DashContent({
     fetchTrend(),
     fetchTargets(),
   ]);
+  // Agregasi 1 pass: 15x trend.reduce → 1x loop (KPI revenue + qty).
+  const totals = {
+    revenue_total: 0,
+    revenue_apple: 0,
+    revenue_android: 0,
+    revenue_accessories: 0,
+    revenue_vas: 0,
+    qty_mac: 0,
+    qty_iphone: 0,
+    qty_ipad: 0,
+    qty_apple_watch: 0,
+    qty_samsung: 0,
+    qty_oppo: 0,
+    qty_xiaomi: 0,
+    qty_huawei: 0,
+    qty_infinix: 0,
+    qty_motorola: 0,
+  };
+  for (const p of trend) {
+    totals.revenue_total += p.revenue_total;
+    totals.revenue_apple += p.revenue_apple;
+    totals.revenue_android += p.revenue_android;
+    totals.revenue_accessories += p.revenue_accessories;
+    totals.revenue_vas += p.revenue_vas;
+    totals.qty_mac += p.qty_mac;
+    totals.qty_iphone += p.qty_iphone;
+    totals.qty_ipad += p.qty_ipad;
+    totals.qty_apple_watch += p.qty_apple_watch;
+    totals.qty_samsung += p.qty_samsung;
+    totals.qty_oppo += p.qty_oppo;
+    totals.qty_xiaomi += p.qty_xiaomi;
+    totals.qty_huawei += p.qty_huawei;
+    totals.qty_infinix += p.qty_infinix;
+    totals.qty_motorola += p.qty_motorola;
+  }
   const byQtyDesc = (items: Omit<QtyBarItem, "fill">[]) =>
     [...items].sort((a, b) => b.qty - a.qty);
   const APPLE_FILLS = ["#7C3AED", "#8B5CF6", "#A78BFA", "#C4B5FD"];
@@ -398,51 +458,21 @@ async function DashContent({
     byQtyDesc(items).map((d, i) => ({ ...d, fill: fills[i] ?? fills[fills.length - 1] }));
   const appleQty = withRankFills(
     [
-      {
-        label: "iPhone",
-        qty: trend.reduce((a, p) => a + p.qty_iphone, 0),
-      },
-      {
-        label: "Mac",
-        qty: trend.reduce((a, p) => a + p.qty_mac, 0),
-      },
-      {
-        label: "iPad",
-        qty: trend.reduce((a, p) => a + p.qty_ipad, 0),
-      },
-      {
-        label: "Watch",
-        qty: trend.reduce((a, p) => a + p.qty_apple_watch, 0),
-      },
+      { label: "iPhone", qty: totals.qty_iphone },
+      { label: "Mac", qty: totals.qty_mac },
+      { label: "iPad", qty: totals.qty_ipad },
+      { label: "Watch", qty: totals.qty_apple_watch },
     ],
     APPLE_FILLS,
   );
   const androidQty = withRankFills(
     [
-      {
-        label: "Samsung",
-        qty: trend.reduce((a, p) => a + p.qty_samsung, 0),
-      },
-      {
-        label: "Oppo",
-        qty: trend.reduce((a, p) => a + p.qty_oppo, 0),
-      },
-      {
-        label: "Xiaomi",
-        qty: trend.reduce((a, p) => a + p.qty_xiaomi, 0),
-      },
-      {
-        label: "Huawei",
-        qty: trend.reduce((a, p) => a + p.qty_huawei, 0),
-      },
-      {
-        label: "Infinix",
-        qty: trend.reduce((a, p) => a + p.qty_infinix, 0),
-      },
-      {
-        label: "Motorola",
-        qty: trend.reduce((a, p) => a + p.qty_motorola, 0),
-      },
+      { label: "Samsung", qty: totals.qty_samsung },
+      { label: "Oppo", qty: totals.qty_oppo },
+      { label: "Xiaomi", qty: totals.qty_xiaomi },
+      { label: "Huawei", qty: totals.qty_huawei },
+      { label: "Infinix", qty: totals.qty_infinix },
+      { label: "Motorola", qty: totals.qty_motorola },
     ],
     ANDROID_FILLS,
   );
@@ -455,17 +485,14 @@ async function DashContent({
   ];
   const brandShareTotal = appleTotalQty + androidTotalQty;
 
-  // KPI: revenue dijumlahkan dari tren periode berjalan penuh
-  // (ikut filter store, abaikan filter tanggal). Target = periode
-  // penuh (snapshot, tanpa dimensi harian).
-  const sumTrend = (f: (p: TrendPoint) => number) =>
-    trend.reduce((a, p) => a + f(p), 0);
+  // KPI: revenue month-to-date dari tren (ikut filter store).
+  // Target = snapshot bulanan (tanpa dimensi harian).
   const kpiRevenue = {
-    revenue_total: sumTrend((p) => p.revenue_total),
-    revenue_apple: sumTrend((p) => p.revenue_apple),
-    revenue_android: sumTrend((p) => p.revenue_android),
-    revenue_accessories: sumTrend((p) => p.revenue_accessories),
-    revenue_vas: sumTrend((p) => p.revenue_vas),
+    revenue_total: totals.revenue_total,
+    revenue_apple: totals.revenue_apple,
+    revenue_android: totals.revenue_android,
+    revenue_accessories: totals.revenue_accessories,
+    revenue_vas: totals.revenue_vas,
   };
   type KpiTargets = {
     total_target: number | null;
@@ -579,11 +606,11 @@ async function DashContent({
             <p className="text-xs font-semibold tracking-[0.2em] text-primary">
               DASHBOARD
             </p>
-            <GreetHead name={prof?.sales_name ?? user.email ?? "?"} />
+            <GreetHead name={prof?.sales_name ?? userEmail ?? "?"} />
             <p className="mt-1 text-xs text-muted">
               {prof
                 ? `${prof.role}${lockedAM ? ` · ${lockedAM}` : prof.store_code ? ` · ${prof.store_code} — ${prof.store_name ?? ""}` : " · semua store"}`
-                : user.email}{" "}
+                : userEmail}{" "}
               · data diperbarui {latestDate}
             </p>
           </header>
@@ -620,6 +647,8 @@ async function DashContent({
               alt=""
               width={1200}
               height={400}
+              loading="lazy"
+              decoding="async"
               className="w-[76%] object-contain"
             />
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -628,6 +657,8 @@ async function DashContent({
               alt=""
               width={520}
               height={316}
+              loading="lazy"
+              decoding="async"
               className="w-[22%] max-w-[220px] object-contain"
             />
           </div>
@@ -659,6 +690,7 @@ async function DashContent({
       </section>
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
+        <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl border border-line bg-surface lg:col-span-3" />}>
         <section className={`${card} lg:col-span-3`} aria-label="Brand share by qty">
           <h2 className="text-sm font-semibold text-ink">Brand Share</h2>
           <p className="mb-3 text-xs text-muted">
@@ -682,7 +714,9 @@ async function DashContent({
             </div>
           )}
         </section>
+        </Suspense>
 
+        <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl border border-line bg-surface lg:col-span-4" />}>
         <section className={`${card} lg:col-span-4`} aria-label={`Apple qty total ${appleTotalQty} unit`}>
           <div className="mb-3 flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -712,7 +746,9 @@ async function DashContent({
             </div>
           )}
         </section>
+        </Suspense>
 
+        <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl border border-line bg-surface lg:col-span-5" />}>
         <section className={`${card} lg:col-span-5`} aria-label={`Android qty total ${androidTotalQty} unit`}>
           <div className="mb-3 flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -742,8 +778,10 @@ async function DashContent({
             </div>
           )}
         </section>
+        </Suspense>
       </div>
 
+      <Suspense fallback={<div className="mt-4 h-64 animate-pulse rounded-2xl border border-line bg-surface" />}>
       <section className={`${card} mt-4`}>
         <h2 className="text-sm font-semibold text-ink">Leaderboard Store</h2>
         <p className="mb-2 text-xs text-muted">
@@ -752,6 +790,7 @@ async function DashContent({
         </p>
         <LeaderboardTable rows={lb} am={am} pacePct={pacePct} />
       </section>
+      </Suspense>
 
       <footer className="mt-6 text-center text-xs text-muted">
         OneMapTech · refresh harian
