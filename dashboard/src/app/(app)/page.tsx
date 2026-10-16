@@ -225,9 +225,23 @@ async function DashContent({
   }
   const params = await searchParams;
   const supabase = await createClient();
+  // Query independen (auth, mapping, filter list, freshness) jalan satu batch.
+  const [userRes, storeMap, storeListRes, latestRes] = await Promise.all([
+    supabase.auth.getUser(),
+    getStoreMap(supabase),
+    supabase
+      .from("mv_leaderboard_store")
+      .select("store_code,store_name")
+      .order("store_code"),
+    supabase
+      .from("mv_dashboard_daily")
+      .select("date")
+      .order("date", { ascending: false })
+      .limit(1),
+  ]);
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = userRes;
   if (!user) redirect("/login");
 
   const salesId = (user.user_metadata?.sales_id as string | undefined) ?? "";
@@ -245,7 +259,7 @@ async function DashContent({
   const lockedAM =
     prof?.role === "Area Manager" ? (prof?.sales_name ?? null) : null;
   // Scope AM (ketat): peta store → AM dari master_stores.
-  const storeMap = await getStoreMap(supabase);
+  const storeListRaw = storeListRes.data;
   const amList = distinctAMs(storeMap);
   const am = effectiveAM(lockedAM, params.am || "");
   const amStores = am
@@ -257,20 +271,12 @@ async function DashContent({
   const store = storeInScope(lockedStore ?? (params.store || ""), am, amStores);
 
   // Daftar store untuk filter (ketat: AM hanya lihat store miliknya)
-  const { data: storeListRaw } = await supabase
-    .from("mv_leaderboard_store")
-    .select("store_code,store_name")
-    .order("store_code");
   const storeList = (
     (storeListRaw ?? []) as { store_code: string; store_name: string | null }[]
   ).filter((s) => !am || amStores.includes(s.store_code));
 
   // Freshness data — independen dari filter tanggal
-  const { data: latest } = await supabase
-    .from("mv_dashboard_daily")
-    .select("date")
-    .order("date", { ascending: false })
-    .limit(1);
+  const latest = latestRes.data;
   const latestDate =
     (latest?.[0] as { date: string } | undefined)?.date ?? "-";
 
@@ -282,8 +288,9 @@ async function DashContent({
   if (store) lbQuery = lbQuery.eq("store_code", store);
   else if (am && amStores.length) lbQuery = lbQuery.in("store_code", amStores);
   else if (amScopeBroken) lbQuery = lbQuery.eq("store_code", "__no_match__");
-  const { data: leaderboard } = await lbQuery;
-  const lb = (leaderboard ?? []) as LeaderboardRow[];
+  const lbPromise = lbQuery.then(
+    (r) => (r.data ?? []) as LeaderboardRow[],
+  );
 
   // Tren: per store bila filter store, global harian bila tidak —
   // periode berjalan penuh (tanpa filter tanggal)
@@ -325,30 +332,40 @@ async function DashContent({
     qty_infinix: d.qty_infinix,
     qty_motorola: d.qty_motorola,
   });
-  let trend: TrendPoint[] = [];
-  if (store) {
-    const { data } = await supabase
-      .from("mv_dashboard_store_daily")
-      .select(QTY_SELECT)
-      .eq("store_code", store)
-      .order("date");
-    trend = ((data ?? []) as StoreDailyRow[]).map(toTrendPoint);
-  } else if (am && amStores.length) {
-    const { data } = await supabase
-      .from("mv_dashboard_store_daily")
-      .select(QTY_SELECT)
-      .in("store_code", amStores)
-      .order("date");
-    trend = ((data ?? []) as StoreDailyRow[]).map(toTrendPoint);
-  } else if (am) {
-    trend = [];
-  } else {
-    const { data } = await supabase
-      .from("mv_dashboard_daily")
-      .select(QTY_SELECT)
-      .order("date");
-    trend = ((data ?? []) as DailyRow[]).map(toTrendPoint);
+  // Function declaration (hoisted) agar bisa dipanggil paralel di bawah.
+  // Logic cabang dipertahankan persis seperti semula.
+  async function fetchTrend(): Promise<TrendPoint[]> {
+    if (store) {
+      const { data } = await supabase
+        .from("mv_dashboard_store_daily")
+        .select(QTY_SELECT)
+        .eq("store_code", store)
+        .order("date");
+      return ((data ?? []) as StoreDailyRow[]).map(toTrendPoint);
+    } else if (am && amStores.length) {
+      const { data } = await supabase
+        .from("mv_dashboard_store_daily")
+        .select(QTY_SELECT)
+        .in("store_code", amStores)
+        .order("date");
+      return ((data ?? []) as StoreDailyRow[]).map(toTrendPoint);
+    } else if (am) {
+      return [];
+    } else {
+      const { data } = await supabase
+        .from("mv_dashboard_daily")
+        .select(QTY_SELECT)
+        .order("date");
+      return ((data ?? []) as DailyRow[]).map(toTrendPoint);
+    }
   }
+  // Leaderboard + tren + target independen satu sama lain → satu batch.
+  // fetchTargets dideklarasikan di bawah (hoisted, aman dipanggil di sini).
+  const [lb, trend, kpiTargets] = await Promise.all([
+    lbPromise,
+    fetchTrend(),
+    fetchTargets(),
+  ]);
   const byQtyDesc = (items: QtyBarItem[]) =>
     [...items].sort((a, b) => b.qty - a.qty);
   const appleQty = byQtyDesc([
@@ -433,7 +450,7 @@ async function DashContent({
     accessories_target: number | null;
     vas_target: number | null;
   };
-  let kpiTargets: KpiTargets;
+  async function fetchTargets(): Promise<KpiTargets> {
   if (store) {
     const { data } = await supabase
       .from("mv_dashboard_store")
@@ -450,7 +467,7 @@ async function DashContent({
       | "accessories_target"
       | "vas_target"
     > | null;
-    kpiTargets = {
+    return {
       total_target: s?.total_target ?? null,
       apple_target: s?.apple_target ?? null,
       android_target: s?.android_target ?? null,
@@ -477,7 +494,7 @@ async function DashContent({
         (acc, x) => (acc ?? 0) + (f(x) ?? 0),
         t.length ? 0 : null,
       );
-    kpiTargets = {
+    return {
       total_target: sum((x) => x.total_target),
       apple_target: sum((x) => x.apple_target),
       android_target: sum((x) => x.android_target),
@@ -486,7 +503,7 @@ async function DashContent({
     };
   } else if (amScopeBroken) {
     // Mapping area tak terbaca: jangan tampilkan target global yang menyesatkan.
-    kpiTargets = {
+    return {
       total_target: null,
       apple_target: null,
       android_target: null,
@@ -512,13 +529,14 @@ async function DashContent({
         (acc, x) => (acc ?? 0) + (f(x) ?? 0),
         t.length ? 0 : null,
       );
-    kpiTargets = {
+    return {
       total_target: sum((x) => x.total_target),
       apple_target: sum((x) => x.apple_target),
       android_target: sum((x) => x.android_target),
       accessories_target: sum((x) => x.accessories_target),
       vas_target: sum((x) => x.vas_target),
     };
+  }
   }
   const kpi = { ...kpiRevenue, ...kpiTargets };
   const { elapsed, daysInMonth } = getWibPeriod();

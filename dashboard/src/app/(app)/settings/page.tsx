@@ -19,12 +19,14 @@ export default function SettingsPage() {
 }
 
 async function SettingsContent() {
-  const supabase = await createClient();
+  const [supabase, session] = await Promise.all([
+    createClient(),
+    getSessionProfile(),
+  ]);
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  const session = await getSessionProfile();
   if (!session?.profile) redirect("/login");
   const { data } = await supabase
     .from("profiles")

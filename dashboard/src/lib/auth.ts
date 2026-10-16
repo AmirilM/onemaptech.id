@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile } from "@/lib/types";
 
@@ -10,7 +11,7 @@ export type SessionProfile = {
   isAdmin: boolean;
 };
 
-export async function getSessionProfile(): Promise<SessionProfile | null> {
+async function fetchSessionProfile(): Promise<SessionProfile | null> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -39,3 +40,7 @@ export async function getSessionProfile(): Promise<SessionProfile | null> {
     isAdmin: profile?.role === "Admin",
   };
 }
+
+// Di-cache per request: layout + page memanggil ini 2x untuk request yang sama.
+// Tanpa argumen sehingga key cache selalu sama dalam satu request.
+export const getSessionProfile = cache(fetchSessionProfile);

@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import * as XLSX from "xlsx";
+
+// xlsx (~800KB) dimuat on-demand saat tombol Excel diklik,
+// tidak ikut bundle awal halaman Report.
 
 type Props = {
   rows: Record<string, string | number | null>[];
@@ -42,9 +44,10 @@ export default function ReportExport({ rows, filename }: Props) {
     }
   }
 
-  function exportExcel() {
+  async function exportExcel() {
     setBusy("xlsx");
     try {
+      const XLSX = await import("xlsx");
       const ws = XLSX.utils.json_to_sheet(
         rows.map((r) => {
           const out: Record<string, string | number> = {};

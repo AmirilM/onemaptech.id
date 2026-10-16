@@ -35,15 +35,25 @@ async function ReportContent({
   searchParams: Promise<Params>;
 }) {
   const params = await searchParams;
-  const supabase = await createClient();
+  const [supabase, session] = await Promise.all([
+    createClient(),
+    getSessionProfile(),
+  ]);
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  const session = await getSessionProfile();
   const lockedStore = session?.lockedStore ?? null;
   const lockedAM = session?.lockedAM ?? null;
-  const storeMap = await getStoreMap(supabase);
+  // storeMap + storeList independen → satu batch.
+  const [storeMap, storeListRes] = await Promise.all([
+    getStoreMap(supabase),
+    supabase
+      .from("mv_leaderboard_store")
+      .select("store_code,store_name")
+      .order("store_code"),
+  ]);
+  const storeListRaw = storeListRes.data;
   const amList = distinctAMs(storeMap);
   const am = effectiveAM(lockedAM, params.am || "");
   const amStores = am
@@ -54,10 +64,6 @@ async function ReportContent({
   const from = params.from || "";
   const to = params.to || "";
 
-  const { data: storeListRaw } = await supabase
-    .from("mv_leaderboard_store")
-    .select("store_code,store_name")
-    .order("store_code");
   const storeList = (
     (storeListRaw ?? []) as { store_code: string; store_name: string | null }[]
   ).filter((s) => !am || amStores.includes(s.store_code));

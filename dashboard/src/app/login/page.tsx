@@ -66,8 +66,9 @@ export default function LoginPage() {
       <div aria-hidden className="pointer-events-none absolute inset-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/login-bg.png"
+          src="/login-bg.webp"
           alt=""
+          fetchPriority="high"
           className="h-full w-full object-cover object-center"
         />
         {/* Overlay agar card kanan terbaca, kiri tetap vivid */}

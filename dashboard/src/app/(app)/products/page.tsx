@@ -33,16 +33,32 @@ async function ProductsContent({
   searchParams: Promise<Params>;
 }) {
   const params = await searchParams;
-  const supabase = await createClient();
+  const [supabase, session] = await Promise.all([
+    createClient(),
+    getSessionProfile(),
+  ]);
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  const session = await getSessionProfile();
   const lockedStore = session?.lockedStore ?? null;
   const lockedAM = session?.lockedAM ?? null;
   const am = effectiveAM(lockedAM, params.am || "");
-  const storeMap = await getStoreMap(supabase);
+  // storeMap + storeList + top global independen → satu batch.
+  const [storeMap, storeListRes, topRes] = await Promise.all([
+    getStoreMap(supabase),
+    supabase
+      .from("mv_leaderboard_store")
+      .select("store_code,store_name")
+      .order("store_code"),
+    supabase
+      .from("mv_top_product")
+      .select("*")
+      .order("rank_revenue")
+      .limit(50),
+  ]);
+  const storeListRaw = storeListRes.data;
+  const topRaw = topRes.data;
   const amList = distinctAMs(storeMap);
   const amStores = am
     ? storeMap.filter((r) => r.area_manager === am).map((r) => r.store_code)
@@ -52,20 +68,11 @@ async function ProductsContent({
   const scopeLabel = store ? `Store ${store}` : am ? `Area ${am}` : "Semua store";
 
   // Daftar store untuk filter (ketat: AM hanya lihat store miliknya)
-  const { data: storeListRaw } = await supabase
-    .from("mv_leaderboard_store")
-    .select("store_code,store_name")
-    .order("store_code");
   const storeList = (
     (storeListRaw ?? []) as { store_code: string; store_name: string | null }[]
   ).filter((s) => !am || amStores.includes(s.store_code));
 
   // Top product global (MV tanpa dimensi store)
-  const { data: topRaw } = await supabase
-    .from("mv_top_product")
-    .select("*")
-    .order("rank_revenue")
-    .limit(50);
   const top = (topRaw ?? []) as TopProductRow[];
 
   // Share kategori dari agregat harian (ikut filter store / area bila ada)

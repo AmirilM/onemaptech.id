@@ -1,11 +1,19 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { DayPicker, type DateRange } from "react-day-picker";
+import type { DateRange } from "react-day-picker";
 import { id } from "react-day-picker/locale/id";
 import { Map, RotateCcw, Store } from "lucide-react";
 import "react-day-picker/style.css";
+
+// DayPicker di-split ke chunk terpisah: hanya diunduh saat FilterBar di-render,
+// tidak membebani halaman yang dateMode="none" pada bundle awal.
+const DayPicker = dynamic(
+  () => import("react-day-picker").then((m) => m.DayPicker),
+  { ssr: false },
+);
 
 type Props = {
   stores: { store_code: string; store_name: string | null }[];
@@ -198,7 +206,20 @@ export default function FilterBar({
     "min-h-[44px] rounded-lg border border-line bg-canvas px-3 py-2 text-base text-ink outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/30 md:text-sm";
 
   return (
-    <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-line bg-surface p-4 shadow-sm xl:flex-nowrap">
+    <>
+      <style>{`@keyframes omt-progress{0%{transform:translateX(-100%)}100%{transform:translateX(400%)}} .omt-progress-bar{animation:omt-progress 1.1s ease-in-out infinite}`}</style>
+      {isPending && (
+        <div
+          aria-hidden
+          className="fixed inset-x-0 top-0 z-[60] h-[3px] overflow-hidden bg-primary/15"
+        >
+          <div className="omt-progress-bar h-full w-1/4 rounded-full bg-primary" />
+        </div>
+      )}
+      <span role="status" className="sr-only">
+        {isPending ? "Memuat data…" : ""}
+      </span>
+      <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-line bg-surface p-4 shadow-sm xl:flex-nowrap">
       {(areaManagers.length > 0 || lockedAM) && (
         <label className="flex w-full min-w-0 flex-col gap-1 text-xs text-muted sm:flex-1">
           Area Manager
@@ -211,7 +232,7 @@ export default function FilterBar({
             <select
               value={am}
               onChange={(e) => handleAM(e.target.value)}
-              disabled={!!lockedAM}
+              disabled={!!lockedAM || isPending}
               className={`${input} w-full disabled:opacity-60 pl-10`}
             >
               <option value="">Semua area</option>
@@ -235,7 +256,7 @@ export default function FilterBar({
           <select
             value={store}
             onChange={(e) => handleStore(e.target.value)}
-            disabled={!!lockedStore}
+            disabled={!!lockedStore || isPending}
             className={`${input} w-full disabled:opacity-60 pl-10`}
           >
             <option value="">Semua store</option>
@@ -257,6 +278,7 @@ export default function FilterBar({
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
+          disabled={isPending}
           aria-expanded={open}
           aria-haspopup="dialog"
           aria-labelledby="periode-label periode-value"
@@ -332,10 +354,11 @@ export default function FilterBar({
       <button
         type="button"
         onClick={reset}
-        className="flex min-h-[44px] shrink-0 items-center gap-2 rounded-lg border border-line px-4 py-2 text-sm text-soft hover:bg-violet-50 active:bg-violet-100"
+        disabled={isPending}
+        className="flex min-h-[44px] shrink-0 items-center gap-2 rounded-lg border border-line px-4 py-2 text-sm text-soft hover:bg-violet-50 active:bg-violet-100 disabled:opacity-60"
       >
         <RotateCcw size={16} aria-hidden />
-        Reset
+        {isPending ? "Memuat…" : "Reset"}
       </button>
       {lockedStore && (
         <span className="w-full text-xs text-warning sm:w-auto">
@@ -347,6 +370,7 @@ export default function FilterBar({
           Terkunci ke area {lockedAM} — hanya store milikmu yang tampil.
         </span>
       )}
-    </div>
+      </div>
+    </>
   );
 }

@@ -66,15 +66,31 @@ async function DailyContent({
   searchParams: Promise<Params>;
 }) {
   const params = await searchParams;
-  const supabase = await createClient();
+  // Query independen jalan paralel (satu batch), bukan serial.
+  const [supabase, session] = await Promise.all([
+    createClient(),
+    getSessionProfile(),
+  ]);
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  const session = await getSessionProfile();
   const lockedStore = session?.lockedStore ?? null;
   const lockedAM = session?.lockedAM ?? null;
-  const storeMap = await getStoreMap(supabase);
+  const [storeMap, latest, storeListRes] = await Promise.all([
+    getStoreMap(supabase),
+    supabase
+      .from("mv_dashboard_daily")
+      .select("date")
+      .order("date", { ascending: false })
+      .limit(1),
+    supabase
+      .from("mv_leaderboard_store")
+      .select("store_code,store_name")
+      .order("store_code"),
+  ]);
+  const latestData = latest.data;
+  const storeListRaw = storeListRes.data;
   const amList = distinctAMs(storeMap);
   const am = effectiveAM(lockedAM, params.am || "");
   const amStores = am
@@ -84,12 +100,8 @@ async function DailyContent({
   const store = storeInScope(lockedStore ?? (params.store || ""), am, amStores);
 
   // Bulan berjalan otomatis dari tanggal data terakhir (month-to-date).
-  const { data: latest } = await supabase
-    .from("mv_dashboard_daily")
-    .select("date")
-    .order("date", { ascending: false })
-    .limit(1);
-  const latestDate = (latest?.[0] as { date: string } | undefined)?.date ?? "";
+  const latestDate =
+    (latestData?.[0] as { date: string } | undefined)?.date ?? "";
   const month = latestDate.slice(0, 7);
   const daysInMonth = month
     ? new Date(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0).getDate()
@@ -166,10 +178,6 @@ async function DailyContent({
     }
   }
 
-  const { data: storeListRaw } = await supabase
-    .from("mv_leaderboard_store")
-    .select("store_code,store_name")
-    .order("store_code");
   const storeList = (
     (storeListRaw ?? []) as { store_code: string; store_name: string | null }[]
   ).filter((s) => !am || amStores.includes(s.store_code));

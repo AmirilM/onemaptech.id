@@ -21,12 +21,14 @@ export default function UsersPage() {
 }
 
 async function UsersContent() {
-  const supabase = await createClient();
+  const [supabase, session] = await Promise.all([
+    createClient(),
+    getSessionProfile(),
+  ]);
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  const session = await getSessionProfile();
   if (!session?.isAdmin) {
     return (
       <main className="mx-auto max-w-7xl p-4 md:p-8">
