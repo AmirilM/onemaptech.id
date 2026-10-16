@@ -40,11 +40,27 @@ export default function AppSidebar({ name, role, avatarUrl, isAdmin }: Props) {
 
   return (
     <aside
-      className={`sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-line bg-surface p-4 transition-[width] duration-200 md:flex ${
+      className={`sticky top-0 hidden h-dvh shrink-0 flex-col overflow-hidden border-r border-line p-4 transition-[width] duration-200 md:flex ${
         collapsed ? "w-[76px]" : "w-60"
       }`}
+      style={{
+        backgroundColor: "#F7F6FD",
+        backgroundImage:
+          "radial-gradient(300px 200px at -20% -5%, rgba(167,139,250,0.20), transparent 60%), radial-gradient(420px 320px at 115% 108%, rgba(124,58,237,0.14), transparent 62%), radial-gradient(circle, rgba(124,58,237,0.14) 1.2px, transparent 1.3px)",
+        backgroundSize: "auto, auto, 22px 22px",
+        backgroundPosition: "0 0, 0 0, -120px 42%",
+        backgroundRepeat: "no-repeat, no-repeat, no-repeat",
+      }}
     >
-      <div className={`flex items-center py-3 ${collapsed ? "flex-col gap-2 px-0" : "justify-between px-2"}`}>
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-16 -right-20 h-64 w-64 rotate-45 rounded-[36px] bg-violet-300/20"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-10 -left-24 h-56 w-56 rotate-45 rounded-[36px] bg-violet-200/25"
+      />
+      <div className={`relative flex items-center py-3 ${collapsed ? "flex-col gap-2 px-0" : "justify-between px-2"}`}>
         {!collapsed && (
           <div className="flex items-center gap-2.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -85,11 +101,11 @@ export default function AppSidebar({ name, role, avatarUrl, isAdmin }: Props) {
           )}
         </button>
       </div>
-      <div className="mt-2 flex-1">
+      <div className="relative mt-2 flex-1">
         <SidebarNav isAdmin={isAdmin} collapsed={collapsed} />
       </div>
       {collapsed ? (
-        <div className="flex flex-col items-center gap-2">
+        <div className="relative flex flex-col items-center gap-2">
           {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -109,7 +125,7 @@ export default function AppSidebar({ name, role, avatarUrl, isAdmin }: Props) {
           <LogoutButton iconOnly />
         </div>
       ) : (
-        <div className="flex items-center gap-3 rounded-xl border border-line bg-canvas p-3">
+        <div className="relative flex items-center gap-3 rounded-xl border border-line bg-white/80 p-3 backdrop-blur">
           {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img

@@ -73,7 +73,13 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
           />
           <aside
             id="mobile-drawer"
-            className="absolute left-0 top-0 flex h-full max-h-dvh w-72 max-w-[85vw] flex-col border-r border-line bg-surface p-4 [padding-bottom:env(safe-area-inset-bottom)]"
+            className="absolute left-0 top-0 flex h-full max-h-dvh w-72 max-w-[85vw] flex-col overflow-hidden border-r border-line p-4 [padding-bottom:env(safe-area-inset-bottom)]"
+            style={{
+              backgroundColor: "#F7F6FD",
+              backgroundImage:
+                "radial-gradient(300px 200px at -20% -5%, rgba(167,139,250,0.20), transparent 60%), radial-gradient(420px 320px at 115% 108%, rgba(124,58,237,0.14), transparent 62%)",
+              backgroundRepeat: "no-repeat",
+            }}
           >
             <div className="flex items-center justify-between px-2 py-3">
               <div className="flex items-center gap-2">
@@ -100,10 +106,10 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
                 <X size={20} aria-hidden />
               </button>
             </div>
-            <div className="mt-2 flex-1 overflow-y-auto" onClick={() => setOpen(false)}>
+            <div className="relative mt-2 flex-1 overflow-y-auto" onClick={() => setOpen(false)}>
               <SidebarNav isAdmin={isAdmin} />
             </div>
-            <div className="flex items-center gap-3 rounded-xl border border-line bg-canvas p-3">
+            <div className="relative flex items-center gap-3 rounded-xl border border-line bg-white/80 p-3 backdrop-blur">
               {avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
