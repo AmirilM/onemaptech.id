@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { pct, pctExact, rupiah, rupiahCompact } from "@/lib/format";
+import { pct, pctExact, rupiah } from "@/lib/format";
 import type {
   DailyRow,
   LeaderboardRow,
@@ -58,7 +58,7 @@ function kpiCard(
 ) {
   const ach = target ? Math.round((10000 * actual) / target) / 100 : null;
   const estimated =
-    elapsed > 0 ? Math.round(((actual / elapsed) * daysInMonth) * 100) / 100 : null;
+    elapsed > 0 ? Math.round((actual / elapsed) * daysInMonth) : null;
   const estPct =
     estimated !== null && target
       ? Math.round((10000 * estimated) / target) / 100
@@ -68,8 +68,20 @@ function kpiCard(
   const covered = variance !== null && variance >= 0;
   const reached = ach !== null && ach >= 100;
   const over = ach !== null && ach > 100;
+  const actualStr = rupiah(actual);
+  const targetStr = rupiah(target);
+  const varianceStr = rupiah(variance);
+  const estimatedStr = rupiah(estimated);
+  const actualSize =
+    actualStr.length <= 12
+      ? "text-[20px]"
+      : actualStr.length <= 16
+        ? "text-[15px]"
+        : "text-[13px]";
+  const detailSize = (s: string) =>
+    s.length > 14 ? "text-[11px]" : "text-xs";
   const row =
-    "flex items-center justify-between gap-3 text-xs leading-4 tabular-nums";
+    "flex min-w-0 items-center justify-between gap-2 overflow-hidden text-xs leading-4 tabular-nums";
   return (
     <div
       key={label}
@@ -90,19 +102,21 @@ function kpiCard(
       <p className="mt-2.5 text-[11px] font-semibold uppercase leading-4 tracking-[0.16em] text-muted">
         Actual Sales
       </p>
-      <p className="mt-1 text-[20px] font-bold leading-none tracking-tight text-ink tabular-nums" title={rupiah(actual)}>
-        {rupiahCompact(actual)}
-      </p>
+      <div className="mt-1 flex h-6 min-w-0 items-center overflow-hidden">
+        <p className={`whitespace-nowrap font-bold tracking-tight text-ink tabular-nums ${actualSize}`} title={actualStr}>
+          {actualStr}
+        </p>
+      </div>
       <dl className="mt-3 space-y-1.5">
         <div className={row}>
-          <dt className="text-muted">Target</dt>
-          <dd className="font-medium text-ink" title={rupiah(target)}>{rupiahCompact(target)}</dd>
+          <dt className="shrink-0 text-muted">Target</dt>
+          <dd className={`min-w-0 max-w-full overflow-hidden text-right font-medium whitespace-nowrap text-ink tabular-nums ${detailSize(targetStr)}`} title={targetStr}>{targetStr}</dd>
         </div>
         <div className={row}>
-          <dt className="text-muted">Variance</dt>
+          <dt className="shrink-0 text-muted">Variance</dt>
           <dd
-            title={rupiah(variance)}
-            className={`rounded-full px-2.5 py-[3px] text-xs leading-4 font-semibold tabular-nums ${
+            title={varianceStr}
+            className={`min-w-0 max-w-full overflow-hidden whitespace-nowrap text-right font-semibold tabular-nums rounded-full px-2 py-[2px] ${detailSize(varianceStr)} ${
               shortfall
                 ? "bg-danger/10 text-danger ring-1 ring-inset ring-danger/25"
                 : covered
@@ -110,13 +124,13 @@ function kpiCard(
                   : "bg-canvas text-ink"
             }`}
           >
-            {rupiahCompact(variance)}
+            {varianceStr}
           </dd>
         </div>
         <div className={row}>
-          <dt className="text-muted">Estimated</dt>
-          <dd className="font-medium text-ink" title={rupiah(estimated)}>
-            {rupiahCompact(estimated)}
+          <dt className="shrink-0 text-muted">Estimated</dt>
+          <dd className={`min-w-0 max-w-full overflow-hidden text-right font-medium whitespace-nowrap text-ink tabular-nums ${detailSize(estimatedStr)}`} title={estimatedStr}>
+            {estimatedStr}
           </dd>
         </div>
       </dl>
