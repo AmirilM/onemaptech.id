@@ -3,7 +3,7 @@
 Push data/clean/master-target.csv ke Supabase (public.master_target).
 
 Penggunaan (dari root proyek):
-    python3 scripts/push/push_target.py [--csv data/clean/master-target.csv] [--table master_target] [--batch 100] [--clean]
+    python3 scripts/push/push_target.py [--csv data/clean/master-target.csv] [--table master_target] [--batch 100] [--clean] [--skip-refresh]
 
 - Membaca koneksi dari .env di root proyek: SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY
   (fallback: SUPABASE_SECRET_KEY / SUPABASE_ANON_KEY).
@@ -12,6 +12,8 @@ Penggunaan (dari root proyek):
 - Upsert on_conflict=store_code (store_code PK) -> aman di-rerun.
 - Jika tabel belum ada, script berhenti dengan instruksi menjalankan sql/master-target.sql
   di Supabase SQL Editor terlebih dulu.
+- Setelah upsert sukses, materialized view dashboard di-refresh via RPC
+  refresh_dashboard_views() agar dashboard langsung sync (kecuali --skip-refresh).
 """
 
 import argparse
@@ -66,6 +68,20 @@ def convert_row(raw: dict) -> dict:
     return out
 
 
+def refresh_views(sb) -> None:
+    """Refresh materialized view dashboard via RPC (best-effort, tidak fatal)."""
+    import time
+
+    print("\nRefresh dashboard views...")
+    try:
+        start = time.time()
+        sb.rpc("refresh_dashboard_views", {}).execute()
+        print(f"  OK ({time.time() - start:.1f}s): mv_dashboard_store/daily/store_daily di-refresh.")
+    except Exception as e:
+        print(f"  WARNING refresh gagal (tidak fatal): {e}")
+        print("  Pastikan sql/dashboard-views.sql sudah dijalankan di SQL Editor.")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--csv", default=str(ROOT / "data" / "clean" / "master-target.csv"))
@@ -73,6 +89,8 @@ def main():
     ap.add_argument("--batch", type=int, default=100)
     ap.add_argument("--clean", action="store_true",
                     help="Hapus semua baris di tabel sebelum upsert.")
+    ap.add_argument("--skip-refresh", action="store_true",
+                    help="Lewati refresh dashboard views.")
     args = ap.parse_args()
 
     csv_path = Path(args.csv)
@@ -137,6 +155,12 @@ def main():
         print(f"Verifikasi count di Supabase: {res.count}")
     except Exception as e:
         print(f"Upsert ok, tapi verifikasi count gagal: {e}")
+
+    # 5. Refresh MV dashboard agar langsung sync (kecuali --skip-refresh)
+    if not args.skip_refresh:
+        refresh_views(sb)
+    else:
+        print("Refresh dashboard views dilewati (--skip-refresh).")
 
 
 if __name__ == "__main__":
