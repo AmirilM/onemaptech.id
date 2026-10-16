@@ -9,7 +9,7 @@ import {
   ChevronRight,
   Search,
 } from "lucide-react";
-import { pct, rupiah, rupiahCompact } from "@/lib/format";
+import { pct, pctExact, rupiah, rupiahCompact } from "@/lib/format";
 import type { LeaderboardRow } from "@/lib/types";
 
 type SortKey =
@@ -129,9 +129,9 @@ function achTitle(
 ): string {
   const s = achStatus(v, pace);
   if (s === "no-target") return "Tanpa target";
-  if (s === "exceed") return `Exceed target (${pct(v)})`;
-  if (s === "on-track") return `On-track vs pace ${pct(pace)} (${pct(v)})`;
-  return `Critical vs pace ${pct(pace)} (${pct(v)})`;
+  if (s === "exceed") return `Exceed target (${pctExact(v)})`;
+  if (s === "on-track") return `On-track vs pace ${pctExact(pace)} (${pctExact(v)})`;
+  return `Critical vs pace ${pctExact(pace)} (${pctExact(v)})`;
 }
 
 function ariaSort(
@@ -247,7 +247,7 @@ export default function LeaderboardTable({
       </div>
       <div
         className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted"
-        aria-label={`Level achievement: pace periode berjalan ${pct(pacePct)}`}
+        aria-label={`Level achievement: pace periode berjalan ${pctExact(pacePct)}`}
       >
         <span className="tabular-nums">Pace {pct(pacePct)}</span>
         <span className="inline-flex items-center gap-1.5">

@@ -8,7 +8,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { num, pct } from "@/lib/format";
+import { num, pct, pctExact } from "@/lib/format";
 
 export type BrandShareItem = {
   name: string;
@@ -49,7 +49,7 @@ function BrandShareTooltip({
     >
       <p style={{ color: "#17171C", margin: 0, fontWeight: 600 }}>{name}</p>
       <p style={{ color: "#4B5563", margin: "4px 0 0" }}>
-        {num(qty)} unit ({pct(share)})
+        {num(qty)} unit ({pctExact(share)})
       </p>
     </div>
   );
@@ -76,7 +76,7 @@ export default function BrandShareDonut({
     ? data
         .map(
           (d) =>
-            `${d.name} ${num(d.qty)} unit (${pct((100 * d.qty) / total)})`,
+            `${d.name} ${num(d.qty)} unit (${pctExact((100 * d.qty) / total)})`,
         )
         .join("; ")
     : "Tidak ada data.";

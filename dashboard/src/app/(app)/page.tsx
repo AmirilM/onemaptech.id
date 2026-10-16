@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { pct, rupiah, rupiahCompact } from "@/lib/format";
+import { pct, pctExact, rupiah, rupiahCompact } from "@/lib/format";
 import type {
   DailyRow,
   LeaderboardRow,
@@ -13,6 +13,7 @@ import FilterBar from "@/components/filter-bar";
 import LeaderboardTable from "@/components/leaderboard-table";
 import { distinctAMs, effectiveAM, getStoreMap, storeInScope } from "@/lib/scope";
 import GreetHead from "@/components/greet-head";
+import PaceCard from "@/components/pace-card";
 import QtyBarChart, { type QtyBarItem } from "@/components/qty-bar-chart";
 import BrandShareDonut, {
   type BrandShareItem,
@@ -139,7 +140,7 @@ function kpiCard(
       <div
         className="relative mt-2.5 h-1.5 overflow-hidden rounded-full bg-track"
         role="img"
-        aria-label={`${label}: actual ${rupiah(actual)}, target ${rupiah(target)}, achievement ${pct(ach)}, estimated ${pct(estPct)}`}
+        aria-label={`${label}: actual ${rupiah(actual)}, target ${rupiah(target)}, achievement ${pctExact(ach)}, estimated ${pctExact(estPct)}`}
       >
         <div
           className="absolute inset-y-0 left-0 rounded-full bg-primary opacity-25"
@@ -557,27 +558,37 @@ async function DashContent({
             />
           </div>
         </div>
-        {/* Graphic header — dekoratif in-flow, hanya desktop lebar */}
-        <div
-          aria-hidden
-          className="pointer-events-none hidden min-w-0 select-none xl:col-span-5 xl:flex xl:items-end xl:justify-end xl:gap-2 2xl:col-span-7"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/header-phone.webp"
-            alt=""
-            width={1200}
-            height={400}
-            className="w-[76%] object-contain"
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/header-tagline.webp"
-            alt=""
-            width={520}
-            height={316}
-            className="w-[22%] max-w-[220px] object-contain"
-          />
+        {/* Graphic header + pace card — dekoratif di bawah, fungsional di kanan atas, hanya desktop lebar */}
+        <div className="relative hidden min-w-0 select-none xl:col-span-5 xl:block 2xl:col-span-7">
+          <div className="pointer-events-none absolute right-0 top-0 z-10">
+            <PaceCard
+              elapsed={elapsed}
+              daysInMonth={daysInMonth}
+              pacePct={pacePct}
+              latestDate={latestDate}
+            />
+          </div>
+          <div
+            aria-hidden
+            className="pointer-events-none flex items-end justify-end gap-2 pt-16"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/header-phone.webp"
+              alt=""
+              width={1200}
+              height={400}
+              className="w-[76%] object-contain"
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/header-tagline.webp"
+              alt=""
+              width={520}
+              height={316}
+              className="w-[22%] max-w-[220px] object-contain"
+            />
+          </div>
         </div>
       </div>
 

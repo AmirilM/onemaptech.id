@@ -11,7 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { num, pct } from "@/lib/format";
+import { num, pctExact } from "@/lib/format";
 
 export type QtyBarItem = {
   label: string;
@@ -47,7 +47,7 @@ function QtyTooltip({
     >
       <p style={{ color: "#17171C", margin: 0, fontWeight: 600 }}>{label}</p>
       <p style={{ color: "#4B5563", margin: "4px 0 0" }}>
-        {num(qty)} unit ({pct(share)})
+        {num(qty)} unit ({pctExact(share)})
       </p>
     </div>
   );
@@ -63,7 +63,7 @@ export default function QtyBarChart({
   const total = data.reduce((a, d) => a + d.qty, 0);
   const shareOf = (qty: number) => (total ? (100 * qty) / total : null);
   const summary = data.length
-    ? data.map((d) => `${d.label} ${num(d.qty)} unit (${pct(shareOf(d.qty))})`).join("; ")
+    ? data.map((d) => `${d.label} ${num(d.qty)} unit (${pctExact(shareOf(d.qty))})`).join("; ")
     : "Tidak ada data.";
   return (
     <div className="h-64 w-full sm:h-72">
