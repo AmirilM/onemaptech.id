@@ -4,7 +4,13 @@ import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
-export default function LogoutButton({ iconOnly = false }: { iconOnly?: boolean }) {
+export default function LogoutButton({
+  iconOnly = false,
+  compact = false,
+}: {
+  iconOnly?: boolean;
+  compact?: boolean;
+}) {
   const router = useRouter();
   async function logout() {
     const supabase = createClient();
@@ -27,7 +33,11 @@ export default function LogoutButton({ iconOnly = false }: { iconOnly?: boolean 
   return (
     <button
       onClick={logout}
-      className="flex min-h-[44px] items-center rounded-lg border border-line px-3 py-1.5 text-xs text-muted hover:bg-violet-50 active:bg-violet-100"
+      className={`flex shrink-0 items-center border border-line text-muted hover:bg-violet-50 active:bg-violet-100 ${
+        compact
+          ? "min-h-0 rounded-md px-2 py-[3px] text-[11px] leading-none"
+          : "min-h-[44px] rounded-lg px-3 py-1.5 text-xs"
+      }`}
     >
       Log out
     </button>

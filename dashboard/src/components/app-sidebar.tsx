@@ -140,12 +140,19 @@ export default function AppSidebar({ name, role, avatarUrl, isAdmin }: Props) {
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <p className="break-words text-sm font-semibold leading-snug text-ink">
+            <p
+              className="truncate text-sm font-semibold leading-tight text-ink"
+              title={name}
+            >
               {name}
             </p>
-            <p className="truncate text-xs text-muted">{role}</p>
+            <div className="mt-0.5 flex items-center justify-between gap-2">
+              <p className="min-w-0 truncate text-xs leading-tight text-muted">
+                {role}
+              </p>
+              <LogoutButton compact />
+            </div>
           </div>
-          <LogoutButton />
         </div>
       )}
 
