@@ -75,6 +75,7 @@ function kpiCard(
   elapsed: number,
   daysInMonth: number,
   Icon: LucideIcon,
+  wide = false,
 ) {
   const ach = target ? Math.round((10000 * actual) / target) / 100 : null;
   const estimated =
@@ -102,12 +103,8 @@ function kpiCard(
     s.length > 14 ? "text-[11px]" : "text-xs";
   const row =
     "flex min-w-0 items-center justify-between gap-2 overflow-hidden text-xs leading-4 tabular-nums";
-  return (
-    <div
-      key={label}
-      className="relative flex flex-col overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-sm"
-    >
-      <div className="absolute inset-x-0 top-0 h-[3px] bg-primary opacity-100" />
+  const body = (
+    <>
       <div className="flex items-center justify-between gap-3">
         <p className="min-w-0 truncate text-xs font-medium leading-4 tracking-wide text-muted">
           {label}
@@ -199,6 +196,194 @@ function kpiCard(
           </p>
         )}
       </div>
+    </>
+  );
+
+  // Varian "wide" (Total Revenue): 3 zona info + ilustrasi 3D "Sales Growth"
+  // yang overlap keluar tepi kanan kartu, ditutup legend + progress bar penuh.
+  if (wide) {
+    return (
+      <div
+        key={label}
+        className="card-surface relative flex flex-col overflow-visible p-5 sm:col-span-2 lg:col-span-4 lg:p-6"
+      >
+        {/* Ilustrasi 3D "Sales Growth" — glass tile, overlap keluar tepi kartu */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-6 -right-4 z-10 hidden h-52 w-64 xl:block"
+        >
+          {/* Blobs kaca di belakang */}
+          <div className="absolute top-16 right-14 h-32 w-32 rotate-6 rounded-[42px] bg-gradient-to-br from-[#C4B5FD]/45 to-[#818CF8]/25 ring-1 ring-white/60 backdrop-blur-md" />
+          <div className="absolute top-2 right-2 h-14 w-14 -rotate-12 rounded-[18px] bg-gradient-to-br from-white/70 to-[#A5B4FC]/30 ring-1 ring-white/70 backdrop-blur-md" />
+          {/* Tile utama */}
+          <div className="animate-float absolute top-8 right-20 flex h-36 w-36 -rotate-12 items-center justify-center rounded-[34px] bg-gradient-to-br from-white/85 via-white/45 to-[#A5B4FC]/40 shadow-[0_28px_54px_-22px_rgba(79,70,229,0.55)] ring-1 ring-white/70 backdrop-blur-xl">
+            {/* Icon Sales Growth: bars naik + panah biru */}
+            <svg viewBox="0 0 96 96" className="h-20 w-20" fill="none" aria-hidden>
+              <defs>
+                <linearGradient id="sgBar" x1="0" y1="1" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#A5B4FC" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="#818CF8" stopOpacity="0.5" />
+                </linearGradient>
+                <linearGradient id="sgArrow" x1="0" y1="1" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#2563EB" />
+                  <stop offset="100%" stopColor="#38BDF8" />
+                </linearGradient>
+              </defs>
+              <rect x="12" y="58" width="14" height="24" rx="5" fill="url(#sgBar)" />
+              <rect x="34" y="48" width="14" height="34" rx="5" fill="url(#sgBar)" />
+              <rect x="56" y="36" width="14" height="46" rx="5" fill="url(#sgBar)" />
+              <path
+                d="M14 66 L57 23"
+                stroke="url(#sgArrow)"
+                strokeWidth="9"
+                strokeLinecap="round"
+              />
+              <path
+                d="M46 20 L60 20 L60 34"
+                stroke="url(#sgArrow)"
+                strokeWidth="9"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <p className="text-xs font-semibold uppercase leading-4 tracking-[0.16em] text-muted">
+          {label}
+        </p>
+
+        <div className="mt-4 grid items-center gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-11 xl:pr-[150px]">
+          {/* Zona A — actual sales */}
+          <div className="min-w-0 sm:col-span-1 lg:col-span-4">
+            <p className="text-[11px] font-semibold uppercase leading-4 tracking-[0.16em] text-muted">
+              Actual Sales
+            </p>
+            <p
+              className={`mt-1.5 whitespace-nowrap font-bold leading-[1.1] tracking-tight text-ink tabular-nums ${
+                actualStr.length <= 12
+                  ? "text-[32px] sm:text-[40px]"
+                  : actualStr.length <= 16
+                    ? "text-[26px] sm:text-[32px]"
+                    : "text-[22px] sm:text-[26px]"
+              }`}
+              title={actualStr}
+            >
+              {actualStr}
+            </p>
+            <p className="mt-1.5 text-xs text-muted">
+              Month to date · day {elapsed} of {daysInMonth}
+            </p>
+          </div>
+
+          {/* Zona B — target, variance, estimasi */}
+          <dl className="space-y-2.5 sm:col-span-1 lg:col-span-4 lg:border-l lg:border-line lg:pl-5">
+            <div className="flex min-w-0 items-center justify-between gap-3 text-sm leading-5 tabular-nums">
+              <dt className="shrink-0 text-muted">Target</dt>
+              <dd
+                className="min-w-0 truncate text-right font-semibold text-ink"
+                title={targetStr}
+              >
+                {targetStr}
+              </dd>
+            </div>
+            <div className="flex min-w-0 items-center justify-between gap-3 text-sm leading-5 tabular-nums">
+              <dt className="shrink-0 text-muted">Variance</dt>
+              <dd
+                title={varianceStr}
+                className={`min-w-0 truncate rounded-full px-2.5 py-[3px] text-right font-semibold ${
+                  shortfall
+                    ? "bg-danger/10 text-danger ring-1 ring-inset ring-danger/25"
+                    : covered
+                      ? "bg-accent/10 text-accent ring-1 ring-inset ring-accent/25"
+                      : "bg-canvas text-ink"
+                }`}
+              >
+                {varianceStr}
+              </dd>
+            </div>
+            <div className="flex min-w-0 items-center justify-between gap-3 text-sm leading-5 tabular-nums">
+              <dt className="shrink-0 text-muted">Estimated</dt>
+              <dd
+                className="min-w-0 truncate text-right font-semibold text-ink"
+                title={estimatedStr}
+              >
+                {estimatedStr}
+              </dd>
+            </div>
+          </dl>
+
+          {/* Zona C — achievement */}
+          <div className="sm:col-span-2 sm:border-t sm:border-line sm:pt-4 lg:col-span-3 lg:border-t-0 lg:border-l lg:border-line lg:pt-0 lg:pl-5">
+            <p className="text-[11px] font-semibold uppercase leading-4 tracking-[0.16em] text-muted">
+              Achievement
+            </p>
+            <p
+              className={`mt-1.5 text-[28px] font-bold leading-[1.1] tracking-tight tabular-nums sm:text-[34px] ${
+                reached ? "text-accent" : "text-ink"
+              }`}
+            >
+              {pct(ach)}
+            </p>
+            <p className="mt-1 text-xs text-muted">
+              Estimated{" "}
+              <span className="font-medium text-soft tabular-nums">
+                {pct(estPct)}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        {/* Footer — legend + progress full width */}
+        <div className="mt-5">
+          <div className="flex items-center justify-between gap-3 text-xs leading-4">
+            <div className="flex items-center gap-3 text-muted">
+              <span className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-primary" aria-hidden />
+                Actual
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span
+                  className="h-2.5 w-2.5 rounded-full bg-primary/25"
+                  aria-hidden
+                />
+                Estimated
+              </span>
+            </div>
+            {over && <span className="font-medium text-accent">Over target</span>}
+          </div>
+          <div
+            className="relative mt-2.5 h-2.5 overflow-hidden rounded-full bg-track"
+            role="img"
+            aria-label={`${label}: actual ${rupiah(actual)}, target ${rupiah(target)}, achievement ${pctExact(ach)}, estimated ${pctExact(estPct)}`}
+          >
+            <div
+              className="absolute inset-y-0 left-0 rounded-full bg-primary opacity-25"
+              style={{
+                width: `${Math.min(100, estPct ?? 0)}%`,
+              }}
+            />
+            <div
+              className="absolute inset-y-0 left-0 rounded-full bg-primary"
+              style={{
+                width: `${Math.min(100, ach ?? 0)}%`,
+              }}
+            />
+            {(ach ?? 0) < 100 && (
+              <div className="absolute inset-y-0 right-0 w-0.5 bg-primary/30" />
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      key={label}
+      className="card-surface relative flex flex-col overflow-hidden p-4"
+    >
+      {body}
     </div>
   );
 }
@@ -216,14 +401,15 @@ export default function DashboardPage({
 }
 
 function DashboardSkeleton() {
-  const pulse = "animate-pulse rounded-2xl border border-line bg-surface";
+  const pulse = "card-surface animate-pulse";
   return (
     <main aria-busy="true" aria-label="Loading dashboard" className="mx-auto max-w-[1600px] bg-transparent p-4 md:p-8">
       <div className="h-3 w-24 rounded bg-slate-200" />
       <div className="mt-2 h-8 w-64 max-w-full rounded bg-slate-200" />
       <div className={`mt-4 h-[76px] ${pulse}`} />
-      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {["Total", "Apple", "Android", "Accessories", "VAS"].map((l) => (
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className={`${pulse} h-[232px] sm:col-span-2 lg:col-span-4`} />
+        {["Apple", "Android", "Accessories", "VAS"].map((l) => (
           <div key={l} className={`${pulse} h-[232px]`} />
         ))}
       </div>
@@ -594,7 +780,7 @@ async function DashContent({
   const pacePct =
     daysInMonth > 0 ? Math.round((10000 * elapsed) / daysInMonth) / 100 : 0;
 
-  const card = "rounded-2xl border border-line bg-surface p-4 shadow-sm md:p-5";
+  const card = "card-surface p-4 md:p-5";
 
   const scopeLabel = store ? `Store ${store}` : am ? `Area ${am}` : "All stores";
 
@@ -680,8 +866,8 @@ async function DashContent({
         <p className="mb-3 text-xs text-muted">
           Current-period revenue · vs target
         </p>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 items-stretch">
-          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, elapsed, daysInMonth, Wallet)}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, elapsed, daysInMonth, Wallet, true)}
           {kpiCard("Apple Revenue", kpi.revenue_apple, kpi.apple_target, elapsed, daysInMonth, Apple)}
           {kpiCard("Android Revenue", kpi.revenue_android, kpi.android_target, elapsed, daysInMonth, Smartphone)}
           {kpiCard("Accessories Revenue", kpi.revenue_accessories, kpi.accessories_target, elapsed, daysInMonth, Headphones)}
@@ -690,7 +876,7 @@ async function DashContent({
       </section>
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
-        <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl border border-line bg-surface lg:col-span-3" />}>
+        <Suspense fallback={<div className="card-surface h-64 animate-pulse lg:col-span-3" />}>
         <section className={`${card} lg:col-span-3`} aria-label="Brand share by qty">
           <h2 className="text-sm font-semibold text-ink">Brand Share</h2>
           <p className="mb-3 text-xs text-muted">
@@ -716,7 +902,7 @@ async function DashContent({
         </section>
         </Suspense>
 
-        <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl border border-line bg-surface lg:col-span-4" />}>
+        <Suspense fallback={<div className="card-surface h-64 animate-pulse lg:col-span-4" />}>
         <section className={`${card} lg:col-span-4`} aria-label={`Apple qty total ${appleTotalQty} units`}>
           <div className="mb-3 flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -748,7 +934,7 @@ async function DashContent({
         </section>
         </Suspense>
 
-        <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl border border-line bg-surface lg:col-span-5" />}>
+        <Suspense fallback={<div className="card-surface h-64 animate-pulse lg:col-span-5" />}>
         <section className={`${card} lg:col-span-5`} aria-label={`Android qty total ${androidTotalQty} units`}>
           <div className="mb-3 flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -781,7 +967,7 @@ async function DashContent({
         </Suspense>
       </div>
 
-      <Suspense fallback={<div className="mt-4 h-64 animate-pulse rounded-2xl border border-line bg-surface" />}>
+      <Suspense fallback={<div className="card-surface mt-4 h-64 animate-pulse" />}>
       <section className={`${card} mt-4`}>
         <h2 className="text-sm font-semibold text-ink">Leaderboard Store</h2>
         <p className="mb-2 text-xs text-muted">

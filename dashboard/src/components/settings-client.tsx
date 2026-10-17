@@ -108,7 +108,7 @@ export default function SettingsClient(p: Props) {
 
   const input =
     "min-h-[44px] w-full rounded-lg border border-line bg-canvas px-3 py-2 text-base text-ink outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/30 md:text-sm";
-  const card = "rounded-2xl border border-line bg-surface p-5 shadow-sm";
+  const card = "card-surface p-5";
 
   return (
     <div className="mt-5 flex max-w-2xl flex-col gap-4">

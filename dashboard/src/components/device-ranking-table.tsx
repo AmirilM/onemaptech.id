@@ -232,7 +232,7 @@ export default function DeviceRankingTable({
         )}
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="mt-3 overflow-x-auto rounded-xl border border-line">
         <table className="w-full min-w-[880px] border-collapse">
           <caption className="sr-only">
             Device product ranking per sublob, by {metric === "qty" ? "quantity" : "revenue"}

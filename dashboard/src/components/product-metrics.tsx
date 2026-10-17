@@ -14,8 +14,7 @@ function MetricCard({
   icon: LucideIcon;
 }) {
   return (
-    <div className="relative flex flex-col overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-sm">
-      <div className="absolute inset-x-0 top-0 h-[3px] bg-primary" />
+    <div className="card-surface relative flex flex-col overflow-hidden p-4">
       <div className="flex items-center justify-between gap-3">
         <p className="min-w-0 truncate text-xs font-medium leading-4 tracking-wide text-muted">
           {label}

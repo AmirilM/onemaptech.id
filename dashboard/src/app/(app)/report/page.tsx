@@ -130,8 +130,8 @@ async function ReportContent({
         />
       </div>
 
-      <section className="mt-4 rounded-2xl border border-line bg-surface p-4 shadow-sm md:p-5">
-        <div className="overflow-x-auto">
+      <section className="card-surface mt-4 p-4 md:p-5">
+        <div className="overflow-x-auto rounded-xl border border-line">
           <table className="w-full min-w-[1200px] border-collapse">
             <thead>
               <tr className="border-b border-line">

@@ -29,6 +29,32 @@
   --color-gold-deep: #b45309;
 }
 
+/* Permukaan card seragam — mengikuti gaya Hero Card Total Revenue. */
+@utility card-surface {
+  border: 1px solid #ece9fb;
+  border-radius: 1.5rem;
+  background-image: linear-gradient(
+    to bottom right,
+    #ffffff,
+    #ffffff 55%,
+    #f7f6fe
+  );
+  box-shadow: 0 24px 60px -30px rgba(109, 40, 217, 0.35);
+}
+
+/* Varian overlay (dropdown filter, dialog) — bayangan lebih tegas. */
+@utility card-surface-strong {
+  border: 1px solid #ece9fb;
+  border-radius: 1.5rem;
+  background-image: linear-gradient(
+    to bottom right,
+    #ffffff,
+    #ffffff 55%,
+    #f7f6fe
+  );
+  box-shadow: 0 30px 70px -20px rgba(23, 23, 28, 0.28);
+}
+
 html {
   color-scheme: light;
   -webkit-text-size-adjust: 100%;
@@ -91,6 +117,22 @@ select option {
 .rdp-premium .rdp-button_previous .rdp-chevron,
 .rdp-premium .rdp-button_next .rdp-chevron {
   fill: var(--color-muted);
+}
+
+/* Hiasan 3D di card Total Revenue: mengapung lembut.
+   Memakai properti `translate` agar tidak menimpa `rotate` dari utility.
+   Aturan prefers-reduced-motion di bawah menonaktifkannya otomatis. */
+@keyframes float {
+  0%,
+  100% {
+    translate: 0 -5px;
+  }
+  50% {
+    translate: 0 5px;
+  }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }
 
 /* Visible focus for all interactive controls */

@@ -264,7 +264,7 @@ export default function LeaderboardTable({
         </span>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="mt-3 overflow-x-auto rounded-xl border border-line">
         <table className="w-full min-w-[1020px] border-collapse">
           <caption className="sr-only">
             Store ranking by Total Sales vs Total Target achievement,

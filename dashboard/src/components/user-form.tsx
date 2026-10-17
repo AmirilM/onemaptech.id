@@ -83,7 +83,7 @@ export default function UserForm({
     <div className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-black/40 p-4 [padding-bottom:env(safe-area-inset-bottom)]">
       <form
         onSubmit={submit}
-        className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-line bg-surface p-6 shadow-xl"
+        className="card-surface-strong max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto p-6"
       >
         <p className="text-[11px] font-semibold tracking-[0.2em] text-primary">
           USER MANAGEMENT

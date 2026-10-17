@@ -219,7 +219,7 @@ export default function FilterBar({
       <span role="status" className="sr-only">
         {isPending ? "Loading data…" : ""}
       </span>
-      <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-line bg-surface p-4 shadow-sm xl:flex-nowrap">
+      <div className="card-surface flex flex-wrap items-end gap-3 p-4 xl:flex-nowrap">
       {(areaManagers.length > 0 || lockedAM) && (
         <label className="flex w-full min-w-0 flex-col gap-1 text-xs text-muted sm:flex-1">
           Area Manager
@@ -310,7 +310,7 @@ export default function FilterBar({
         </button>
 
         {open && (
-          <div className="absolute left-0 top-full z-50 mt-2 max-w-[calc(100vw-2rem)] overflow-x-auto rounded-2xl border border-line bg-surface p-3 shadow-xl">
+          <div className="card-surface-strong absolute top-full left-0 z-50 mt-2 max-w-[calc(100vw-2rem)] overflow-x-auto p-3">
             <DayPicker
               mode="range"
               locale={id}

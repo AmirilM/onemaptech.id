@@ -11,7 +11,7 @@ import {
   type DeviceProductRow,
 } from "@/lib/product-analytics";
 
-const CARD = "rounded-2xl border border-line bg-surface p-4 shadow-sm md:p-5";
+const CARD = "card-surface p-4 md:p-5";
 
 export default function ProductAnalyticsView({
   rows,

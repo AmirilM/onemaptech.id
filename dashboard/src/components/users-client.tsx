@@ -251,7 +251,7 @@ export default function UsersClient({
 
       {/* Stat cards */}
       <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="flex items-center gap-4 rounded-2xl border border-line bg-surface p-5 shadow-sm">
+        <div className="card-surface flex items-center gap-4 p-5">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-primary">
             <Users size={24} aria-hidden />
           </div>
@@ -261,7 +261,7 @@ export default function UsersClient({
             <p className="mt-0.5 text-xs text-muted">registered in profiles</p>
           </div>
         </div>
-        <div className="flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface p-5 shadow-sm">
+        <div className="card-surface flex items-center justify-between gap-4 p-5">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-primary">
               <Layers size={24} aria-hidden />
@@ -294,7 +294,7 @@ export default function UsersClient({
       </div>
 
       {/* Toolbar + table in a single card */}
-      <section className="mt-4 rounded-2xl border border-line bg-surface p-4 shadow-sm md:p-5">
+      <section className="card-surface mt-4 p-4 md:p-5">
         <div className="flex flex-col gap-3 lg:flex-row">
           <div className="relative flex-1">
             <Search
@@ -454,7 +454,7 @@ export default function UsersClient({
                               onClick={() => setOpenId(null)}
                               className="fixed inset-0 z-10 cursor-default"
                             />
-                            <div className="absolute right-0 z-20 w-36 rounded-xl border border-line bg-surface p-1 text-left shadow-lg">
+                            <div className="card-surface-strong absolute right-0 z-20 w-36 rounded-xl p-1 text-left">
                               <button
                                 onClick={() => {
                                   setOpenId(null);
@@ -564,7 +564,7 @@ export default function UsersClient({
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-2xl border border-line bg-surface p-4 shadow-xl"
+            className="card-surface-strong w-full max-w-sm p-4"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">

@@ -185,7 +185,7 @@ async function DailyContent({
     (storeListRaw ?? []) as { store_code: string; store_name: string | null }[]
   ).filter((s) => !am || amStores.includes(s.store_code));
 
-  const card = "rounded-2xl border border-line bg-surface p-4 shadow-sm md:p-5";
+  const card = "card-surface p-4 md:p-5";
   const scopeKey = `${store}|${am}|${month}`;
 
   return (

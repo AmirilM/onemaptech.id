@@ -200,7 +200,7 @@ export default function DailySummaryTables({
   const android = usePaged(rows.length);
 
   const card =
-    "rounded-2xl border border-line bg-surface p-4 shadow-sm md:p-5";
+    "card-surface p-4 md:p-5";
 
   return (
     <div className="mt-4 space-y-4">
