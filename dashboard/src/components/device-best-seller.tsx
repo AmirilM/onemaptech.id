@@ -65,32 +65,33 @@ function BestSellerCard({
 }) {
   const share = Math.max(0, Math.min(100, item.share));
   return (
-    <div className="flex flex-col rounded-xl border border-line bg-canvas p-3">
-      {/* Level lini */}
-      <p className="min-w-0 truncate text-[11px] font-bold uppercase tracking-[0.12em] text-muted">
-        {item.group}
-      </p>
-      <div className="mt-2">
-        <FactRow
-          label={`Total ${kind}`}
-          value={valueLabel(item.groupValue, metric)}
-          title={valueTitle(item.groupValue, metric)}
-        />
+    <div className="flex flex-col rounded-xl border border-line bg-canvas p-2.5">
+      {/* Level lini: judul sejajar dengan nilai totalnya */}
+      <div className="flex items-center justify-between gap-3">
+        <p className="min-w-0 truncate text-[11px] font-bold uppercase tracking-[0.12em] text-muted">
+          {item.group}
+        </p>
+        <span
+          className="shrink-0 text-sm font-semibold tabular-nums text-ink"
+          title={`Total ${kind}: ${valueTitle(item.groupValue, metric)}`}
+        >
+          {valueLabel(item.groupValue, metric)}
+        </span>
       </div>
 
-      <div className="my-2.5 border-t border-line" aria-hidden />
+      <div className="my-2 border-t border-line" aria-hidden />
 
       {/* Level produk */}
       <p className="text-[11px] uppercase tracking-[0.12em] text-muted">
         Top Product
       </p>
       <p
-        className="mt-1 truncate text-sm font-semibold text-ink"
+        className="mt-0.5 truncate text-sm font-semibold text-ink"
         title={item.top.sublob}
       >
         {item.top.sublob}
       </p>
-      <div className="mt-2 space-y-1.5">
+      <div className="mt-1.5 space-y-1">
         <FactRow
           label={metric === "qty" ? "Qty" : "Revenue"}
           value={valueLabel(item.topValue, metric)}
@@ -105,7 +106,7 @@ function BestSellerCard({
         />
       </div>
       <div
-        className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-track"
+        className="mt-2 h-1.5 overflow-hidden rounded-full bg-track"
         aria-hidden
       >
         <div
