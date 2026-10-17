@@ -13,7 +13,7 @@ function Sparkle({ className = "" }: { className?: string }) {
 
 export default function BrandSignature() {
   return (
-    <div className="relative mt-5 flex select-none flex-col items-center">
+    <div className="relative mt-4 flex select-none flex-col items-center">
       <span
         aria-hidden
         className="flex w-full items-center justify-center gap-2"
@@ -22,10 +22,10 @@ export default function BrandSignature() {
         <Sparkle className="h-2.5 w-2.5 shrink-0 text-primary/60" />
         <span className="h-px max-w-16 flex-1 bg-gradient-to-l from-transparent to-primary/40" />
       </span>
-      <p className="mt-4 pl-[0.24em] text-[10px] font-semibold uppercase tracking-[0.24em] text-soft">
+      <p className="mt-2.5 pl-[0.24em] text-[8px] font-semibold uppercase tracking-[0.24em] text-soft">
         Powered by
       </p>
-      <p className="mt-1 pl-[0.18em] text-[10px] font-bold uppercase leading-none tracking-[0.18em] text-soft">
+      <p className="mt-1 pl-[0.18em] text-[8px] font-bold uppercase leading-none tracking-[0.18em] text-soft">
         Amiril<span className="text-primary-hover">&nbsp;M</span>
       </p>
     </div>
