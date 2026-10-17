@@ -16,14 +16,7 @@ import GreetHead from "@/components/greet-head";
 import PaceCard from "@/components/pace-card";
 import type { QtyBarItem } from "@/components/qty-bar-chart";
 import type { BrandShareItem } from "@/components/brand-share-donut";
-import {
-  Apple,
-  Headphones,
-  Smartphone,
-  Sparkles,
-  Wallet,
-  type LucideIcon,
-} from "lucide-react";
+import KpiIllustration, { type KpiVariant } from "@/components/kpi-illustration";
 
 // Recharts + heavy tables are code-split (dynamic in a Server Component:
 // without ssr:false so they can still SSR + stream per section).
@@ -74,7 +67,7 @@ function kpiCard(
   target: number | null,
   elapsed: number,
   daysInMonth: number,
-  Icon: LucideIcon,
+  variant: KpiVariant | null,
   wide = false,
 ) {
   const ach = target ? Math.round((10000 * actual) / target) / 100 : null;
@@ -95,36 +88,33 @@ function kpiCard(
   const estimatedStr = rupiah(estimated);
   const actualSize =
     actualStr.length <= 12
-      ? "text-[20px]"
+      ? "text-[22px]"
       : actualStr.length <= 16
-        ? "text-[15px]"
-        : "text-[13px]";
+        ? "text-[17px]"
+        : "text-[15px]";
+  // Ukuran detail memakai font-size eksplisit (bukan text-xs) supaya
+  // line-height `leading-[15px]` dari barisnya tetap berlaku, tidak ditimpa.
   const detailSize = (s: string) =>
-    s.length > 14 ? "text-[11px]" : "text-xs";
+    s.length > 14 ? "text-[11px]" : "text-[12px]";
   const row =
-    "flex min-w-0 items-center justify-between gap-2 overflow-hidden text-xs leading-4 tabular-nums";
+    "flex min-w-0 items-center justify-between gap-2 overflow-hidden text-xs leading-[15px] tabular-nums";
   const body = (
     <>
       <div className="flex items-center justify-between gap-3">
-        <p className="min-w-0 truncate text-xs font-medium leading-4 tracking-wide text-muted">
+        <p className="min-w-0 flex-1 truncate pr-20 text-xs font-medium leading-4 tracking-wide text-muted">
           {label}
         </p>
-        <span
-          className="shrink-0 rounded-[10px] bg-primary/10 p-1.5 text-primary ring-1 ring-inset ring-primary/25"
-          aria-hidden
-        >
-          <Icon size={14} strokeWidth={2} />
-        </span>
       </div>
+      {variant && <KpiIllustration variant={variant} />}
       <p className="mt-2.5 text-[11px] font-semibold uppercase leading-4 tracking-[0.16em] text-muted">
         Actual Sales
       </p>
-      <div className="mt-1 flex h-6 min-w-0 items-center overflow-hidden">
-        <p className={`whitespace-nowrap font-bold tracking-tight text-ink tabular-nums ${actualSize}`} title={actualStr}>
+      <div className="mt-2 flex h-7 min-w-0 items-center overflow-hidden">
+        <p className={`whitespace-nowrap font-bold leading-[1.15] tracking-tight text-ink tabular-nums ${actualSize}`} title={actualStr}>
           {actualStr}
         </p>
       </div>
-      <dl className="mt-3 space-y-1.5">
+      <dl className="mt-4 space-y-1">
         <div className={row}>
           <dt className="shrink-0 text-muted">Target</dt>
           <dd className={`min-w-0 max-w-full overflow-hidden text-right font-medium whitespace-nowrap text-ink tabular-nums ${detailSize(targetStr)}`} title={targetStr}>{targetStr}</dd>
@@ -133,7 +123,7 @@ function kpiCard(
           <dt className="shrink-0 text-muted">Variance</dt>
           <dd
             title={varianceStr}
-            className={`min-w-0 max-w-full overflow-hidden whitespace-nowrap text-right font-semibold tabular-nums rounded-full px-2 py-[2px] ${detailSize(varianceStr)} ${
+            className={`min-w-0 max-w-full overflow-hidden whitespace-nowrap text-right font-semibold tabular-nums rounded-full px-2 py-px ${detailSize(varianceStr)} ${
               shortfall
                 ? "bg-danger/10 text-danger ring-1 ring-inset ring-danger/25"
                 : covered
@@ -151,25 +141,25 @@ function kpiCard(
           </dd>
         </div>
       </dl>
-      <div className="my-3 border-t border-line" />
-      <div className="space-y-1">
+      <div className="my-2.5 border-t border-line" />
+      <div className="space-y-0.5">
         <div className={row}>
           <span className="text-muted">Achievement</span>
           <span
-            className={`text-[14px] leading-5 font-bold tabular-nums ${reached ? "text-accent" : "text-ink"}`}
+            className={`text-[14px] leading-[18px] font-bold tabular-nums ${reached ? "text-accent" : "text-ink"}`}
           >
             {pct(ach)}
           </span>
         </div>
         <div className={row}>
           <span className="text-muted">Estimated</span>
-          <span className="text-xs font-medium text-soft tabular-nums">
+          <span className="text-[12px] font-medium text-soft tabular-nums">
             {pct(estPct)}
           </span>
         </div>
       </div>
       <div
-        className="relative mt-2.5 h-1.5 overflow-hidden rounded-full bg-track"
+        className="relative mt-2 h-1.5 overflow-hidden rounded-full bg-track"
         role="img"
         aria-label={`${label}: actual ${rupiah(actual)}, target ${rupiah(target)}, achievement ${pctExact(ach)}, estimated ${pctExact(estPct)}`}
       >
@@ -381,7 +371,7 @@ function kpiCard(
   return (
     <div
       key={label}
-      className="card-surface relative flex flex-col overflow-hidden p-4"
+      className="card-surface group relative flex flex-col overflow-hidden px-4 pb-4 pt-5"
     >
       {body}
     </div>
@@ -787,7 +777,7 @@ async function DashContent({
   return (
     <main className="mx-auto max-w-[1600px] p-4 md:p-8">
       <div className="grid gap-4 xl:grid-cols-12">
-        <div className="min-w-0 xl:col-span-7 2xl:col-span-5">
+        <div className="min-w-0 xl:col-span-7">
           <header>
             <p className="text-xs font-semibold tracking-[0.2em] text-primary">
               DASHBOARD
@@ -815,39 +805,17 @@ async function DashContent({
             />
           </div>
         </div>
-        {/* Graphic header + pace card — decorative below, functional at top right, wide desktop only */}
-        <div className="relative hidden min-w-0 select-none xl:col-span-5 xl:block 2xl:col-span-7">
-          <div className="pointer-events-none absolute right-0 top-0 z-10">
+        {/* Pace card: rata atas (sejajar baris "DASHBOARD") + rata kanan kolom.
+            Tetap `hidden` di bawah xl, sama seperti blok gambar yang dulu
+            menempati kolom ini. Pembungkus `min-w-0` supaya kalau kolomnya
+            menyempit, teks kartunya terpotong rapi, bukan meluber. */}
+        <div className="hidden min-w-0 items-start justify-end xl:col-span-5 xl:flex">
+          <div className="min-w-0">
             <PaceCard
               elapsed={elapsed}
               daysInMonth={daysInMonth}
               pacePct={pacePct}
               latestDate={latestDate}
-            />
-          </div>
-          <div
-            aria-hidden
-            className="pointer-events-none flex items-end justify-end gap-2 pt-16"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/header-phone.webp"
-              alt=""
-              width={1200}
-              height={400}
-              loading="lazy"
-              decoding="async"
-              className="w-[76%] object-contain"
-            />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/header-tagline.webp"
-              alt=""
-              width={520}
-              height={316}
-              loading="lazy"
-              decoding="async"
-              className="w-[22%] max-w-[220px] object-contain"
             />
           </div>
         </div>
@@ -869,11 +837,11 @@ async function DashContent({
           Current-period revenue · vs target
         </p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, elapsed, daysInMonth, Wallet, true)}
-          {kpiCard("Apple Revenue", kpi.revenue_apple, kpi.apple_target, elapsed, daysInMonth, Apple)}
-          {kpiCard("Android Revenue", kpi.revenue_android, kpi.android_target, elapsed, daysInMonth, Smartphone)}
-          {kpiCard("Accessories Revenue", kpi.revenue_accessories, kpi.accessories_target, elapsed, daysInMonth, Headphones)}
-          {kpiCard("VAS Revenue", kpi.revenue_vas, kpi.vas_target, elapsed, daysInMonth, Sparkles)}
+          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, elapsed, daysInMonth, null, true)}
+          {kpiCard("Apple Revenue", kpi.revenue_apple, kpi.apple_target, elapsed, daysInMonth, "apple")}
+          {kpiCard("Android Revenue", kpi.revenue_android, kpi.android_target, elapsed, daysInMonth, "android")}
+          {kpiCard("Accessories Revenue", kpi.revenue_accessories, kpi.accessories_target, elapsed, daysInMonth, "accessories")}
+          {kpiCard("VAS Revenue", kpi.revenue_vas, kpi.vas_target, elapsed, daysInMonth, "vas")}
         </div>
       </section>
 

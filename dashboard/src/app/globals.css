@@ -149,6 +149,10 @@ input:focus-visible {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    /* Menolkan durasi saja tidak cukup: ilustrasi KPI memakai animation-delay
+       bertingkat (0/900/1800/2700ms), jadi tanpa ini kartu ke-2..4 baru muncul
+       setelah menunggu — persis gerakan yang ingin dihindari. */
+    animation-delay: 0s !important;
     transition-duration: 0.01ms !important;
   }
 }
