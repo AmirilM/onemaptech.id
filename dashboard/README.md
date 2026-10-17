@@ -30,6 +30,7 @@ python3 scripts/seed_auth.py
 1. `sql/dashboard-views.sql` — 5 materialized views + refresh functions
 2. `sql/dashboard-rls.sql` — GRANT + RLS for the `authenticated` role
 3. `sql/dashboard-v2.sql` — `avatar_url` column + `avatars` Storage bucket
+4. `sql/product-analytics.sql` — RPC `product_analytics_devices` for the Product Analytics page
 
 ## Deploy (Vercel)
 
@@ -42,6 +43,8 @@ the frontend.
 
 Sidebar: Dashboard (greeting + KPI + trend + leaderboard + top product),
 Daily Summary (trend + table for the 1st–end of month + growth vs yesterday),
-Product Analytics (category share + top 50), Report (preview + export the
+Product Analytics (device products only: sublob ranking by Qty/Revenue with
+share + cumulative, lob→sublob treemap, and product metrics; Accessories & VAS
+are out of scope), Report (preview + export the
 active filter to CSV/Excel), User Management (CRUD, Admin-only),
 Settings (profile + photo + password).

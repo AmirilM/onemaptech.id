@@ -2,12 +2,16 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth";
-import { num, pct, rupiah } from "@/lib/format";
-import type { TopProductRow } from "@/lib/types";
 import FilterBar from "@/components/filter-bar";
+import ProductAnalyticsView from "@/components/product-analytics";
 import { distinctAMs, effectiveAM, getStoreMap, storeInScope } from "@/lib/scope";
+import {
+  DEVICE_METRIC_DEFAULT,
+  normalizeDeviceRows,
+  type DeviceMetric,
+} from "@/lib/product-analytics";
 
-type Params = { store?: string; am?: string };
+type Params = { store?: string; am?: string; metric?: string };
 
 export default function ProductsPage({
   searchParams,
@@ -41,25 +45,22 @@ async function ProductsContent({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+
   const lockedStore = session?.lockedStore ?? null;
   const lockedAM = session?.lockedAM ?? null;
-  const am = effectiveAM(lockedAM, params.am || "");
-  // storeMap + storeList + global top are independent → one batch.
-  const [storeMap, storeListRes, topRes] = await Promise.all([
+
+  // storeMap + store list are independent → one batch.
+  const [storeMap, storeListRes] = await Promise.all([
     getStoreMap(supabase),
     supabase
       .from("mv_leaderboard_store")
       .select("store_code,store_name")
       .order("store_code"),
-    supabase
-      .from("mv_top_product")
-      .select("*")
-      .order("rank_revenue")
-      .limit(50),
   ]);
   const storeListRaw = storeListRes.data;
-  const topRaw = topRes.data;
+
   const amList = distinctAMs(storeMap);
+  const am = effectiveAM(lockedAM, params.am || "");
   const amStores = am
     ? storeMap.filter((r) => r.area_manager === am).map((r) => r.store_code)
     : [];
@@ -72,82 +73,22 @@ async function ProductsContent({
     (storeListRaw ?? []) as { store_code: string; store_name: string | null }[]
   ).filter((s) => !am || amStores.includes(s.store_code));
 
-  // Global top product (MV with no store dimension)
-  const top = (topRaw ?? []) as TopProductRow[];
+  const metric: DeviceMetric =
+    params.metric === "revenue" ? "revenue" : DEVICE_METRIC_DEFAULT;
 
-  // Category share from the daily aggregate (respects the store / area filter when present)
-  let cat: { label: string; revenue: number }[];
-  if (store) {
-    const { data } = await supabase
-      .from("mv_dashboard_store_daily")
-      .select("revenue_apple,revenue_android,revenue_accessories,revenue_vas")
-      .eq("store_code", store);
-    const rows = (data ?? []) as {
-      revenue_apple: number;
-      revenue_android: number;
-      revenue_accessories: number;
-      revenue_vas: number;
-    }[];
-    const s = (f: (r: (typeof rows)[number]) => number) =>
-      rows.reduce((a, r) => a + f(r), 0);
-    cat = [
-      { label: "Apple", revenue: s((r) => r.revenue_apple) },
-      { label: "Android", revenue: s((r) => r.revenue_android) },
-      { label: "Accessories", revenue: s((r) => r.revenue_accessories) },
-      { label: "VAS", revenue: s((r) => r.revenue_vas) },
-    ];
-  } else if (am && amStores.length) {
-    const { data } = await supabase
-      .from("mv_dashboard_store_daily")
-      .select("revenue_apple,revenue_android,revenue_accessories,revenue_vas")
-      .in("store_code", amStores);
-    const rows = (data ?? []) as {
-      revenue_apple: number;
-      revenue_android: number;
-      revenue_accessories: number;
-      revenue_vas: number;
-    }[];
-    const s = (f: (r: (typeof rows)[number]) => number) =>
-      rows.reduce((a, r) => a + f(r), 0);
-    cat = [
-      { label: "Apple", revenue: s((r) => r.revenue_apple) },
-      { label: "Android", revenue: s((r) => r.revenue_android) },
-      { label: "Accessories", revenue: s((r) => r.revenue_accessories) },
-      { label: "VAS", revenue: s((r) => r.revenue_vas) },
-    ];
-  } else if (amScopeBroken) {
-    cat = [
-      { label: "Apple", revenue: 0 },
-      { label: "Android", revenue: 0 },
-      { label: "Accessories", revenue: 0 },
-      { label: "VAS", revenue: 0 },
-    ];
-  } else {
-    const { data } = await supabase
-      .from("mv_dashboard_daily")
-      .select("revenue_apple,revenue_android,revenue_accessories,revenue_vas");
-    const rows = (data ?? []) as {
-      revenue_apple: number;
-      revenue_android: number;
-      revenue_accessories: number;
-      revenue_vas: number;
-    }[];
-    const s = (f: (r: (typeof rows)[number]) => number) =>
-      rows.reduce((a, r) => a + f(r), 0);
-    cat = [
-      { label: "Apple", revenue: s((r) => r.revenue_apple) },
-      { label: "Android", revenue: s((r) => r.revenue_android) },
-      { label: "Accessories", revenue: s((r) => r.revenue_accessories) },
-      { label: "VAS", revenue: s((r) => r.revenue_vas) },
-    ];
-  }
-  const total = cat.reduce((a, c) => a + c.revenue, 0) || 1;
+  // Server-side aggregation via RPC (avoids the PostgREST row cap and keeps the
+  // payload to ~1 row per sublob). Scope args follow the strict store/AM rules.
+  const p_store = store ? store : amScopeBroken ? "__no_match__" : null;
+  const p_am = !store && am && amStores.length ? am : null;
+  const { data: rpcData, error: rpcError } = await supabase.rpc(
+    "product_analytics_devices",
+    { p_store, p_am },
+  );
+  const rows = rpcError ? [] : normalizeDeviceRows(rpcData as unknown[] | null);
 
-  const th =
-    "px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-muted";
-  const td = "px-3 py-2.5 text-sm tabular-nums text-soft";
-  const card = "rounded-2xl border border-line bg-surface p-4 shadow-sm md:p-5";
-  const bar = ["bg-primary", "bg-[#8B5CF6]", "bg-[#A78BFA]", "bg-accent"];
+  const exportName = `product-analytics${
+    store ? `-${store}` : am ? `-${am.replace(/\s+/g, "")}` : ""
+  }-${metric}`;
 
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-8">
@@ -158,7 +99,7 @@ async function ProductsContent({
         Product Analytics
       </h1>
       <p className="mt-1 text-xs text-muted">
-        {scopeLabel} · by sublob (excluding NULL/0)
+        {scopeLabel} · device products only (Apple + Android)
       </p>
 
       <div className="mt-4">
@@ -183,72 +124,25 @@ async function ProductsContent({
         </div>
       )}
 
-      <section className={`mt-4 ${card}`}>
-        <h2 className="text-sm font-semibold text-ink">Category Share</h2>
-        <div className="mt-3 flex flex-col gap-3">
-          {cat.map((c, i) => (
-            <div key={c.label}>
-              <div className="flex justify-between text-xs">
-                <span className="text-soft">{c.label}</span>
-                <span className="text-muted">
-                  {rupiah(c.revenue)} · {pct((100 * c.revenue) / total)}
-                </span>
-              </div>
-              <div className="mt-1 h-2 overflow-hidden rounded-full bg-track">
-                <div
-                  className={`h-full rounded-full ${bar[i % bar.length]}`}
-                  style={{ width: `${(100 * c.revenue) / total}%` }}
-                />
-              </div>
-            </div>
-          ))}
+      {rpcError && (
+        <div className="mt-4 rounded-2xl border border-warning/30 bg-warning/10 p-4 text-sm">
+          <p className="font-semibold text-warning">Product analytics unavailable</p>
+          <p className="mt-1 text-muted">
+            The <code>product_analytics_devices</code> function could not be read.
+            Ask an admin to run <code>sql/product-analytics.sql</code> in the SQL
+            Editor, then reload.
+          </p>
         </div>
-      </section>
+      )}
 
-      <section className={`mt-4 ${card}`}>
-        <h2 className="text-sm font-semibold text-ink">Top Product (Top 50)</h2>
-        <p className="mb-2 text-xs text-muted">
-          Global{(store || am) ? " — ignores store/area filter" : ""}
-        </p>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] border-collapse">
-            <thead>
-              <tr className="border-b border-line">
-                <th className={th}>#Rev</th>
-                <th className={th}>#Qty</th>
-                <th className={th}>Product</th>
-                <th className={`${th} text-right`}>Qty</th>
-                <th className={`${th} text-right`}>Revenue</th>
-                <th className={`${th} text-right`}>Trx</th>
-              </tr>
-            </thead>
-            <tbody>
-              {top.map((r) => (
-                <tr
-                  key={r.product}
-                  className="border-b border-line/60 last:border-0 hover:bg-violet-50"
-                >
-                  <td className={`${td} text-muted`}>{r.rank_revenue}</td>
-                  <td className={`${td} text-muted`}>{r.rank_qty}</td>
-                  <td className={`${td} max-w-[200px] break-words font-medium text-ink sm:max-w-none`}>{r.product}</td>
-                  <td className={`${td} text-right`}>{num(r.total_qty)}</td>
-                  <td className={`${td} text-right`}>{rupiah(r.revenue_total)}</td>
-                  <td className={`${td} text-right text-muted`}>
-                    {num(r.trx_count)}
-                  </td>
-                </tr>
-              ))}
-              {!top.length && (
-                <tr>
-                  <td colSpan={6} className="py-8 text-center text-sm text-muted">
-                    No data.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      {!amScopeBroken && !rpcError && (
+        <ProductAnalyticsView
+          rows={rows}
+          initialMetric={metric}
+          scopeLabel={scopeLabel}
+          exportName={exportName}
+        />
+      )}
     </main>
   );
 }
