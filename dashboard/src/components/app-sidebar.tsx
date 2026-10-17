@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { initials } from "@/lib/names";
+import BrandSignature from "@/components/brand-signature";
 import LogoutButton from "@/components/logout-button";
 import SidebarNav from "@/components/sidebar";
 
@@ -101,7 +102,7 @@ export default function AppSidebar({ name, role, avatarUrl, isAdmin }: Props) {
           )}
         </button>
       </div>
-      <div className="relative mt-2 flex-1">
+      <div className="relative mt-2 flex-1 overflow-y-auto">
         <SidebarNav isAdmin={isAdmin} collapsed={collapsed} />
       </div>
       {collapsed ? (
@@ -147,6 +148,9 @@ export default function AppSidebar({ name, role, avatarUrl, isAdmin }: Props) {
           <LogoutButton />
         </div>
       )}
+
+      {/* Brand signature */}
+      {!collapsed && <BrandSignature />}
     </aside>
   );
 }

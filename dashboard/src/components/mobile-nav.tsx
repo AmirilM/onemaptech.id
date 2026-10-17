@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { initials } from "@/lib/names";
+import BrandSignature from "@/components/brand-signature";
 import LogoutButton from "@/components/logout-button";
 import SidebarNav from "@/components/sidebar";
 
@@ -130,6 +131,8 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
               </div>
               <LogoutButton />
             </div>
+
+            <BrandSignature />
           </aside>
         </div>
       )}
