@@ -792,7 +792,9 @@ async function DashContent({
             <p className="text-xs font-semibold tracking-[0.2em] text-primary">
               DASHBOARD
             </p>
-            <GreetHead name={prof?.sales_name ?? userEmail ?? "?"} />
+            <GreetHead
+              name={prof?.sales_name?.trim() || userEmail?.trim() || "?"}
+            />
             <p className="mt-1 text-xs text-muted">
               {prof
                 ? `${prof.role}${lockedAM ? ` · ${lockedAM}` : prof.store_code ? ` · ${prof.store_code} — ${prof.store_name ?? ""}` : " · all stores"}`

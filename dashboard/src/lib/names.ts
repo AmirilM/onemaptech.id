@@ -10,10 +10,10 @@ export function greeting(
       hourCycle: "h23",
     }).format(date),
   );
-  if (h < 11) return "Good morning";
-  if (h < 15) return "Good afternoon";
-  if (h < 19) return "Good evening";
-  return "Good night";
+  if (h < 11) return "Good Morning";
+  if (h < 15) return "Good Afternoon";
+  if (h < 19) return "Good Evening";
+  return "Good Night";
 }
 
 export function initials(name: string): string {

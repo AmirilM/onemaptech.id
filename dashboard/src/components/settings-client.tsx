@@ -127,7 +127,9 @@ export default function SettingsClient(p: Props) {
             </div>
           )}
           <div className="min-w-0 flex-1 basis-40">
-            <p className="truncate font-semibold text-ink">{p.salesName}</p>
+            <p className="break-words font-semibold leading-snug text-ink">
+              {p.salesName}
+            </p>
             <p className="text-xs text-muted">
               {p.role}
               {p.storeCode ? ` · ${p.storeCode}` : ""}
