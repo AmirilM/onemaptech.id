@@ -131,7 +131,13 @@ function Row({
   );
 }
 
-export default function DailySummaryCards({ rows }: { rows: DailySummaryRow[] }) {
+export default function DailySummaryCards({
+  rows,
+  daysElapsed,
+}: {
+  rows: DailySummaryRow[];
+  daysElapsed: number;
+}) {
   const totalDays = rows.length;
   const activeRows = rows.filter((r) => r.revenue_total > 0);
   const activeDays = activeRows.length;
@@ -188,7 +194,9 @@ export default function DailySummaryCards({ rows }: { rows: DailySummaryRow[] })
   const avgGrowth = growthN ? growthSum / growthN : null;
 
   const aboveAvg = activeRows.filter((r) => r.revenue_total > avgPerActive).length;
-  const emptyDays = totalDays - activeDays;
+  // Count only the days that have elapsed (not future zero-filled days).
+  const safeElapsed = Math.min(daysElapsed, totalDays);
+  const emptyDays = Math.max(0, safeElapsed - activeDays);
 
   const deltaTone: "up" | "down" | null =
     deltaPct === null ? null : deltaPct >= 0 ? "up" : "down";

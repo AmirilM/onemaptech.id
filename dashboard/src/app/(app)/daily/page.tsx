@@ -103,6 +103,8 @@ async function DailyContent({
   // Current month derived automatically from the latest data date (month-to-date).
   const latestDate =
     (latestData?.[0] as { date: string } | undefined)?.date ?? "";
+  // Running days = the last day that has data (from the existing latestDate).
+  const daysElapsed = latestDate ? Number(latestDate.slice(8, 10)) : 0;
   const month = latestDate.slice(0, 7);
   const daysInMonth = month
     ? new Date(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0).getDate()
@@ -220,7 +222,9 @@ async function DailyContent({
         </div>
       )}
 
-      {!amScopeBroken && rows.length > 0 && <DailySummaryCards rows={rows} />}
+      {!amScopeBroken && rows.length > 0 && (
+        <DailySummaryCards rows={rows} daysElapsed={daysElapsed} />
+      )}
 
       <section className={`mt-4 ${card}`}>
         <h2 className="text-sm font-semibold text-ink">Daily Trend</h2>
