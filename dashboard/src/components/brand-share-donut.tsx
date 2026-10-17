@@ -76,10 +76,10 @@ export default function BrandShareDonut({
     ? data
         .map(
           (d) =>
-            `${d.name} ${num(d.qty)} unit (${pctExact((100 * d.qty) / total)})`,
+            `${d.name} ${num(d.qty)} units (${pctExact((100 * d.qty) / total)})`,
         )
         .join("; ")
-    : "Tidak ada data.";
+    : "No data.";
 
   return (
     <div className="flex h-40 w-full flex-col sm:h-44">
@@ -119,7 +119,7 @@ export default function BrandShareDonut({
             {num(total)}
           </p>
           <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted">
-            unit
+            units
           </p>
         </div>
       </div>
@@ -139,7 +139,7 @@ export default function BrandShareDonut({
                 <span className="truncate font-medium">{d.name}</span>
               </span>
               <span className="shrink-0 tabular-nums text-muted">
-                {num(d.qty)} unit ·{" "}
+                {num(d.qty)} units ·{" "}
                 <span className="font-semibold text-ink">
                   {pct(share)}
                 </span>

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient as createAnon } from "@/lib/supabase/server";
 import { createClient as createService } from "@supabase/supabase-js";
 
-// Service client (bypass RLS). HANYA di server, tidak pernah ke browser.
+// Service client (bypasses RLS). SERVER ONLY, never shipped to the browser.
 function service() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -29,7 +29,7 @@ export async function guard(
   if (!svc)
     return {
       ok: false,
-      response: NextResponse.json({ error: "Server belum dikonfigurasi." }, { status: 500 }),
+      response: NextResponse.json({ error: "Server is not configured." }, { status: 500 }),
     };
   const salesId = (user.user_metadata?.sales_id as string | undefined) ?? "";
   const { data: prof } = salesId
@@ -44,6 +44,6 @@ export async function guard(
     return { ok: true, service: svc, salesId, role };
   return {
     ok: false,
-    response: NextResponse.json({ error: "Forbidden (khusus Admin)." }, { status: 403 }),
+    response: NextResponse.json({ error: "Forbidden (admin only)." }, { status: 403 }),
   };
 }

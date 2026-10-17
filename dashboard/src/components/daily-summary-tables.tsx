@@ -25,19 +25,37 @@ export type DailySummaryRow = {
 
 const PAGE_SIZE = 10;
 
-const th =
-  "border-b border-line px-3 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-muted";
-const tdBase = "border-b border-line/60 px-3 py-2.5 text-sm tabular-nums";
+// --- Table design tokens (one source for all three tables) ------------------
+// Spacing rhythm: body rows are tight (py-2 ±37px), header & footer feel stronger.
+const CELL_X = "px-3.5";
+const ROW_Y = "py-2"; // body row height
+const HEAD_Y = "py-2.5"; // header & Grand Total footer
+
+// Header with a subtle background + bottom border to separate it clearly from the body.
+const th = `border-b border-line bg-canvas ${CELL_X} ${HEAD_Y} text-[11px] font-semibold uppercase tracking-[0.08em] text-muted`;
+const tdBase = `border-b border-line/60 ${CELL_X} ${ROW_Y} text-sm tabular-nums`;
 const td = `${tdBase} text-soft`;
-// Single source untuk lebar kolom Date = offset sticky kolom Day (desktop saja).
-// (Literal class dijaga agar terdeteksi Tailwind; jangan jadikan dinamis.)
-// Opsi B: tanpa freeze di mobile — sticky Date + Day hanya aktif di md+.
-const DATE_MIN_W = "min-w-[84px]";
-const DAY_STICKY_LEFT = "md:left-[84px]";
-const dateCell = `${tdBase} md:sticky md:left-0 md:bg-surface font-medium text-ink group-hover:bg-violet-50 ${DATE_MIN_W}`;
-const dateHead = `${th} md:sticky md:left-0 md:bg-surface ${DATE_MIN_W}`;
-const dayCell = `${tdBase} md:sticky md:border-r md:border-line md:bg-surface text-soft group-hover:bg-violet-50 ${DAY_STICKY_LEFT}`;
-const dayHead = `${th} md:sticky md:border-r md:border-line md:bg-surface ${DAY_STICKY_LEFT}`;
+
+// Key column block (Date + Day): fixed and identical widths across all three tables.
+// (Literal classes are kept so Tailwind detects them; do not make them dynamic.)
+// Sticky Date + Day only active at md+ (no freeze on mobile).
+const DATE_MIN_W = "min-w-[96px]";
+const DAY_MIN_W = "min-w-[120px]";
+const DAY_STICKY_LEFT = "md:left-[96px]";
+const dateCell = `${tdBase} ${DATE_MIN_W} md:sticky md:left-0 md:z-10 md:bg-surface font-semibold text-ink group-hover:bg-violet-50`;
+const dateHead = `${th} ${DATE_MIN_W} md:sticky md:left-0 md:z-20 text-left`;
+const dayCell = `${tdBase} ${DAY_MIN_W} border-r border-line md:sticky ${DAY_STICKY_LEFT} md:z-10 md:bg-surface text-muted group-hover:bg-violet-50`;
+const dayHead = `${th} ${DAY_MIN_W} border-r border-line md:sticky ${DAY_STICKY_LEFT} md:z-20 text-left`;
+
+// Metric cell & header: right-aligned numbers (revenue) / centered (qty).
+const thNum = `${th} text-right`;
+const thQty = `${th} text-center`;
+const tdNum = `${td} text-right`;
+const tdQty = `${td} text-center`;
+
+// Grand Total footer: bold weight + a stronger top background & border as a closing row.
+const footCell = `border-t-2 border-line bg-canvas ${CELL_X} ${HEAD_Y} text-sm font-bold tabular-nums text-ink`;
+const footLabel = `${footCell} text-center md:sticky md:left-0 md:z-10 md:border-r md:border-line`;
 
 function dayName(date: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
@@ -52,7 +70,7 @@ function qtyCellClass(v: number): string {
   return "text-faint";
 }
 
-// Kolom qty produk (11) untuk color-scale ala Excel (heatmap per kolom).
+// Product qty columns (11) for an Excel-style color scale (per-column heatmap).
 const QTY_KEYS = [
   "qty_mac",
   "qty_ipad",
@@ -67,8 +85,16 @@ const QTY_KEYS = [
   "qty_motorola",
 ] as const;
 
-// Background sel proporsional ke max global (0 = transparan).
-// Alpha tipis (maks ±0.22); yang ditonjolkan adalah teks.
+const REVENUE_KEYS = [
+  "revenue_total",
+  "revenue_apple",
+  "revenue_android",
+  "revenue_accessories",
+  "revenue_vas",
+] as const;
+
+// Cell background proportional to the global max (0 = transparent).
+// Thin alpha (max ±0.22); the text is what stands out.
 function heatBg(v: number, max: number): CSSProperties | undefined {
   if (v <= 0 || max <= 0) return undefined;
   const alpha = Math.round((0.04 + (0.18 * v) / max) * 100) / 100;
@@ -98,18 +124,18 @@ function Pagination({
   if (totalPages <= 1) return null;
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
   const btn =
-    "min-h-[36px] min-w-[36px] rounded-lg border border-line px-2 text-sm tabular-nums text-soft hover:bg-violet-50 active:bg-violet-100 disabled:opacity-40";
+    "min-h-[40px] min-w-[40px] rounded-lg border border-line px-2 text-sm tabular-nums text-soft hover:bg-violet-50 active:bg-violet-100 disabled:opacity-40";
   return (
     <nav
       aria-label={label}
-      className="mt-2 flex flex-wrap items-center justify-end gap-1.5 border-t border-line/60 pt-3"
+      className="mt-3 flex flex-wrap items-center justify-end gap-1.5 border-t border-line/60 pt-3"
     >
       <button
         type="button"
         className={btn}
         disabled={page <= 1}
         onClick={() => onPage(page - 1)}
-        aria-label="Halaman sebelumnya"
+        aria-label="Previous page"
       >
         ‹
       </button>
@@ -129,7 +155,7 @@ function Pagination({
         className={btn}
         disabled={page >= totalPages}
         onClick={() => onPage(page + 1)}
-        aria-label="Halaman berikutnya"
+        aria-label="Next page"
       >
         ›
       </button>
@@ -150,13 +176,25 @@ export default function DailySummaryTables({
 }: {
   rows: DailySummaryRow[];
 }) {
-  // Max global seluruh kolom qty sebulan penuh untuk heatmap skala global.
+  // Global max across all qty columns for the full month, for the global-scale heatmap.
   const globalMax = useMemo(() => {
     let mx = 0;
     for (const r of rows)
       for (const k of QTY_KEYS) if (r[k] > mx) mx = r[k];
     return mx;
   }, [rows]);
+
+  // Grand Total for the full month (not per page) for each table's footer.
+  const totals = useMemo(() => {
+    const keys = [...REVENUE_KEYS, ...QTY_KEYS];
+    const acc = Object.fromEntries(keys.map((k) => [k, 0])) as Record<
+      (typeof keys)[number],
+      number
+    >;
+    for (const r of rows) for (const k of keys) acc[k] += r[k] ?? 0;
+    return acc;
+  }, [rows]);
+
   const summary = usePaged(rows.length);
   const apple = usePaged(rows.length);
   const android = usePaged(rows.length);
@@ -170,25 +208,25 @@ export default function DailySummaryTables({
         <h2 className="text-sm font-semibold text-ink">
           Daily Sales Summary
         </h2>
-        <p className="mt-0.5 text-xs text-muted">
-          Tgl 1 – akhir bulan · semua hari tampil (0 bila tanpa transaksi)
+        <p className="mt-1 text-xs text-muted">
+          1st – end of month · all days shown (0 when no transactions)
         </p>
-        <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[1112px] table-fixed border-separate border-spacing-0">
+        <div className="mt-4 overflow-x-auto rounded-xl border border-line">
+          <table className="w-full min-w-[1000px] table-fixed border-separate border-spacing-0">
             <colgroup>
-              <col style={{ width: 84 }} />
-              <col style={{ width: 128 }} />
+              <col style={{ width: 96 }} />
+              <col style={{ width: 120 }} />
             </colgroup>
             <thead>
-              <tr className="border-b border-line">
+              <tr>
                 <th className={dateHead}>Date</th>
                 <th className={dayHead}>Day</th>
-                <th className={`${th} text-center`}>Total Revenue</th>
-                <th className={`${th} text-center`}>Apple</th>
-                <th className={`${th} text-center`}>Android</th>
-                <th className={`${th} text-center`}>Accessories</th>
-                <th className={`${th} text-center`}>VAS</th>
-                <th className={`${th} text-center`}>Total vs Yesterday</th>
+                <th className={thNum}>Total Revenue</th>
+                <th className={thNum}>Apple</th>
+                <th className={thNum}>Android</th>
+                <th className={thNum}>Accessories</th>
+                <th className={thNum}>VAS</th>
+                <th className={thNum}>Total vs Yesterday</th>
               </tr>
             </thead>
             <tbody>
@@ -209,25 +247,25 @@ export default function DailySummaryTables({
                         {formatDayMonth(r.date)}
                       </td>
                       <td className={dayCell}>{dayName(r.date)}</td>
-                      <td className={`${td} text-right`}>
+                      <td className={tdNum}>
                         {rupiah(r.revenue_total)}
                       </td>
-                      <td className={`${td} text-right`}>
+                      <td className={tdNum}>
                         {rupiah(r.revenue_apple)}
                       </td>
-                      <td className={`${td} text-right`}>
+                      <td className={tdNum}>
                         {rupiah(r.revenue_android)}
                       </td>
-                      <td className={`${td} text-right`}>
+                      <td className={tdNum}>
                         {rupiah(r.revenue_accessories)}
                       </td>
-                      <td className={`${td} text-right`}>
+                      <td className={tdNum}>
                         {rupiah(r.revenue_vas)}
                       </td>
                       <td
-                        // Manual (bukan reuse `td`): hindari konflik `text-soft`
-                        // vs warna growth — urutan cascade Tailwind tak dijamin.
-                        className={`border-b border-line/60 px-3 py-2.5 text-right text-sm font-semibold tabular-nums ${
+                        // Manual (not reusing `td`): avoid a `text-soft`
+                        // vs growth-color conflict — Tailwind cascade order is not guaranteed.
+                        className={`border-b border-line/60 ${CELL_X} ${ROW_Y} text-right text-sm font-semibold tabular-nums ${
                           g === null
                             ? "text-faint"
                             : g >= 0
@@ -246,13 +284,40 @@ export default function DailySummaryTables({
                 <tr>
                   <td
                     colSpan={8}
-                    className="py-8 text-center text-sm text-muted"
+                    className={`${CELL_X} py-8 text-center text-sm text-muted`}
                   >
-                    Tidak ada data.
+                    No data.
                   </td>
                 </tr>
               )}
             </tbody>
+            {rows.length > 0 && (
+              <tfoot>
+                <tr>
+                  <td className={footLabel} colSpan={2}>
+                    Grand Total
+                  </td>
+                  <td className={`${footCell} text-right`}>
+                    {rupiah(totals.revenue_total)}
+                  </td>
+                  <td className={`${footCell} text-right`}>
+                    {rupiah(totals.revenue_apple)}
+                  </td>
+                  <td className={`${footCell} text-right`}>
+                    {rupiah(totals.revenue_android)}
+                  </td>
+                  <td className={`${footCell} text-right`}>
+                    {rupiah(totals.revenue_accessories)}
+                  </td>
+                  <td className={`${footCell} text-right`}>
+                    {rupiah(totals.revenue_vas)}
+                  </td>
+                  <td className={`${footCell} text-right`}>
+                    <span className="text-faint">—</span>
+                  </td>
+                </tr>
+              </tfoot>
+            )}
           </table>
         </div>
         <Pagination
@@ -267,25 +332,25 @@ export default function DailySummaryTables({
         <h2 className="text-sm font-semibold text-ink">
           Apple Daily Product
         </h2>
-        <p className="mt-0.5 text-xs text-muted">
-          Qty per hari · Mac / iPad / iPhone / Watch / AirPods · warna
-          skala global, makin pekat makin tinggi
+        <p className="mt-1 text-xs text-muted">
+          Qty per day · Mac / iPad / iPhone / Watch / AirPods · global
+          color scale, the darker the higher
         </p>
-        <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[712px] table-fixed border-separate border-spacing-0">
+        <div className="mt-4 overflow-x-auto rounded-xl border border-line">
+          <table className="w-full min-w-[860px] table-fixed border-separate border-spacing-0">
             <colgroup>
-              <col style={{ width: 84 }} />
-              <col style={{ width: 128 }} />
+              <col style={{ width: 96 }} />
+              <col style={{ width: 120 }} />
             </colgroup>
             <thead>
-              <tr className="border-b border-line">
+              <tr>
                 <th className={dateHead}>Date</th>
                 <th className={dayHead}>Day</th>
-                <th className={`${th} text-center`}>Mac</th>
-                <th className={`${th} text-center`}>iPad</th>
-                <th className={`${th} text-center`}>iPhone</th>
-                <th className={`${th} text-center`}>Apple Watch</th>
-                <th className={`${th} text-center`}>AirPods</th>
+                <th className={thQty}>Mac</th>
+                <th className={thQty}>iPad</th>
+                <th className={thQty}>iPhone</th>
+                <th className={thQty}>Apple Watch</th>
+                <th className={thQty}>AirPods</th>
               </tr>
             </thead>
             <tbody>
@@ -301,13 +366,13 @@ export default function DailySummaryTables({
                     {formatDayMonth(r.date)}
                   </td>
                   <td className={dayCell}>{dayName(r.date)}</td>
-                  <td className={`${td} text-center`} style={heatBg(r.qty_mac, globalMax)}><span className={qtyCellClass(r.qty_mac)}>{num(r.qty_mac)}</span></td>
-                  <td className={`${td} text-center`} style={heatBg(r.qty_ipad, globalMax)}><span className={qtyCellClass(r.qty_ipad)}>{num(r.qty_ipad)}</span></td>
-                  <td className={`${td} text-center`} style={heatBg(r.qty_iphone, globalMax)}><span className={qtyCellClass(r.qty_iphone)}>{num(r.qty_iphone)}</span></td>
-                  <td className={`${td} text-center`} style={heatBg(r.qty_apple_watch, globalMax)}>
+                  <td className={tdQty} style={heatBg(r.qty_mac, globalMax)}><span className={qtyCellClass(r.qty_mac)}>{num(r.qty_mac)}</span></td>
+                  <td className={tdQty} style={heatBg(r.qty_ipad, globalMax)}><span className={qtyCellClass(r.qty_ipad)}>{num(r.qty_ipad)}</span></td>
+                  <td className={tdQty} style={heatBg(r.qty_iphone, globalMax)}><span className={qtyCellClass(r.qty_iphone)}>{num(r.qty_iphone)}</span></td>
+                  <td className={tdQty} style={heatBg(r.qty_apple_watch, globalMax)}>
                     <span className={qtyCellClass(r.qty_apple_watch)}>{num(r.qty_apple_watch)}</span>
                   </td>
-                  <td className={`${td} text-center`} style={heatBg(r.qty_airpods, globalMax)}>
+                  <td className={tdQty} style={heatBg(r.qty_airpods, globalMax)}>
                     <span className={qtyCellClass(r.qty_airpods)}>{num(r.qty_airpods)}</span>
                   </td>
                 </tr>
@@ -316,13 +381,37 @@ export default function DailySummaryTables({
                 <tr>
                   <td
                     colSpan={7}
-                    className="py-8 text-center text-sm text-muted"
+                    className={`${CELL_X} py-8 text-center text-sm text-muted`}
                   >
-                    Tidak ada data.
+                    No data.
                   </td>
                 </tr>
               )}
             </tbody>
+            {rows.length > 0 && (
+              <tfoot>
+                <tr>
+                  <td className={footLabel} colSpan={2}>
+                    Grand Total
+                  </td>
+                  <td className={`${footCell} text-center`}>
+                    {num(totals.qty_mac)}
+                  </td>
+                  <td className={`${footCell} text-center`}>
+                    {num(totals.qty_ipad)}
+                  </td>
+                  <td className={`${footCell} text-center`}>
+                    {num(totals.qty_iphone)}
+                  </td>
+                  <td className={`${footCell} text-center`}>
+                    {num(totals.qty_apple_watch)}
+                  </td>
+                  <td className={`${footCell} text-center`}>
+                    {num(totals.qty_airpods)}
+                  </td>
+                </tr>
+              </tfoot>
+            )}
           </table>
         </div>
         <Pagination
@@ -337,26 +426,26 @@ export default function DailySummaryTables({
         <h2 className="text-sm font-semibold text-ink">
           Android Daily Product
         </h2>
-        <p className="mt-0.5 text-xs text-muted">
-          Qty per hari · per brand Android · warna skala global, makin
-          pekat makin tinggi
+        <p className="mt-1 text-xs text-muted">
+          Qty per day · per Android brand · global color scale, the
+          darker the higher
         </p>
-        <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[812px] table-fixed border-separate border-spacing-0">
+        <div className="mt-4 overflow-x-auto rounded-xl border border-line">
+          <table className="w-full min-w-[1000px] table-fixed border-separate border-spacing-0">
             <colgroup>
-              <col style={{ width: 84 }} />
-              <col style={{ width: 128 }} />
+              <col style={{ width: 96 }} />
+              <col style={{ width: 120 }} />
             </colgroup>
             <thead>
-              <tr className="border-b border-line">
+              <tr>
                 <th className={dateHead}>Date</th>
                 <th className={dayHead}>Day</th>
-                <th className={`${th} text-center`}>Samsung</th>
-                <th className={`${th} text-center`}>Oppo</th>
-                <th className={`${th} text-center`}>Xiaomi</th>
-                <th className={`${th} text-center`}>Huawei</th>
-                <th className={`${th} text-center`}>Infinix</th>
-                <th className={`${th} text-center`}>Motorola</th>
+                <th className={thQty}>Samsung</th>
+                <th className={thQty}>Oppo</th>
+                <th className={thQty}>Xiaomi</th>
+                <th className={thQty}>Huawei</th>
+                <th className={thQty}>Infinix</th>
+                <th className={thQty}>Motorola</th>
               </tr>
             </thead>
             <tbody>
@@ -372,14 +461,14 @@ export default function DailySummaryTables({
                     {formatDayMonth(r.date)}
                   </td>
                   <td className={dayCell}>{dayName(r.date)}</td>
-                  <td className={`${td} text-center`} style={heatBg(r.qty_samsung, globalMax)}>
+                  <td className={tdQty} style={heatBg(r.qty_samsung, globalMax)}>
                     <span className={qtyCellClass(r.qty_samsung)}>{num(r.qty_samsung)}</span>
                   </td>
-                  <td className={`${td} text-center`} style={heatBg(r.qty_oppo, globalMax)}><span className={qtyCellClass(r.qty_oppo)}>{num(r.qty_oppo)}</span></td>
-                  <td className={`${td} text-center`} style={heatBg(r.qty_xiaomi, globalMax)}><span className={qtyCellClass(r.qty_xiaomi)}>{num(r.qty_xiaomi)}</span></td>
-                  <td className={`${td} text-center`} style={heatBg(r.qty_huawei, globalMax)}><span className={qtyCellClass(r.qty_huawei)}>{num(r.qty_huawei)}</span></td>
-                  <td className={`${td} text-center`} style={heatBg(r.qty_infinix, globalMax)}><span className={qtyCellClass(r.qty_infinix)}>{num(r.qty_infinix)}</span></td>
-                  <td className={`${td} text-center`} style={heatBg(r.qty_motorola, globalMax)}>
+                  <td className={tdQty} style={heatBg(r.qty_oppo, globalMax)}><span className={qtyCellClass(r.qty_oppo)}>{num(r.qty_oppo)}</span></td>
+                  <td className={tdQty} style={heatBg(r.qty_xiaomi, globalMax)}><span className={qtyCellClass(r.qty_xiaomi)}>{num(r.qty_xiaomi)}</span></td>
+                  <td className={tdQty} style={heatBg(r.qty_huawei, globalMax)}><span className={qtyCellClass(r.qty_huawei)}>{num(r.qty_huawei)}</span></td>
+                  <td className={tdQty} style={heatBg(r.qty_infinix, globalMax)}><span className={qtyCellClass(r.qty_infinix)}>{num(r.qty_infinix)}</span></td>
+                  <td className={tdQty} style={heatBg(r.qty_motorola, globalMax)}>
                     <span className={qtyCellClass(r.qty_motorola)}>{num(r.qty_motorola)}</span>
                   </td>
                 </tr>
@@ -388,13 +477,40 @@ export default function DailySummaryTables({
                 <tr>
                   <td
                     colSpan={8}
-                    className="py-8 text-center text-sm text-muted"
+                    className={`${CELL_X} py-8 text-center text-sm text-muted`}
                   >
-                    Tidak ada data.
+                    No data.
                   </td>
                 </tr>
               )}
             </tbody>
+            {rows.length > 0 && (
+              <tfoot>
+                <tr>
+                  <td className={footLabel} colSpan={2}>
+                    Grand Total
+                  </td>
+                  <td className={`${footCell} text-center`}>
+                    {num(totals.qty_samsung)}
+                  </td>
+                  <td className={`${footCell} text-center`}>
+                    {num(totals.qty_oppo)}
+                  </td>
+                  <td className={`${footCell} text-center`}>
+                    {num(totals.qty_xiaomi)}
+                  </td>
+                  <td className={`${footCell} text-center`}>
+                    {num(totals.qty_huawei)}
+                  </td>
+                  <td className={`${footCell} text-center`}>
+                    {num(totals.qty_infinix)}
+                  </td>
+                  <td className={`${footCell} text-center`}>
+                    {num(totals.qty_motorola)}
+                  </td>
+                </tr>
+              </tfoot>
+            )}
           </table>
         </div>
         <Pagination

@@ -128,7 +128,7 @@ function achTitle(
   pace: number,
 ): string {
   const s = achStatus(v, pace);
-  if (s === "no-target") return "Tanpa target";
+  if (s === "no-target") return "No target";
   if (s === "exceed") return `Exceed target (${pctExact(v)})`;
   if (s === "on-track") return `On-track vs pace ${pctExact(pace)} (${pctExact(v)})`;
   return `Critical vs pace ${pctExact(pace)} (${pctExact(v)})`;
@@ -213,7 +213,7 @@ export default function LeaderboardTable({
         <ArrowDown size={12} aria-hidden />
       )
     ) : null;
-  // Kolom identitas sticky: zebra ikut menempel via varian even:
+  // Sticky identity columns: the zebra stripe sticks along via the even variant:
   const stickyCell = "sticky bg-surface even:bg-canvas";
 
   const from = sorted.length === 0 ? 0 : start + 1;
@@ -235,19 +235,19 @@ export default function LeaderboardTable({
               setQuery(e.target.value);
               setPage(1);
             }}
-            placeholder="Cari kode / nama toko…"
-            aria-label="Cari kode atau nama toko"
+            placeholder="Search code / store name…"
+            aria-label="Search by code or store name"
             className="w-full rounded-xl border border-line bg-canvas py-2 pr-3 pl-9 text-sm text-ink placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/25 focus:outline-none"
           />
         </div>
         <p className="ml-auto text-xs text-muted tabular-nums" aria-live="polite">
-          {sorted.length} toko
-          {query.trim() ? ` · hasil cari "${query.trim()}"` : ""}
+          {sorted.length} stores
+          {query.trim() ? ` · results for "${query.trim()}"` : ""}
         </p>
       </div>
       <div
         className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted"
-        aria-label={`Level achievement: pace periode berjalan ${pctExact(pacePct)}`}
+        aria-label={`Achievement levels: current-period pace ${pctExact(pacePct)}`}
       >
         <span className="tabular-nums">Pace {pct(pacePct)}</span>
         <span className="inline-flex items-center gap-1.5">
@@ -267,8 +267,8 @@ export default function LeaderboardTable({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1020px] border-collapse">
           <caption className="sr-only">
-            Peringkat store berdasarkan achievement Total Sales vs Total Target,
-            dirinci Apple dan Android
+            Store ranking by Total Sales vs Total Target achievement,
+            broken down by Apple and Android
           </caption>
           <thead>
             <tr className="border-b border-line">
@@ -280,7 +280,7 @@ export default function LeaderboardTable({
                 <button
                   type="button"
                   onClick={() => toggleSort("rank")}
-                  aria-label="Urutkan berdasarkan Rank"
+                  aria-label="Sort by rank"
                   className={sortBtn}
                 >
                   Rank
@@ -295,10 +295,10 @@ export default function LeaderboardTable({
                 <button
                   type="button"
                   onClick={() => toggleSort("store_code")}
-                  aria-label="Urutkan berdasarkan Store code"
+                  aria-label="Sort by store code"
                   className={sortBtn}
                 >
-                  Kode
+                  Code
                   {sortIcon("store_code")}
                 </button>
               </th>
@@ -310,7 +310,7 @@ export default function LeaderboardTable({
                 <button
                   type="button"
                   onClick={() => toggleSort("store_name")}
-                  aria-label="Urutkan berdasarkan Store Name"
+                  aria-label="Sort by store name"
                   className={sortBtn}
                 >
                   Store Name
@@ -339,7 +339,7 @@ export default function LeaderboardTable({
                     <button
                       type="button"
                       onClick={() => toggleSort(c.key)}
-                      aria-label={`Urutkan berdasarkan ${c.label} ${g.label}`}
+                      aria-label={`Sort by ${g.label} ${c.label}`}
                       className={sortBtn}
                     >
                       {c.label}
@@ -366,7 +366,7 @@ export default function LeaderboardTable({
                 <td className={`${td} ${stickyCell} left-16 border-r border-line text-[13px]`}>
                   <Link
                     href={storeHref(r.store_code)}
-                    title={`Lihat store ${r.store_code}`}
+                    title={`View store ${r.store_code}`}
                     className="font-medium text-primary underline-offset-4 hover:underline"
                   >
                     {r.store_code}
@@ -426,8 +426,8 @@ export default function LeaderboardTable({
               <tr>
                 <td colSpan={12} className="py-8 text-center text-sm text-muted">
                   {query.trim()
-                    ? `Tidak ada toko cocok "${query.trim()}".`
-                    : "Tidak ada data."}
+                    ? `No stores match "${query.trim()}".`
+                    : "No data."}
                 </td>
               </tr>
             )}
@@ -437,14 +437,14 @@ export default function LeaderboardTable({
 
       <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted">
         <label className="inline-flex items-center gap-1.5">
-          Baris
+          Rows
           <select
             value={pageSize}
             onChange={(e) => {
               setPageSize(Number(e.target.value));
               setPage(1);
             }}
-            aria-label="Jumlah baris per halaman"
+            aria-label="Rows per page"
             className="rounded-lg border border-line bg-canvas px-2 py-1 text-xs text-ink focus:border-primary focus:outline-none"
           >
             {[10, 20, 50].map((n) => (
@@ -455,14 +455,14 @@ export default function LeaderboardTable({
           </select>
         </label>
         <p className="tabular-nums" aria-live="polite">
-          Menampilkan {from}–{to} dari {sorted.length}
+          Showing {from}–{to} of {sorted.length}
         </p>
         <div className="ml-auto inline-flex items-center gap-1">
           <button
             type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={safePage <= 1}
-            aria-label="Halaman sebelumnya"
+            aria-label="Previous page"
             className="rounded-lg border border-line p-1.5 disabled:opacity-40 enabled:hover:bg-violet-50"
           >
             <ChevronLeft size={14} aria-hidden />
@@ -474,7 +474,7 @@ export default function LeaderboardTable({
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={safePage >= totalPages}
-            aria-label="Halaman berikutnya"
+            aria-label="Next page"
             className="rounded-lg border border-line p-1.5 disabled:opacity-40 enabled:hover:bg-violet-50"
           >
             <ChevronRight size={14} aria-hidden />

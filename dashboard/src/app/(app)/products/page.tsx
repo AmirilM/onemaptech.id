@@ -18,7 +18,7 @@ export default function ProductsPage({
     <Suspense
       fallback={
         <main className="mx-auto max-w-7xl p-8 text-sm text-muted">
-          Memuat product analytics...
+          Loading product analytics...
         </main>
       }
     >
@@ -44,7 +44,7 @@ async function ProductsContent({
   const lockedStore = session?.lockedStore ?? null;
   const lockedAM = session?.lockedAM ?? null;
   const am = effectiveAM(lockedAM, params.am || "");
-  // storeMap + storeList + top global independen → satu batch.
+  // storeMap + storeList + global top are independent → one batch.
   const [storeMap, storeListRes, topRes] = await Promise.all([
     getStoreMap(supabase),
     supabase
@@ -65,17 +65,17 @@ async function ProductsContent({
     : [];
   const amScopeBroken = am !== "" && amStores.length === 0;
   const store = storeInScope(lockedStore ?? (params.store || ""), am, amStores);
-  const scopeLabel = store ? `Store ${store}` : am ? `Area ${am}` : "Semua store";
+  const scopeLabel = store ? `Store ${store}` : am ? `Area ${am}` : "All stores";
 
-  // Daftar store untuk filter (ketat: AM hanya lihat store miliknya)
+  // Store list for the filter (strict: an AM only sees their own stores)
   const storeList = (
     (storeListRaw ?? []) as { store_code: string; store_name: string | null }[]
   ).filter((s) => !am || amStores.includes(s.store_code));
 
-  // Top product global (MV tanpa dimensi store)
+  // Global top product (MV with no store dimension)
   const top = (topRaw ?? []) as TopProductRow[];
 
-  // Share kategori dari agregat harian (ikut filter store / area bila ada)
+  // Category share from the daily aggregate (respects the store / area filter when present)
   let cat: { label: string; revenue: number }[];
   if (store) {
     const { data } = await supabase
@@ -155,10 +155,10 @@ async function ProductsContent({
         PRODUCT ANALYTICS
       </p>
       <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink md:text-3xl">
-        Analitik Produk
+        Product Analytics
       </h1>
       <p className="mt-1 text-xs text-muted">
-        {scopeLabel} · by sublob (tanpa NULL/0)
+        {scopeLabel} · by sublob (excluding NULL/0)
       </p>
 
       <div className="mt-4">
@@ -175,16 +175,16 @@ async function ProductsContent({
 
       {amScopeBroken && (
         <div className="mt-4 rounded-2xl border border-warning/30 bg-warning/10 p-4 text-sm">
-          <p className="font-semibold text-warning">Data area tidak terbaca</p>
+          <p className="font-semibold text-warning">Unable to read area data</p>
           <p className="mt-1 text-muted">
-            Mapping store area ({am}) tidak dapat dimuat. Minta admin menjalankan{" "}
-            <code>sql/dashboard-rls.sql</code> terbaru di SQL Editor, lalu muat ulang.
+            Area-to-store mapping ({am}) could not be loaded. Ask an admin to run
+            the latest <code>sql/dashboard-rls.sql</code> in the SQL Editor, then reload.
           </p>
         </div>
       )}
 
       <section className={`mt-4 ${card}`}>
-        <h2 className="text-sm font-semibold text-ink">Share Kategori</h2>
+        <h2 className="text-sm font-semibold text-ink">Category Share</h2>
         <div className="mt-3 flex flex-col gap-3">
           {cat.map((c, i) => (
             <div key={c.label}>
@@ -208,7 +208,7 @@ async function ProductsContent({
       <section className={`mt-4 ${card}`}>
         <h2 className="text-sm font-semibold text-ink">Top Product (Top 50)</h2>
         <p className="mb-2 text-xs text-muted">
-          Global{(store || am) ? " — tidak ikut filter store/area" : ""}
+          Global{(store || am) ? " — ignores store/area filter" : ""}
         </p>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] border-collapse">
@@ -241,7 +241,7 @@ async function ProductsContent({
               {!top.length && (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-sm text-muted">
-                    Tidak ada data.
+                    No data.
                   </td>
                 </tr>
               )}

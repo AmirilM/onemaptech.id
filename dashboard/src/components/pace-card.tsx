@@ -24,7 +24,7 @@ export default function PaceCard({ elapsed, daysInMonth, pacePct, latestDate }: 
     <div
       className="flex items-center gap-3 rounded-2xl border border-white/60 bg-white/70 px-3 py-2 shadow-sm backdrop-blur"
       role="img"
-      aria-label={`Periode berjalan hari ke-${safeElapsed} dari ${safeDays}, pace ${pctExact(pacePct)}, sisa ${remaining} hari, data diperbarui ${latestDate}`}
+      aria-label={`Current period day ${safeElapsed} of ${safeDays}, pace ${pctExact(pacePct)}, ${remaining} days remaining, data updated ${latestDate}`}
     >
       <svg
         width={size}
@@ -54,10 +54,10 @@ export default function PaceCard({ elapsed, daysInMonth, pacePct, latestDate }: 
       </svg>
       <div className="min-w-0 leading-tight">
         <p className="truncate text-xs font-semibold text-ink tabular-nums">
-          Hari ke-{safeElapsed}/{safeDays} · Pace {pct(pacePct)}
+          Day {safeElapsed}/{safeDays} · Pace {pct(pacePct)}
         </p>
         <p className="mt-0.5 truncate text-xs text-muted tabular-nums">
-          Sisa {remaining} hari · data diperbarui {latestDate}
+          {remaining} days remaining · data updated {latestDate}
         </p>
       </div>
     </div>

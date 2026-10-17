@@ -11,7 +11,7 @@ export default function AppLayout({
 }) {
   return (
     <div className="relative flex min-h-dvh flex-col bg-canvas md:flex-row">
-      {/* Sentuhan canvas — lavender waves, di belakang konten */}
+      {/* Canvas touch — lavender waves, behind the content */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[280px] overflow-hidden md:h-[320px]"
@@ -26,7 +26,7 @@ export default function AppLayout({
       <Suspense
         fallback={
           <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 border-r border-line bg-surface p-4 text-sm text-muted md:block">
-            Memuat...
+            Loading...
           </aside>
         }
       >

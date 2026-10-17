@@ -1,15 +1,15 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { StoreMapRow } from "@/lib/types";
 
-// Scoping Area Manager (ketat): 1 AM = banyak store (master_stores).
-// - User role Area Manager terkunci ke sales_name-nya (= area_manager).
-// - Admin / Regional Head boleh pilih AM via ?am=, atau lihat semua.
-// - Supervisor tetap terkunci 1 store (lockedStore, di luar helper ini).
+// Area Manager scoping (strict): 1 AM = many stores (master_stores).
+// - A user with the Area Manager role is locked to their sales_name (= area_manager).
+// - Admin / Regional Head may pick an AM via ?am=, or view everything.
+// - A Supervisor stays locked to 1 store (lockedStore, outside this helper).
 
 export type AreaScope = {
-  /** AM efektif: lockedAM ?? paramAM ("" bila tidak ada filter AM). */
+  /** Effective AM: lockedAM ?? paramAM ("" when there is no AM filter). */
   am: string;
-  /** Daftar store_code milik AM efektif (kosong bila tanpa filter AM). */
+  /** List of store_codes for the effective AM (empty when there is no AM filter). */
   storeCodes: string[];
 };
 
@@ -50,7 +50,7 @@ export function distinctAMs(storeMap: StoreMapRow[]): string[] {
   return [...set].sort((a, b) => a.localeCompare(b));
 }
 
-/** Paksa store ke dalam scope AM (ketat): store di luar area → diabaikan. */
+/** Force the store into the AM scope (strict): a store outside the area → ignored. */
 export function storeInScope(
   store: string,
   am: string,

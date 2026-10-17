@@ -8,8 +8,8 @@ import { id } from "react-day-picker/locale/id";
 import { Map, RotateCcw, Store } from "lucide-react";
 import "react-day-picker/style.css";
 
-// DayPicker di-split ke chunk terpisah: hanya diunduh saat FilterBar di-render,
-// tidak membebani halaman yang dateMode="none" pada bundle awal.
+// DayPicker is split into a separate chunk: only downloaded when FilterBar renders,
+// so it does not weigh down dateMode="none" pages in the initial bundle.
 const DayPicker = dynamic(
   () => import("react-day-picker").then((m) => m.DayPicker),
   { ssr: false },
@@ -61,7 +61,7 @@ function rangeFromParams(from: string, to: string): DateRange | undefined {
 const monthShort = new Intl.DateTimeFormat("id-ID", { month: "short" });
 
 function rangeLabel(r: DateRange | undefined): string {
-  if (!r?.from) return "Semua tanggal";
+  if (!r?.from) return "All dates";
   const f = r.from;
   if (!r.to) return `${f.getDate()} ${monthShort.format(f)} ${f.getFullYear()} – …`;
   const t = r.to;
@@ -101,7 +101,7 @@ export default function FilterBar({
   );
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Sync saat back/forward navigation — render-time adjust (tanpa effect)
+  // Sync on back/forward navigation — render-time adjust (no effect)
   const [prev, setPrev] = useState({ s: currentStore, f: currentFrom, t: currentTo, a: lockedAM ?? currentAM });
   if (currentStore !== prev.s || (dateMode !== "none" && (currentFrom !== prev.f || currentTo !== prev.t)) || (lockedAM ?? currentAM) !== prev.a) {
     setPrev({ s: currentStore, f: currentFrom, t: currentTo, a: lockedAM ?? currentAM });
@@ -110,7 +110,7 @@ export default function FilterBar({
     if (dateMode !== "none") setRange(rangeFromParams(currentFrom, currentTo));
   }
 
-  // 2 bulan di layar >= md, 1 bulan di mobile
+  // 2 months on screens >= md, 1 month on mobile
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
     const sync = () => setMonths(mq.matches ? 2 : 1);
@@ -119,7 +119,7 @@ export default function FilterBar({
     return () => mq.removeEventListener("change", sync);
   }, []);
 
-  // Tutup popover saat klik di luar / Escape
+  // Close the popover on outside click / Escape
   useEffect(() => {
     if (!open) return;
     function onPointerDown(e: PointerEvent) {
@@ -166,7 +166,7 @@ export default function FilterBar({
   }
 
   function handleAM(v: string) {
-    // Ketat: ganti AM → reset store (store harus milik AM tersebut).
+    // Strict: changing the AM resets the store (the store must belong to that AM).
     setAm(v);
     setStore("");
     push("", range, v);
@@ -174,7 +174,7 @@ export default function FilterBar({
 
   function handleSelect(r: DateRange | undefined) {
     setRange(r);
-    // Auto-run hanya saat range lengkap; klik pertama (from saja) belum push
+    // Auto-run only when the range is complete; the first click (from only) does not push yet
     if (r?.from && r?.to) push(store, { from: r.from, to: r.to });
   }
 
@@ -217,7 +217,7 @@ export default function FilterBar({
         </div>
       )}
       <span role="status" className="sr-only">
-        {isPending ? "Memuat data…" : ""}
+        {isPending ? "Loading data…" : ""}
       </span>
       <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-line bg-surface p-4 shadow-sm xl:flex-nowrap">
       {(areaManagers.length > 0 || lockedAM) && (
@@ -235,7 +235,7 @@ export default function FilterBar({
               disabled={!!lockedAM || isPending}
               className={`${input} w-full disabled:opacity-60 pl-10`}
             >
-              <option value="">Semua area</option>
+              <option value="">All areas</option>
               {(lockedAM ? [lockedAM] : areaManagers).map((a) => (
                 <option key={a} value={a}>
                   {a}
@@ -259,7 +259,7 @@ export default function FilterBar({
             disabled={!!lockedStore || isPending}
             className={`${input} w-full disabled:opacity-60 pl-10`}
           >
-            <option value="">Semua store</option>
+            <option value="">All stores</option>
             {stores.map((s) => (
               <option key={s.store_code} value={s.store_code}>
                 {s.store_code} — {s.store_name ?? "-"}
@@ -271,9 +271,9 @@ export default function FilterBar({
 
       {dateMode !== "none" && (
       <div ref={panelRef} className="relative w-full sm:w-auto">
-        <span id="periode-label" className="mb-1 flex items-center gap-2 text-xs text-muted">
-          Periode
-          {isPending && <span className="text-primary">Memuat…</span>}
+        <span id="period-label" className="mb-1 flex items-center gap-2 text-xs text-muted">
+          Period
+          {isPending && <span className="text-primary">Loading…</span>}
         </span>
         <button
           type="button"
@@ -281,11 +281,11 @@ export default function FilterBar({
           disabled={isPending}
           aria-expanded={open}
           aria-haspopup="dialog"
-          aria-labelledby="periode-label periode-value"
+          aria-labelledby="period-label period-value"
           className={`${input} flex w-full items-center justify-between gap-3 sm:w-auto sm:min-w-64`}
         >
           <span
-            id="periode-value"
+            id="period-value"
             className={range?.from ? "text-ink" : "text-faint"}
           >
             {rangeLabel(range)}
@@ -324,7 +324,7 @@ export default function FilterBar({
             <div className="mt-2 flex items-center justify-between gap-2 border-t border-line pt-2">
               <span className="px-1 text-xs text-muted">
                 {range?.from && !range.to
-                  ? "Pilih tanggal kedua untuk rentang"
+                  ? "Select the end date for the range"
                   : rangeLabel(range)}
               </span>
               <span className="flex gap-2">
@@ -334,7 +334,7 @@ export default function FilterBar({
                     onClick={clearRange}
                     className="min-h-[36px] rounded-lg px-3 py-1 text-xs text-muted hover:bg-violet-50 active:bg-violet-100"
                   >
-                    Hapus
+                    Clear
                   </button>
                 )}
                 <button
@@ -342,7 +342,7 @@ export default function FilterBar({
                   onClick={() => setOpen(false)}
                   className="min-h-[36px] rounded-lg bg-primary px-3 py-1 text-xs font-semibold text-white hover:bg-primary-hover"
                 >
-                  Tutup
+                  Close
                 </button>
               </span>
             </div>
@@ -358,16 +358,16 @@ export default function FilterBar({
         className="flex min-h-[44px] shrink-0 items-center gap-2 rounded-lg border border-line px-4 py-2 text-sm text-soft hover:bg-violet-50 active:bg-violet-100 disabled:opacity-60"
       >
         <RotateCcw size={16} aria-hidden />
-        {isPending ? "Memuat…" : "Reset"}
+        {isPending ? "Loading…" : "Reset"}
       </button>
       {lockedStore && (
         <span className="w-full text-xs text-warning sm:w-auto">
-          Terkunci ke store {lockedStore} (role kamu).
+          Locked to store {lockedStore} (your role).
         </span>
       )}
       {lockedAM && !lockedStore && (
         <span className="w-full text-xs text-warning sm:w-auto">
-          Terkunci ke area {lockedAM} — hanya store milikmu yang tampil.
+          Locked to area {lockedAM} — only your stores are shown.
         </span>
       )}
       </div>

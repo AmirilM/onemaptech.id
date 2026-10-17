@@ -52,14 +52,14 @@ function UserAvatar({
       <button
         type="button"
         onClick={onView}
-        title="Lihat foto"
-        aria-label={`Lihat foto ${salesName}`}
+        title="View photo"
+        aria-label={`View photo of ${salesName}`}
         className="shrink-0 cursor-zoom-in rounded-full outline-none transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary/50"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={avatarUrl}
-          alt={`Foto ${salesName}`}
+          alt={`Photo of ${salesName}`}
           loading="lazy"
           onError={() => setBroken(true)}
           className="h-9 w-9 rounded-full object-cover"
@@ -92,9 +92,9 @@ function roleBadge(role: string): string {
 }
 
 function formatLogin(iso: string | null): { date: string; time: string } {
-  if (!iso) return { date: "-", time: "Belum pernah login" };
+  if (!iso) return { date: "-", time: "Never logged in" };
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return { date: "-", time: "Belum pernah login" };
+  if (Number.isNaN(d.getTime())) return { date: "-", time: "Never logged in" };
   const date = new Intl.DateTimeFormat("id-ID", {
     day: "numeric",
     month: "short",
@@ -188,12 +188,12 @@ export default function UsersClient({
   }
 
   async function handleDelete(salesId: string) {
-    if (!confirm(`Hapus user ${salesId}? (profiles + Auth)`)) return;
+    if (!confirm(`Delete user ${salesId}? (profiles + Auth)`)) return;
     setDeleting(salesId);
     try {
       const res = await fetch(`/api/users/${salesId}`, { method: "DELETE" });
       const j = await res.json();
-      if (!res.ok) throw new Error(j.error ?? "Gagal menghapus.");
+      if (!res.ok) throw new Error(j.error ?? "Failed to delete.");
       setOpenId(null);
       setSelected((prev) => {
         const next = new Set(prev);
@@ -202,13 +202,13 @@ export default function UsersClient({
       });
       router.refresh();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Gagal menghapus.");
+      alert(err instanceof Error ? err.message : "Failed to delete.");
     } finally {
       setDeleting(null);
     }
   }
 
-  // Mini bar untuk card Role Terdaftar (distribusi per role)
+  // Mini bar for the Registered Roles card (distribution per role)
   const roleCounts = useMemo(() => {
     const map = new Map<string, number>();
     for (const r of rows) map.set(r.role, (map.get(r.role) ?? 0) + 1);
@@ -228,24 +228,24 @@ export default function UsersClient({
 
   return (
     <>
-      {/* Header ala reference */}
+      {/* Reference-style header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-semibold tracking-[0.2em] text-primary">
             USER MANAGEMENT
           </p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink md:text-[32px] md:leading-tight">
-            Kelola User
+            Manage Users
           </h1>
           <p className="mt-1 text-xs text-muted">
-            {total} user · menulis ke profiles + Auth sekaligus
+            {total} users · writes to profiles + Auth at once
           </p>
         </div>
         <button
           onClick={() => setEditing(null)}
           className="flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover"
         >
-          <Plus size={16} aria-hidden /> Tambah User
+          <Plus size={16} aria-hidden /> Add User
         </button>
       </div>
 
@@ -256,9 +256,9 @@ export default function UsersClient({
             <Users size={24} aria-hidden />
           </div>
           <div>
-            <p className="text-[13px] text-muted">Total User</p>
+            <p className="text-[13px] text-muted">Total users</p>
             <p className="text-3xl font-bold text-ink">{total}</p>
-            <p className="mt-0.5 text-xs text-muted">terdaftar di profiles</p>
+            <p className="mt-0.5 text-xs text-muted">registered in profiles</p>
           </div>
         </div>
         <div className="flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface p-5 shadow-sm">
@@ -267,7 +267,7 @@ export default function UsersClient({
               <Layers size={24} aria-hidden />
             </div>
             <div>
-              <p className="text-[13px] text-muted">Role Terdaftar</p>
+              <p className="text-[13px] text-muted">Registered roles</p>
               <p className="text-3xl font-bold text-ink">{roles.length}</p>
               <p className="mt-0.5 text-xs text-muted">
                 {roleCounts
@@ -293,7 +293,7 @@ export default function UsersClient({
         </div>
       </div>
 
-      {/* Toolbar + tabel dalam satu card */}
+      {/* Toolbar + table in a single card */}
       <section className="mt-4 rounded-2xl border border-line bg-surface p-4 shadow-sm md:p-5">
         <div className="flex flex-col gap-3 lg:flex-row">
           <div className="relative flex-1">
@@ -308,7 +308,7 @@ export default function UsersClient({
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              placeholder="Cari nama atau Sales ID..."
+              placeholder="Search name or Sales ID..."
               className="min-h-[44px] w-full rounded-lg border border-line bg-surface pr-3 pl-10 text-sm text-ink outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/30"
             />
           </div>
@@ -319,10 +319,10 @@ export default function UsersClient({
                 setRoleFilter(e.target.value);
                 setPage(1);
               }}
-              aria-label="Filter role"
+              aria-label="Filter by role"
               className="min-h-[44px] w-full appearance-none rounded-lg border border-line bg-surface pr-9 pl-4 text-sm text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 lg:w-44"
             >
-              <option value="all">Semua Role</option>
+              <option value="all">All roles</option>
               {roles.map((r) => (
                 <option key={r} value={r}>
                   {r}
@@ -342,10 +342,10 @@ export default function UsersClient({
                 setStoreFilter(e.target.value);
                 setPage(1);
               }}
-              aria-label="Filter store"
+              aria-label="Filter by store"
               className="min-h-[44px] w-full appearance-none rounded-lg border border-line bg-surface pr-9 pl-4 text-sm text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 lg:w-44"
             >
-              <option value="all">Semua Store</option>
+              <option value="all">All stores</option>
               {stores.map((s) => (
                 <option key={s.code} value={s.code}>
                   {s.code}
@@ -367,7 +367,7 @@ export default function UsersClient({
                 <th className={`${th} w-10`}>
                   <input
                     type="checkbox"
-                    aria-label="Pilih semua"
+                    aria-label="Select all"
                     checked={allVisibleSelected}
                     onChange={toggleAllVisible}
                     className="h-4 w-4 accent-[#7c3aed]"
@@ -377,7 +377,7 @@ export default function UsersClient({
                 <th className={th}>Store</th>
                 <th className={th}>Role</th>
                 <th className={th}>Last Login</th>
-                <th className={`${th} text-center`}>Aksi</th>
+                <th className={`${th} text-center`}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -392,7 +392,7 @@ export default function UsersClient({
                     <td className="px-3 py-3">
                       <input
                         type="checkbox"
-                        aria-label={`Pilih ${r.sales_id}`}
+                        aria-label={`Select ${r.sales_id}`}
                         checked={isSel}
                         onChange={() => toggleOne(r.sales_id)}
                         className="h-4 w-4 accent-[#7c3aed]"
@@ -421,7 +421,7 @@ export default function UsersClient({
                     <td className="px-3 py-3">
                       <p className="text-sm text-ink">{r.store_code ?? "-"}</p>
                       <p className="max-w-48 truncate text-xs text-muted">
-                        {r.store_name ?? "Tidak ada store"}
+                        {r.store_name ?? "No store"}
                       </p>
                     </td>
                     <td className="px-3 py-3">
@@ -441,7 +441,7 @@ export default function UsersClient({
                           onClick={() =>
                             setOpenId(openId === r.sales_id ? null : r.sales_id)
                           }
-                          aria-label={`Aksi untuk ${r.sales_id}`}
+                          aria-label={`Actions for ${r.sales_id}`}
                           aria-expanded={openId === r.sales_id}
                           className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-soft hover:bg-violet-50 active:bg-violet-100"
                         >
@@ -450,7 +450,7 @@ export default function UsersClient({
                         {openId === r.sales_id && (
                           <>
                             <button
-                              aria-label="Tutup menu"
+                              aria-label="Close menu"
                               onClick={() => setOpenId(null)}
                               className="fixed inset-0 z-10 cursor-default"
                             />
@@ -469,7 +469,7 @@ export default function UsersClient({
                                 disabled={deleting === r.sales_id}
                                 className="flex min-h-[40px] w-full items-center rounded-lg px-3 text-sm text-danger hover:bg-danger/10 disabled:opacity-60"
                               >
-                                {deleting === r.sales_id ? "Menghapus..." : "Hapus"}
+                                {deleting === r.sales_id ? "Deleting..." : "Delete"}
                               </button>
                             </div>
                           </>
@@ -483,8 +483,8 @@ export default function UsersClient({
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-sm text-muted">
                     {rows.length
-                      ? "Tidak ada user yang cocok dengan filter."
-                      : "Belum ada user."}
+                      ? "No users match the filter."
+                      : "No users yet."}
                   </td>
                 </tr>
               )}
@@ -494,8 +494,8 @@ export default function UsersClient({
 
         <div className="mt-2 flex flex-col gap-3 border-t border-line pt-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-muted">
-            Menampilkan {filtered.length ? `${start + 1}–${Math.min(start + perPage, filtered.length)}` : "0"} dari{" "}
-            {filtered.length} user
+            Showing {filtered.length ? `${start + 1}–${Math.min(start + perPage, filtered.length)}` : "0"} of{" "}
+            {filtered.length} users
           </p>
           <div className="flex items-center gap-2">
             <div className="relative">
@@ -505,12 +505,12 @@ export default function UsersClient({
                   setPerPage(Number(e.target.value));
                   setPage(1);
                 }}
-                aria-label="Baris per halaman"
+                aria-label="Rows per page"
                 className="min-h-[36px] appearance-none rounded-lg border border-line bg-surface pr-8 pl-3 text-xs text-soft outline-none focus:border-primary"
               >
                 {PER_PAGE_OPTS.map((n) => (
                   <option key={n} value={n}>
-                    {n} per halaman
+                    {n} per page
                   </option>
                 ))}
               </select>
@@ -523,7 +523,7 @@ export default function UsersClient({
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={safePage <= 1}
-              aria-label="Halaman sebelumnya"
+              aria-label="Previous page"
               className="flex h-8 w-8 items-center justify-center rounded-lg border border-line text-soft hover:bg-violet-50 disabled:opacity-40"
             >
               <ChevronLeft size={16} aria-hidden />
@@ -541,7 +541,7 @@ export default function UsersClient({
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={safePage >= totalPages}
-              aria-label="Halaman berikutnya"
+              aria-label="Next page"
               className="flex h-8 w-8 items-center justify-center rounded-lg border border-line text-soft hover:bg-violet-50 disabled:opacity-40"
             >
               <ChevronRight size={16} aria-hidden />
@@ -558,7 +558,7 @@ export default function UsersClient({
         <div
           role="dialog"
           aria-modal="true"
-          aria-label={`Foto ${viewing.sales_name}`}
+          aria-label={`Photo of ${viewing.sales_name}`}
           onClick={() => setViewing(null)}
           className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 p-4"
         >
@@ -579,7 +579,7 @@ export default function UsersClient({
               <button
                 type="button"
                 onClick={() => setViewing(null)}
-                aria-label="Tutup foto"
+                aria-label="Close photo"
                 autoFocus
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-soft hover:bg-violet-50 active:bg-violet-100"
               >
@@ -589,7 +589,7 @@ export default function UsersClient({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={viewing.avatar_url}
-              alt={`Foto ${viewing.sales_name}`}
+              alt={`Photo of ${viewing.sales_name}`}
               className="mt-3 max-h-[70dvh] w-full rounded-xl object-cover"
             />
           </div>

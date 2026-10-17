@@ -9,7 +9,7 @@ export default function SettingsPage() {
     <Suspense
       fallback={
         <main className="mx-auto max-w-7xl p-8 text-sm text-muted">
-          Memuat settings...
+          Loading settings...
         </main>
       }
     >
@@ -47,7 +47,7 @@ async function SettingsContent() {
         SETTINGS
       </p>
       <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink md:text-3xl">
-        Pengaturan
+        Settings
       </h1>
       <SettingsClient
         salesId={row.sales_id}

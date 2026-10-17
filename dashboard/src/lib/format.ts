@@ -23,8 +23,8 @@ export function pct(n: number | null | undefined): string {
   if (n === null || n === undefined) return "-";
   const v = Number(n);
   if (!Number.isFinite(v)) return "-";
-  // Opsi B: jangan pernah tampil 100% sebelum real >= 100.
-  // 99.95%-99.99% dibulatkan normal akan jadi 100%, jadi di-cap ke 99,9%.
+  // Option B: never show 100% before the real value is >= 100.
+  // 99.95%-99.99% would normally round to 100%, so cap it at 99.9%.
   const rounded1 = Math.round(v * 10) / 10;
   if (v < 100 && rounded1 >= 100) {
     return `${(99.9).toLocaleString("id-ID", { maximumFractionDigits: 1 })}%`;
@@ -59,7 +59,7 @@ const MONTH_SHORT_EN = [
   "Dec",
 ] as const;
 
-// "2026-10-01" -> "01-Oct". Parse manual agar aman dari geser timezone.
+// "2026-10-01" -> "01-Oct". Parse manually to stay safe from timezone shifts.
 export function formatDayMonth(iso: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
   if (!m) return iso;

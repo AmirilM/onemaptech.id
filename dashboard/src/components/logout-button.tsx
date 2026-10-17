@@ -16,8 +16,8 @@ export default function LogoutButton({ iconOnly = false }: { iconOnly?: boolean 
     return (
       <button
         onClick={logout}
-        aria-label="Keluar"
-        title="Keluar"
+        aria-label="Log out"
+        title="Log out"
         className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-line text-muted hover:bg-violet-50 active:bg-violet-100"
       >
         <LogOut size={18} aria-hidden />
@@ -29,7 +29,7 @@ export default function LogoutButton({ iconOnly = false }: { iconOnly?: boolean 
       onClick={logout}
       className="flex min-h-[44px] items-center rounded-lg border border-line px-3 py-1.5 text-xs text-muted hover:bg-violet-50 active:bg-violet-100"
     >
-      Keluar
+      Log out
     </button>
   );
 }

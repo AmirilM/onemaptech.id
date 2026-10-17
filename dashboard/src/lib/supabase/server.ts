@@ -17,7 +17,7 @@ export async function createClient() {
               cookieStore.set(name, value, options),
             );
           } catch {
-            // Dipanggil dari Server Component (read-only): abaikan.
+            // Called from a Server Component (read-only): ignore.
           }
         },
       },

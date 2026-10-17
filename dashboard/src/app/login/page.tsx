@@ -15,10 +15,10 @@ import { createClient } from "@/lib/supabase/client";
 
 function friendlyError(message: string) {
   if (/invalid login credentials/i.test(message))
-    return "Sales ID atau password salah. Periksa kembali.";
+    return "Incorrect Sales ID or password. Please check again.";
   if (/email not confirmed/i.test(message))
-    return "Akun belum aktif. Hubungi admin.";
-  return message || "Login gagal.";
+    return "Account not active yet. Contact an admin.";
+  return message || "Login failed.";
 }
 
 export default function LoginPage() {
@@ -47,7 +47,7 @@ export default function LoginPage() {
       router.refresh();
     } catch (err) {
       setError(
-        friendlyError(err instanceof Error ? err.message : "Login gagal."),
+        friendlyError(err instanceof Error ? err.message : "Login failed."),
       );
       setErrorKey((k) => k + 1);
     } finally {
@@ -62,7 +62,7 @@ export default function LoginPage() {
     <main className="relative flex min-h-dvh flex-col overflow-hidden bg-[#F4F4F6]">
       <style>{`@keyframes login-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}`}</style>
 
-      {/* Background — kolase One Data, Many Possibilities */}
+      {/* Background — One Data, Many Possibilities collage */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -71,16 +71,16 @@ export default function LoginPage() {
           fetchPriority="high"
           className="h-full w-full object-cover object-center"
         />
-        {/* Overlay agar card kanan terbaca, kiri tetap vivid */}
+        {/* Overlay so the right card stays readable while the left stays vivid */}
         <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/0 to-white/80" />
         <div className="absolute inset-0 bg-white/20 lg:hidden" />
       </div>
 
       <div className="relative grid flex-1 lg:grid-cols-[1fr_520px]">
-        {/* Kiri — kosong, headline sudah ada di gambar background */}
+        {/* Left — empty; the headline is already in the background image */}
         <div className="hidden lg:block" aria-hidden />
 
-        {/* Kanan — form card */}
+        {/* Right — form card */}
         <section
           aria-label="Login"
           className="flex items-center justify-center p-6 [padding-bottom:env(safe-area-inset-bottom)] lg:bg-white/40 lg:p-10 lg:backdrop-blur-[2px]"
@@ -158,7 +158,7 @@ export default function LoginPage() {
                       onClick={() => setShowPw((v) => !v)}
                       aria-pressed={showPw}
                       aria-label={
-                        showPw ? "Sembunyikan password" : "Tampilkan password"
+                        showPw ? "Hide password" : "Show password"
                       }
                       className="absolute right-3 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600"
                     >
@@ -171,7 +171,7 @@ export default function LoginPage() {
                   </div>
                   {capsOn && (
                     <p id="caps-hint" className="mt-1.5 text-xs text-amber-600">
-                      Caps Lock aktif.
+                      Caps Lock is on.
                     </p>
                   )}
                 </div>
@@ -206,7 +206,7 @@ export default function LoginPage() {
                       aria-hidden
                       className="animate-spin"
                     />
-                    Masuk...
+                    Signing in...
                   </span>
                 ) : (
                   <>
@@ -221,7 +221,7 @@ export default function LoginPage() {
               </button>
 
               <p className="mt-5 text-center text-sm text-slate-400">
-                Lupa password? Hubungi admin.
+                Forgot your password? Contact an admin.
               </p>
             </form>
 

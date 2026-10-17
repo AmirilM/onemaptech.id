@@ -8,6 +8,7 @@ import { formatMonthYear } from "@/lib/format";
 import DailySummaryTables, {
   type DailySummaryRow,
 } from "@/components/daily-summary-tables";
+import DailySummaryCards from "@/components/daily-summary-cards";
 import { distinctAMs, effectiveAM, getStoreMap, storeInScope } from "@/lib/scope";
 
 type Params = { store?: string; am?: string };
@@ -51,7 +52,7 @@ export default function DailyPage({
     <Suspense
       fallback={
         <main className="mx-auto max-w-7xl p-8 text-sm text-muted">
-          Memuat daily summary...
+          Loading daily summary...
         </main>
       }
     >
@@ -66,7 +67,7 @@ async function DailyContent({
   searchParams: Promise<Params>;
 }) {
   const params = await searchParams;
-  // Query independen jalan paralel (satu batch), bukan serial.
+  // Independent queries run in parallel (one batch), not serially.
   const [supabase, session] = await Promise.all([
     createClient(),
     getSessionProfile(),
@@ -99,7 +100,7 @@ async function DailyContent({
   const amScopeBroken = am !== "" && amStores.length === 0;
   const store = storeInScope(lockedStore ?? (params.store || ""), am, amStores);
 
-  // Bulan berjalan otomatis dari tanggal data terakhir (month-to-date).
+  // Current month derived automatically from the latest data date (month-to-date).
   const latestDate =
     (latestData?.[0] as { date: string } | undefined)?.date ?? "";
   const month = latestDate.slice(0, 7);
@@ -130,7 +131,7 @@ async function DailyContent({
         .gte("date", start)
         .lte("date", end)
         .order("date");
-      // Agregasi per tanggal di server-side (MV berdimensi store x tanggal)
+      // Aggregate per date server-side (MV is dimensioned store x date)
       const byDate = new Map<string, DailySummaryRow>();
       for (const r of (data ?? []) as (DailySummaryRow & {
         store_code: string;
@@ -168,7 +169,7 @@ async function DailyContent({
     }
   }
 
-  // Zero-fill: tampilkan semua tanggal 1–akhir bulan (0 bila tanpa transaksi).
+  // Zero-fill: show every date from the 1st to end of month (0 when no transactions).
   const byDateRaw = new Map(raw.map((r) => [r.date, r]));
   const rows: DailySummaryRow[] = [];
   if (month && daysInMonth > 0) {
@@ -191,10 +192,10 @@ async function DailyContent({
         DAILY SUMMARY
       </p>
       <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink md:text-3xl">
-        Ringkasan Harian
+        Daily Summary
       </h1>
       <p className="mt-1 text-xs text-muted">
-        {store ? `Store ${store}` : am ? `Area ${am}` : "Semua store"} · {month ? formatMonthYear(month) : "-"}
+        {store ? `Store ${store}` : am ? `Area ${am}` : "All stores"} · {month ? formatMonthYear(month) : "-"}
       </p>
 
       <div className="mt-4">
@@ -211,23 +212,25 @@ async function DailyContent({
 
       {amScopeBroken && (
         <div className="mt-4 rounded-2xl border border-warning/30 bg-warning/10 p-4 text-sm">
-          <p className="font-semibold text-warning">Data area tidak terbaca</p>
+          <p className="font-semibold text-warning">Unable to read area data</p>
           <p className="mt-1 text-muted">
-            Mapping store area ({am}) tidak dapat dimuat. Minta admin menjalankan{" "}
-            <code>sql/dashboard-rls.sql</code> terbaru di SQL Editor, lalu muat ulang.
+            Area-to-store mapping ({am}) could not be loaded. Ask an admin to run
+            the latest <code>sql/dashboard-rls.sql</code> in the SQL Editor, then reload.
           </p>
         </div>
       )}
 
+      {!amScopeBroken && rows.length > 0 && <DailySummaryCards rows={rows} />}
+
       <section className={`mt-4 ${card}`}>
         <h2 className="text-sm font-semibold text-ink">Daily Trend</h2>
-        <p className="mt-0.5 text-xs text-muted">Total revenue per hari</p>
+        <p className="mt-0.5 text-xs text-muted">Total revenue per day</p>
         <div className="mt-3">
           {rows.length ? (
             <TrendChart data={rows} />
           ) : (
             <p className="py-10 text-center text-sm text-muted">
-              Tidak ada data pada bulan ini.
+              No data for this month.
             </p>
           )}
         </div>

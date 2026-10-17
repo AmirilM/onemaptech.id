@@ -11,7 +11,7 @@ export default function UsersPage() {
     <Suspense
       fallback={
         <main className="mx-auto max-w-7xl p-8 text-sm text-muted">
-          Memuat users...
+          Loading users...
         </main>
       }
     >
@@ -36,8 +36,8 @@ async function UsersContent() {
           USER MANAGEMENT
         </p>
         <div className="mt-4 rounded-2xl border border-warning/30 bg-warning/10 p-6 text-sm text-warning">
-          Halaman ini khusus role Admin. Akun kamu ({session?.profile?.role ?? "-"})
-          tidak punya akses.
+          This page is for the Admin role only. Your account ({session?.profile?.role ?? "-"})
+          does not have access.
         </div>
       </main>
     );
@@ -52,7 +52,7 @@ async function UsersContent() {
         })
       : null;
 
-  // Profiles: pakai service agar konsisten + bypass RLS, fallback ke anon.
+  // Profiles: use the service client for consistency + to bypass RLS, fall back to anon.
   const reader = svc ?? supabase;
   const { data } = await reader
     .from("profiles")
@@ -60,7 +60,7 @@ async function UsersContent() {
     .order("sales_id");
   const profiles = (data ?? []) as Omit<UserRow, "last_login">[];
 
-  // Last login dari Auth (server-only). Map sales_id -> last_sign_in_at.
+  // Last login from Auth (server-only). Map sales_id -> last_sign_in_at.
   const lastLogin = new Map<string, string | null>();
   if (svc) {
     try {
@@ -85,7 +85,7 @@ async function UsersContent() {
         page += 1;
       }
     } catch {
-      /* abaikan — last login jadi null */
+      /* ignore — last login becomes null */
     }
   }
 

@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 
-// xlsx (~800KB) dimuat on-demand saat tombol Excel diklik,
-// tidak ikut bundle awal halaman Report.
+// xlsx (~800KB) is loaded on demand when the Excel button is clicked,
+// so it is not in the initial Report page bundle.
 
 type Props = {
   rows: Record<string, string | number | null>[];

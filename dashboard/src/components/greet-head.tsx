@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { greeting } from "@/lib/names";
 
 export default function GreetHead({ name }: { name: string }) {
-  // Client-only: dihitung di useEffect setelah mount dengan zona Asia/Jakarta,
-  // agar tidak beku di jam server (UTC) saat prerender.
+  // Client-only: computed in useEffect after mount with the Asia/Jakarta zone,
+  // so it does not freeze at the server clock (UTC) during prerender.
   const [greet, setGreet] = useState<string | null>(null);
 
   useEffect(() => {

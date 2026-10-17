@@ -20,7 +20,7 @@ export default function ReportPage({
     <Suspense
       fallback={
         <main className="mx-auto max-w-7xl p-8 text-sm text-muted">
-          Memuat report...
+          Loading report...
         </main>
       }
     >
@@ -45,7 +45,7 @@ async function ReportContent({
   if (!user) redirect("/login");
   const lockedStore = session?.lockedStore ?? null;
   const lockedAM = session?.lockedAM ?? null;
-  // storeMap + storeList independen → satu batch.
+  // storeMap + storeList are independent → one batch.
   const [storeMap, storeListRes] = await Promise.all([
     getStoreMap(supabase),
     supabase
@@ -68,8 +68,8 @@ async function ReportContent({
     (storeListRaw ?? []) as { store_code: string; store_name: string | null }[]
   ).filter((s) => !am || amStores.includes(s.store_code));
 
-  // Dibatasi 2000 baris agar tidak crash di browser HP (RAM + XLSX di client).
-  // Persempit filter store/tanggal untuk data penuh.
+  // Capped at 2000 rows to avoid crashing mobile browsers (RAM + client-side XLSX).
+  // Narrow the store/date filter for the full dataset.
   const ROW_LIMIT = 2000;
   let q = supabase.from("store_transactions").select(COLS).order("date").limit(ROW_LIMIT);
   if (store) q = q.eq("store_code", store);
@@ -92,11 +92,11 @@ async function ReportContent({
         REPORT
       </p>
       <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink md:text-3xl">
-        Export Transaksi
+        Transaction Export
       </h1>
       <p className="mt-1 text-xs text-muted">
-        {rows.length} baris sesuai filter{am ? ` · area ${am}` : ""}{store ? ` · store ${store}` : ""} · preview 100 pertama
-        {rows.length >= ROW_LIMIT ? ` · dibatasi ${ROW_LIMIT} baris (persempit filter)` : ""}
+        {rows.length} rows match the filter{am ? ` · area ${am}` : ""}{store ? ` · store ${store}` : ""} · first 100 previewed
+        {rows.length >= ROW_LIMIT ? ` · limited to ${ROW_LIMIT} rows (narrow the filter)` : ""}
       </p>
 
       <div className="mt-4">
@@ -115,10 +115,10 @@ async function ReportContent({
 
       {amScopeBroken && (
         <div className="mt-4 rounded-2xl border border-warning/30 bg-warning/10 p-4 text-sm">
-          <p className="font-semibold text-warning">Data area tidak terbaca</p>
+          <p className="font-semibold text-warning">Unable to read area data</p>
           <p className="mt-1 text-muted">
-            Mapping store area ({am}) tidak dapat dimuat. Minta admin menjalankan{" "}
-            <code>sql/dashboard-rls.sql</code> terbaru di SQL Editor, lalu muat ulang.
+            Area-to-store mapping ({am}) could not be loaded. Ask an admin to run
+            the latest <code>sql/dashboard-rls.sql</code> in the SQL Editor, then reload.
           </p>
         </div>
       )}
@@ -158,7 +158,7 @@ async function ReportContent({
               {!preview.length && (
                 <tr>
                   <td className="py-8 text-center text-sm text-muted">
-                    Tidak ada data.
+                    No data.
                   </td>
                 </tr>
               )}

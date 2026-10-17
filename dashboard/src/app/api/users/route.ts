@@ -3,7 +3,7 @@ import { guard } from "@/lib/admin";
 
 const ROLES = ["Store Supervisor", "Area Manager", "Regional Head", "Admin"];
 
-// POST /api/users — tambah user (Admin only): insert profiles + create Auth user
+// POST /api/users — add user (admin only): insert profiles + create Auth user
 export async function POST(req: Request) {
   const g = await guard();
   if (!g.ok) return g.response;
@@ -11,11 +11,11 @@ export async function POST(req: Request) {
   const { sales_id, sales_name, store_code, store_name, role, password } = body;
   if (!sales_id || !sales_name || !role || !password)
     return NextResponse.json(
-      { error: "sales_id, sales_name, role, password wajib diisi." },
+      { error: "sales_id, sales_name, role, and password are required." },
       { status: 400 },
     );
   if (!ROLES.includes(role))
-    return NextResponse.json({ error: "Role tidak valid." }, { status: 400 });
+    return NextResponse.json({ error: "Invalid role." }, { status: 400 });
 
   const { error: insErr } = await g.service.from("profiles").insert({
     sales_id,
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
   });
   if (authErr)
     return NextResponse.json(
-      { error: `auth: ${authErr.message} (baris profiles tetap tersimpan)` },
+      { error: `auth: ${authErr.message} (the profiles row is still saved)` },
       { status: 500 },
     );
   return NextResponse.json({ ok: true });

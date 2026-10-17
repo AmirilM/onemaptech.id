@@ -50,27 +50,27 @@ export default function UserForm({
         }),
       });
       const j = await res.json();
-      if (!res.ok) throw new Error(j.error ?? "Gagal menyimpan.");
+      if (!res.ok) throw new Error(j.error ?? "Failed to save.");
       onClose();
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal menyimpan.");
+      setError(err instanceof Error ? err.message : "Failed to save.");
     } finally {
       setLoading(false);
     }
   }
 
   async function remove() {
-    if (!confirm(`Hapus user ${initial!.sales_id}? (profiles + Auth)`)) return;
+    if (!confirm(`Delete user ${initial!.sales_id}? (profiles + Auth)`)) return;
     setLoading(true);
     try {
       const res = await fetch(`/api/users/${initial!.sales_id}`, { method: "DELETE" });
       const j = await res.json();
-      if (!res.ok) throw new Error(j.error ?? "Gagal menghapus.");
+      if (!res.ok) throw new Error(j.error ?? "Failed to delete.");
       onClose();
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal menghapus.");
+      setError(err instanceof Error ? err.message : "Failed to delete.");
     } finally {
       setLoading(false);
     }
@@ -89,12 +89,12 @@ export default function UserForm({
           USER MANAGEMENT
         </p>
         <h3 className="mt-1 text-lg font-bold text-ink">
-          {isEdit ? `Edit ${initial!.sales_id}` : "Tambah User"}
+          {isEdit ? `Edit ${initial!.sales_id}` : "Add User"}
         </h3>
         <p className="mt-0.5 text-xs text-muted">
           {isEdit
-            ? "Ubah data profiles + Auth sekaligus."
-            : "Menulis ke profiles + Auth sekaligus."}
+            ? "Updates profiles + Auth at once."
+            : "Writes to profiles + Auth at once."}
         </p>
         <div className="mt-4 flex flex-col gap-3">
           {!isEdit && (
@@ -108,7 +108,7 @@ export default function UserForm({
           <input
             value={f.sales_name}
             onChange={(e) => setF({ ...f, sales_name: e.target.value })}
-            placeholder="Nama lengkap"
+            placeholder="Full name"
             className={input}
           />
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -138,7 +138,7 @@ export default function UserForm({
             type="password"
             value={f.password}
             onChange={(e) => setF({ ...f, password: e.target.value })}
-            placeholder={isEdit ? "Password baru (kosongkan bila tetap)" : "Password"}
+            placeholder={isEdit ? "New password (leave blank to keep)" : "Password"}
             className={input}
           />
         </div>
@@ -156,7 +156,7 @@ export default function UserForm({
                 disabled={loading}
                 className="min-h-[44px] rounded-lg border border-danger/40 px-4 py-2 text-sm text-danger hover:bg-danger/10"
               >
-                Hapus
+                Delete
               </button>
             )}
           </div>
@@ -166,14 +166,14 @@ export default function UserForm({
               onClick={onClose}
               className="min-h-[44px] rounded-lg border border-line px-4 py-2 text-sm text-soft hover:bg-violet-50 active:bg-violet-100"
             >
-              Batal
+              Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
               className="min-h-[44px] rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
             >
-              {loading ? "..." : "Simpan"}
+              {loading ? "..." : "Save"}
             </button>
           </div>
         </div>

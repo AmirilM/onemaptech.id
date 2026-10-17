@@ -18,7 +18,7 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
-  // Tutup drawer saat pindah route (render-time sync, bukan effect)
+  // Close the drawer when the route changes (render-time sync, not an effect)
   const [prevPath, setPrevPath] = useState(pathname);
   if (pathname !== prevPath) {
     setPrevPath(pathname);
@@ -56,7 +56,7 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
         </div>
         <button
           onClick={() => setOpen(true)}
-          aria-label="Buka menu"
+          aria-label="Open menu"
           aria-expanded={open}
           aria-controls="mobile-drawer"
           className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-line px-3 py-1.5 leading-none text-soft active:bg-violet-100"
@@ -100,7 +100,7 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
               </div>
               <button
                 onClick={() => setOpen(false)}
-                aria-label="Tutup menu"
+                aria-label="Close menu"
                 className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-line px-3 py-1.5 text-muted active:bg-violet-100"
               >
                 <X size={20} aria-hidden />
@@ -114,7 +114,7 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={avatarUrl}
-                  alt="Foto profil"
+                  alt="Profile photo"
                   className="h-10 w-10 shrink-0 rounded-full object-cover"
                 />
               ) : (

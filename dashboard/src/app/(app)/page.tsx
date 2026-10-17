@@ -25,8 +25,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-// Recharts + tabel berat di-code-split (dynamic di Server Component:
-// tanpa ssr:false agar bisa SSR + streaming per section).
+// Recharts + heavy tables are code-split (dynamic in a Server Component:
+// without ssr:false so they can still SSR + stream per section).
 const QtyBarChart = dynamic(() => import("@/components/qty-bar-chart"), {
   loading: () => <div className="h-40 sm:h-44 animate-pulse rounded-xl bg-canvas" />,
 });
@@ -195,7 +195,7 @@ function kpiCard(
       <div className="mt-1.5 h-4">
         {over && (
           <p className="text-[11px] leading-4 font-medium text-accent">
-            Melebihi target
+            Over target
           </p>
         )}
       </div>
@@ -218,7 +218,7 @@ export default function DashboardPage({
 function DashboardSkeleton() {
   const pulse = "animate-pulse rounded-2xl border border-line bg-surface";
   return (
-    <main aria-busy="true" aria-label="Memuat dashboard" className="mx-auto max-w-[1600px] bg-transparent p-4 md:p-8">
+    <main aria-busy="true" aria-label="Loading dashboard" className="mx-auto max-w-[1600px] bg-transparent p-4 md:p-8">
       <div className="h-3 w-24 rounded bg-slate-200" />
       <div className="mt-2 h-8 w-64 max-w-full rounded bg-slate-200" />
       <div className={`mt-4 h-[76px] ${pulse}`} />
@@ -245,12 +245,12 @@ async function DashContent({
     return (
       <main className="mx-auto max-w-xl p-8">
         <div className="rounded-2xl border border-warning/30 bg-warning/10 p-6 text-sm">
-          <p className="font-semibold text-warning">Supabase belum dikonfigurasi</p>
+          <p className="font-semibold text-warning">Supabase not configured</p>
           <p className="mt-2 text-muted">
-            Copy <code>dashboard/.env.example</code> ke{" "}
-            <code>dashboard/.env.local</code> lalu isi{" "}
-            <code>NEXT_PUBLIC_SUPABASE_URL</code> dan{" "}
-            <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>, kemudian restart dev
+            Copy <code>dashboard/.env.example</code> to{" "}
+            <code>dashboard/.env.local</code>, fill in{" "}
+            <code>NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
+            <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>, then restart the dev
             server.
           </p>
         </div>
@@ -261,9 +261,9 @@ async function DashContent({
   const session = await getSessionProfile();
   if (!session) redirect("/login");
   const supabase = await createClient();
-  // Batch 1: mapping + filter list + freshness (independen dari sesi).
-  // Auth/profile tidak di-query ulang di sini (sudah via getSessionProfile
-  // yang di-cache per request dan dipakai juga oleh layout).
+  // Batch 1: mapping + filter list + freshness (independent of the session).
+  // Auth/profile are not re-queried here (already via getSessionProfile,
+  // which is cached per request and also used by the layout).
   const [storeMap, storeListRes, latestRes] = await Promise.all([
     getStoreMap(supabase),
     supabase
@@ -281,29 +281,29 @@ async function DashContent({
 
   const lockedStore = session.lockedStore;
   const lockedAM = session.lockedAM;
-  // Scope AM (ketat): peta store → AM dari master_stores.
+  // AM scope (strict): store → AM map from master_stores.
   const storeListRaw = storeListRes.data;
   const amList = distinctAMs(storeMap);
   const am = effectiveAM(lockedAM, params.am || "");
   const amStores = am
     ? storeMap.filter((r) => r.area_manager === am).map((r) => r.store_code)
     : [];
-  // Bila filter area aktif tapi mapping tak terbaca (mis. akses master_stores
-  // belum dibuka), jangan tampilkan angka global yang menyesatkan.
+  // If the area filter is active but the mapping is unreadable (e.g. no access
+  // to master_stores yet), do not show misleading global numbers.
   const amScopeBroken = am !== "" && amStores.length === 0;
   const store = storeInScope(lockedStore ?? (params.store || ""), am, amStores);
 
-  // Daftar store untuk filter (ketat: AM hanya lihat store miliknya)
+  // Store list for the filter (strict: an AM only sees their own stores)
   const storeList = (
     (storeListRaw ?? []) as { store_code: string; store_name: string | null }[]
   ).filter((s) => !am || amStores.includes(s.store_code));
 
-  // Freshness data — independen dari filter tanggal
+  // Data freshness — independent of the date filter
   const latest = latestRes.data;
   const latestDate =
     (latest?.[0] as { date: string } | undefined)?.date ?? "-";
 
-  // Leaderboard: hanya kolom yang dirender tabel (hemat payload vs select *).
+  // Leaderboard: only the columns the table renders (less payload than select *).
   const LB_SELECT =
     "store_code,store_name,total_target,revenue_total,ach_total_pct,apple_target,revenue_apple,ach_apple_pct,android_target,revenue_android,ach_android_pct,rank_achievement";
   let lbQuery = supabase
@@ -317,16 +317,16 @@ async function DashContent({
     (r) => (r.data ?? []) as LeaderboardRow[],
   );
 
-  // Tren month-to-date: batasi ke bulan data terakhir agar baris yang
-  // ditransfer = hari × store dalam 1 bulan (bukan seluruh histori).
-  // KPI/target adalah snapshot bulanan, jadi semantik tetap sama.
+  // Month-to-date trend: cap to the last data month so the rows
+  // transferred = days × stores within 1 month (not the whole history).
+  // KPI/target are monthly snapshots, so the semantics stay the same.
   const monthStart =
     latestDate && latestDate !== "-"
       ? `${latestDate.slice(0, 7)}-01`
       : null;
 
-  // Tren: per store bila filter store, global harian bila tidak —
-  // periode berjalan penuh (tanpa filter tanggal)
+  // Trend: per store when filtered by store, global daily otherwise —
+  // full current period (no date filter)
   type TrendPoint = {
     date: string;
     revenue_total: number;
@@ -365,8 +365,8 @@ async function DashContent({
     qty_infinix: d.qty_infinix,
     qty_motorola: d.qty_motorola,
   });
-  // Function declaration (hoisted) agar bisa dipanggil paralel di bawah.
-  // Logic cabang dipertahankan persis seperti semula.
+  // Function declaration (hoisted) so it can be called in parallel below.
+  // Branching logic kept exactly as before.
   async function fetchTrend(): Promise<TrendPoint[]> {
     if (store) {
       let q = supabase
@@ -398,14 +398,14 @@ async function DashContent({
       return ((data ?? []) as DailyRow[]).map(toTrendPoint);
     }
   }
-  // Leaderboard + tren + target independen satu sama lain → satu batch.
-  // fetchTargets dideklarasikan di bawah (hoisted, aman dipanggil di sini).
+  // Leaderboard + trend + targets are independent of each other → one batch.
+  // fetchTargets is declared below (hoisted, safe to call here).
   const [lb, trend, kpiTargets] = await Promise.all([
     lbPromise,
     fetchTrend(),
     fetchTargets(),
   ]);
-  // Agregasi 1 pass: 15x trend.reduce → 1x loop (KPI revenue + qty).
+  // Single-pass aggregation: 15x trend.reduce → 1x loop (KPI revenue + qty).
   const totals = {
     revenue_total: 0,
     revenue_apple: 0,
@@ -485,8 +485,8 @@ async function DashContent({
   ];
   const brandShareTotal = appleTotalQty + androidTotalQty;
 
-  // KPI: revenue month-to-date dari tren (ikut filter store).
-  // Target = snapshot bulanan (tanpa dimensi harian).
+  // KPI: month-to-date revenue from the trend (respects the store filter).
+  // Target = monthly snapshot (no daily dimension).
   const kpiRevenue = {
     revenue_total: totals.revenue_total,
     revenue_apple: totals.revenue_apple,
@@ -553,7 +553,7 @@ async function DashContent({
       vas_target: sum((x) => x.vas_target),
     };
   } else if (amScopeBroken) {
-    // Mapping area tak terbaca: jangan tampilkan target global yang menyesatkan.
+    // Area mapping unreadable: do not show misleading global targets.
     return {
       total_target: null,
       apple_target: null,
@@ -596,7 +596,7 @@ async function DashContent({
 
   const card = "rounded-2xl border border-line bg-surface p-4 shadow-sm md:p-5";
 
-  const scopeLabel = store ? `Store ${store}` : am ? `Area ${am}` : "Semua store";
+  const scopeLabel = store ? `Store ${store}` : am ? `Area ${am}` : "All stores";
 
   return (
     <main className="mx-auto max-w-[1600px] p-4 md:p-8">
@@ -609,9 +609,9 @@ async function DashContent({
             <GreetHead name={prof?.sales_name ?? userEmail ?? "?"} />
             <p className="mt-1 text-xs text-muted">
               {prof
-                ? `${prof.role}${lockedAM ? ` · ${lockedAM}` : prof.store_code ? ` · ${prof.store_code} — ${prof.store_name ?? ""}` : " · semua store"}`
+                ? `${prof.role}${lockedAM ? ` · ${lockedAM}` : prof.store_code ? ` · ${prof.store_code} — ${prof.store_name ?? ""}` : " · all stores"}`
                 : userEmail}{" "}
-              · data diperbarui {latestDate}
+              · data updated {latestDate}
             </p>
           </header>
 
@@ -627,7 +627,7 @@ async function DashContent({
             />
           </div>
         </div>
-        {/* Graphic header + pace card — dekoratif di bawah, fungsional di kanan atas, hanya desktop lebar */}
+        {/* Graphic header + pace card — decorative below, functional at top right, wide desktop only */}
         <div className="relative hidden min-w-0 select-none xl:col-span-5 xl:block 2xl:col-span-7">
           <div className="pointer-events-none absolute right-0 top-0 z-10">
             <PaceCard
@@ -667,18 +667,18 @@ async function DashContent({
 
       {amScopeBroken && (
         <div className="mt-4 rounded-2xl border border-warning/30 bg-warning/10 p-4 text-sm">
-          <p className="font-semibold text-warning">Data area tidak terbaca</p>
+          <p className="font-semibold text-warning">Unable to read area data</p>
           <p className="mt-1 text-muted">
-            Mapping store area ({am}) tidak dapat dimuat. Minta admin menjalankan{" "}
-            <code>sql/dashboard-rls.sql</code> terbaru di SQL Editor, lalu muat ulang.
+            Area-to-store mapping ({am}) could not be loaded. Ask an admin to run
+            the latest <code>sql/dashboard-rls.sql</code> in the SQL Editor, then reload.
           </p>
         </div>
       )}
 
-      <section aria-label="Ringkasan revenue" className="mt-4">
-        <h2 className="sr-only">Ringkasan revenue</h2>
+      <section aria-label="Revenue summary" className="mt-4">
+        <h2 className="sr-only">Revenue summary</h2>
         <p className="mb-3 text-xs text-muted">
-          Revenue periode berjalan · vs target
+          Current-period revenue · vs target
         </p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 items-stretch">
           {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, elapsed, daysInMonth, Wallet)}
@@ -694,22 +694,22 @@ async function DashContent({
         <section className={`${card} lg:col-span-3`} aria-label="Brand share by qty">
           <h2 className="text-sm font-semibold text-ink">Brand Share</h2>
           <p className="mb-3 text-xs text-muted">
-            {scopeLabel} · total periode · unit
+            {scopeLabel} · total this period · units
           </p>
           {brandShareTotal ? (
             <div
               role="img"
-              aria-label={`Grafik brand share by qty, Apple vs Android`}
+              aria-label={`Brand share by qty chart, Apple vs Android`}
             >
               <BrandShareDonut
                 data={brandShare}
-                ariaLabel="Grafik brand share by qty: Apple vs Android"
+                ariaLabel="Brand share by qty chart: Apple vs Android"
               />
             </div>
           ) : (
             <div className="py-10 text-center">
               <p className="text-sm text-muted">
-                Tidak ada data pada periode ini.
+                No data for this period.
               </p>
             </div>
           )}
@@ -717,7 +717,7 @@ async function DashContent({
         </Suspense>
 
         <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl border border-line bg-surface lg:col-span-4" />}>
-        <section className={`${card} lg:col-span-4`} aria-label={`Apple qty total ${appleTotalQty} unit`}>
+        <section className={`${card} lg:col-span-4`} aria-label={`Apple qty total ${appleTotalQty} units`}>
           <div className="mb-3 flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="text-sm font-semibold text-ink">Apple Qty</h2>
@@ -729,19 +729,19 @@ async function DashContent({
               </p>
               <p className="mt-0.5 text-xl font-bold tracking-tight text-ink tabular-nums">
                 {num(appleTotalQty)}{" "}
-                <span className="text-xs font-medium text-muted">unit</span>
+                <span className="text-xs font-medium text-muted">units</span>
               </p>
             </div>
           </div>
           {trend.length ? (
             <QtyBarChart
               data={appleQty}
-              ariaLabel="Grafik total qty Apple: Mac, iPad, iPhone, Watch, urut terbesar"
+              ariaLabel="Total Apple qty chart: Mac, iPad, iPhone, Watch, sorted descending"
             />
           ) : (
             <div className="py-10 text-center">
               <p className="text-sm text-muted">
-                Tidak ada data pada periode ini.
+                No data for this period.
               </p>
             </div>
           )}
@@ -749,7 +749,7 @@ async function DashContent({
         </Suspense>
 
         <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl border border-line bg-surface lg:col-span-5" />}>
-        <section className={`${card} lg:col-span-5`} aria-label={`Android qty total ${androidTotalQty} unit`}>
+        <section className={`${card} lg:col-span-5`} aria-label={`Android qty total ${androidTotalQty} units`}>
           <div className="mb-3 flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="text-sm font-semibold text-ink">Android Qty</h2>
@@ -761,19 +761,19 @@ async function DashContent({
               </p>
               <p className="mt-0.5 text-xl font-bold tracking-tight text-ink tabular-nums">
                 {num(androidTotalQty)}{" "}
-                <span className="text-xs font-medium text-muted">unit</span>
+                <span className="text-xs font-medium text-muted">units</span>
               </p>
             </div>
           </div>
           {trend.length ? (
             <QtyBarChart
               data={androidQty}
-              ariaLabel="Grafik total qty Android: Samsung, Oppo, Xiaomi, Huawei, Infinix, Motorola, urut terbesar"
+              ariaLabel="Total Android qty chart: Samsung, Oppo, Xiaomi, Huawei, Infinix, Motorola, sorted descending"
             />
           ) : (
             <div className="py-10 text-center">
               <p className="text-sm text-muted">
-                Tidak ada data pada periode ini.
+                No data for this period.
               </p>
             </div>
           )}
@@ -785,15 +785,15 @@ async function DashContent({
       <section className={`${card} mt-4`}>
         <h2 className="text-sm font-semibold text-ink">Leaderboard Store</h2>
         <p className="mb-2 text-xs text-muted">
-          Peringkat berdasarkan achievement Total Sales vs Total Target ·
-          snapshot periode berjalan · pace {pct(pacePct)}
+          Store ranking by Total Sales vs Total Target achievement ·
+          current-period snapshot · pace {pct(pacePct)}
         </p>
         <LeaderboardTable rows={lb} am={am} pacePct={pacePct} />
       </section>
       </Suspense>
 
       <footer className="mt-6 text-center text-xs text-muted">
-        OneMapTech · refresh harian
+        OneMapTech · daily refresh
       </footer>
     </main>
   );

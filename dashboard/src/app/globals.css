@@ -22,7 +22,7 @@
   --color-danger: #dc2626;
   --color-success: #059669;
 
-  /* Compat lama: navy -> violet, gold -> amber */
+  /* Legacy compat: navy -> violet, gold -> amber */
   --color-navy: #7c3aed;
   --color-navy-hover: #6d28d9;
   --color-gold: #d97706;
@@ -93,7 +93,7 @@ select option {
   fill: var(--color-muted);
 }
 
-/* Focus terlihat untuk semua kontrol interaktif */
+/* Visible focus for all interactive controls */
 button:focus-visible,
 a:focus-visible,
 select:focus-visible,

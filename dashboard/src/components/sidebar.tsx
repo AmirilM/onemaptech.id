@@ -12,7 +12,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-// Halaman yang memakai filter scope global (FilterBar).
+// Pages that use the global scope filter (FilterBar).
 const FILTER_PAGES = new Set(["/", "/daily", "/products", "/report"]);
 
 const ITEMS: { href: string; label: string; icon: LucideIcon; admin?: boolean }[] = [
@@ -34,9 +34,9 @@ export default function SidebarNav({
   const pathname = usePathname();
   const params = useSearchParams();
 
-  // Scope global (?store=&am=) ikut saat pindah halaman filter.
-  // Klik link halaman aktif: pertahankan query apa adanya (no-op).
-  // ?from/?to milik Report tidak ikut — sifatnya lokal per halaman.
+  // Global scope (?store=&am=) carries over when switching filter pages.
+  // Clicking the active page link: keep the query as-is (no-op).
+  // Report's ?from/?to are not carried over — they are local per page.
   function hrefFor(href: string): string {
     if (href === pathname) {
       const qs = params.toString();
@@ -53,7 +53,7 @@ export default function SidebarNav({
   }
 
   return (
-    <nav className="flex flex-col gap-1" aria-label="Navigasi utama">
+    <nav className="flex flex-col gap-1" aria-label="Main navigation">
       {ITEMS.filter((i) => !i.admin || isAdmin).map((i) => {
         const active =
           i.href === "/" ? pathname === "/" : pathname.startsWith(i.href);

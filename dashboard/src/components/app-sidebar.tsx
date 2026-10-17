@@ -32,7 +32,7 @@ export default function AppSidebar({ name, role, avatarUrl, isAdmin }: Props) {
       try {
         window.localStorage.setItem(STORAGE_KEY, c ? "0" : "1");
       } catch {
-        /* abaikan */
+        /* ignore */
       }
       return !c;
     });
@@ -90,8 +90,8 @@ export default function AppSidebar({ name, role, avatarUrl, isAdmin }: Props) {
           type="button"
           onClick={toggle}
           aria-expanded={!collapsed}
-          aria-label={collapsed ? "Bentangkan sidebar" : "Ciutkan sidebar"}
-          title={collapsed ? "Bentangkan sidebar" : "Ciutkan sidebar"}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           className="flex min-h-[40px] min-w-[40px] items-center justify-center rounded-lg border border-line text-muted hover:bg-violet-50 hover:text-ink active:bg-violet-100"
         >
           {collapsed ? (
@@ -110,7 +110,7 @@ export default function AppSidebar({ name, role, avatarUrl, isAdmin }: Props) {
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={avatarUrl}
-              alt="Foto profil"
+              alt="Profile photo"
               title={`${name} · ${role}`}
               className="h-10 w-10 shrink-0 rounded-full object-cover"
             />
@@ -130,7 +130,7 @@ export default function AppSidebar({ name, role, avatarUrl, isAdmin }: Props) {
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={avatarUrl}
-              alt="Foto profil"
+              alt="Profile photo"
               className="h-10 w-10 shrink-0 rounded-full object-cover"
             />
           ) : (

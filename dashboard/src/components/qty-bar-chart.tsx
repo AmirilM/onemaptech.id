@@ -47,7 +47,7 @@ function QtyTooltip({
     >
       <p style={{ color: "#17171C", margin: 0, fontWeight: 600 }}>{label}</p>
       <p style={{ color: "#4B5563", margin: "4px 0 0" }}>
-        {num(qty)} unit ({pctExact(share)})
+        {num(qty)} units ({pctExact(share)})
       </p>
     </div>
   );
@@ -63,8 +63,8 @@ export default function QtyBarChart({
   const total = data.reduce((a, d) => a + d.qty, 0);
   const shareOf = (qty: number) => (total ? (100 * qty) / total : null);
   const summary = data.length
-    ? data.map((d) => `${d.label} ${num(d.qty)} unit (${pctExact(shareOf(d.qty))})`).join("; ")
-    : "Tidak ada data.";
+    ? data.map((d) => `${d.label} ${num(d.qty)} units (${pctExact(shareOf(d.qty))})`).join("; ")
+    : "No data.";
   return (
     <div className="h-40 w-full sm:h-44">
       <p className="sr-only">

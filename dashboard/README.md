@@ -1,51 +1,47 @@
 # Dashboard (Next.js)
 
-Sales performance dashboard — dark premium. Data dari Supabase MV
+Sales performance dashboard — dark premium. Data comes from Supabase MVs
 (`mv_dashboard_*`, `mv_leaderboard_store`, `mv_top_product`).
 
 ## Setup
 
 ```bash
 cd dashboard
-cp .env.example .env.local   # isi URL + ANON key (jangan commit)
+cp .env.example .env.local   # fill in URL + ANON key (do not commit)
 npm install --ignore-scripts
 npm run dev                  # http://localhost:3000
 ```
 
-> `npm install` polos bisa gagal karena policy `allow-scripts` di mesin ini;
-> `--ignore-scripts` aman (Next/SWC tidak butuh lifecycle scripts).
+> A plain `npm install` can fail because of this machine's `allow-scripts`
+> policy; `--ignore-scripts` is safe (Next/SWC do not need lifecycle scripts).
 
-## Akun
+## Accounts
 
-Login pakai **Sales ID** + password (email internal: `{sales_id}@onemaptech.id`).
-Seed/update user Auth dari `profiles`:
+Log in with **Sales ID** + password (internal email: `{sales_id}@onemaptech.id`).
+Seed/update Auth users from `profiles`:
 
 ```bash
-python3 scripts/seed_auth.py --dry-run   # cek dulu
+python3 scripts/seed_auth.py --dry-run   # check first
 python3 scripts/seed_auth.py
 ```
 
-## SQL yang harus dijalankan (SQL Editor, sekali saja)
+## SQL to run (SQL Editor, once)
 
-1. `sql/dashboard-views.sql` — 5 materialized view + fungsi refresh
-2. `sql/dashboard-rls.sql` — GRANT + RLS untuk role `authenticated`
+1. `sql/dashboard-views.sql` — 5 materialized views + refresh functions
+2. `sql/dashboard-rls.sql` — GRANT + RLS for the `authenticated` role
+3. `sql/dashboard-v2.sql` — `avatar_url` column + `avatars` Storage bucket
 
 ## Deploy (Vercel)
 
 Root directory: `dashboard/`. Env vars: `NEXT_PUBLIC_SUPABASE_URL`,
-`NEXT_PUBLIC_SUPABASE_ANON_KEY` (+ `SUPABASE_SERVICE_ROLE_KEY` untuk API
-CRUD user — tanpa prefix `NEXT_PUBLIC_`). Jangan pernah expose secret key ke frontend.
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` (+ `SUPABASE_SERVICE_ROLE_KEY` for the user
+CRUD API — without the `NEXT_PUBLIC_` prefix). Never expose the secret key to
+the frontend.
 
-## SQL yang harus dijalankan (SQL Editor, sekali saja)
+## Pages
 
-1. `sql/dashboard-views.sql` — 5 materialized view + fungsi refresh
-2. `sql/dashboard-rls.sql` — GRANT + RLS untuk role `authenticated`
-3. `sql/dashboard-v2.sql` — kolom `avatar_url` + bucket Storage `avatars`
-
-## Halaman
-
-Sidebar: Dashboard (greeting + KPI + tren + leaderboard + top product),
-Daily Summary (tren + tabel tgl 1–akhir bulan + growth vs kemarin),
-Product Analytics (share kategori + top 50), Report (preview + export
-CSV/Excel filter aktif), User Management (CRUD, Admin-only),
-Settings (profil + foto + password).
+Sidebar: Dashboard (greeting + KPI + trend + leaderboard + top product),
+Daily Summary (trend + table for the 1st–end of month + growth vs yesterday),
+Product Analytics (category share + top 50), Report (preview + export the
+active filter to CSV/Excel), User Management (CRUD, Admin-only),
+Settings (profile + photo + password).

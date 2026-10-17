@@ -33,11 +33,11 @@ export default function SettingsClient(p: Props) {
         body: JSON.stringify({ sales_name: name }),
       });
       const j = await res.json();
-      if (!res.ok) throw new Error(j.error ?? "Gagal menyimpan.");
-      setMsg("Profil tersimpan.");
+      if (!res.ok) throw new Error(j.error ?? "Failed to save.");
+      setMsg("Profile saved.");
       router.refresh();
     } catch (err) {
-      setMsg(err instanceof Error ? err.message : "Gagal menyimpan.");
+      setMsg(err instanceof Error ? err.message : "Failed to save.");
     } finally {
       setLoading(false);
     }
@@ -64,11 +64,11 @@ export default function SettingsClient(p: Props) {
         body: JSON.stringify({ avatar_url: publicUrl }),
       });
       const j = await res.json();
-      if (!res.ok) throw new Error(j.error ?? "Gagal menyimpan foto.");
-      setMsg("Foto profil diperbarui.");
+      if (!res.ok) throw new Error(j.error ?? "Failed to save the photo.");
+      setMsg("Profile photo updated.");
       router.refresh();
     } catch (err) {
-      setMsg(err instanceof Error ? err.message : "Gagal upload.");
+      setMsg(err instanceof Error ? err.message : "Upload failed.");
     } finally {
       setLoading(false);
     }
@@ -78,11 +78,11 @@ export default function SettingsClient(p: Props) {
     e.preventDefault();
     setMsg("");
     if (pw1 !== pw2) {
-      setMsg("Konfirmasi password tidak sama.");
+      setMsg("Passwords do not match.");
       return;
     }
     if (pw1.length < 6) {
-      setMsg("Password minimal 6 karakter.");
+      setMsg("Password must be at least 6 characters.");
       return;
     }
     setLoading(true);
@@ -90,7 +90,7 @@ export default function SettingsClient(p: Props) {
       const supabase = createClient();
       const { error } = await supabase.auth.updateUser({ password: pw1 });
       if (error) throw error;
-      // Sinkron juga ke kolom profiles (dipakai seed/cek admin)
+      // Also sync to the profiles column (used by the seed/admin check)
       await fetch(`/api/users/${p.salesId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -98,9 +98,9 @@ export default function SettingsClient(p: Props) {
       }).catch(() => {});
       setPw1("");
       setPw2("");
-      setMsg("Password diganti.");
+      setMsg("Password changed.");
     } catch (err) {
-      setMsg(err instanceof Error ? err.message : "Gagal ganti password.");
+      setMsg(err instanceof Error ? err.message : "Failed to change password.");
     } finally {
       setLoading(false);
     }
@@ -118,7 +118,7 @@ export default function SettingsClient(p: Props) {
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={p.avatarUrl}
-              alt="Foto profil"
+              alt="Profile photo"
               className="h-16 w-16 shrink-0 rounded-full object-cover"
             />
           ) : (
@@ -133,7 +133,7 @@ export default function SettingsClient(p: Props) {
               {p.storeCode ? ` · ${p.storeCode}` : ""}
             </p>
             <label className="mt-2 inline-block cursor-pointer rounded-lg border border-line px-3 py-1.5 text-xs text-soft hover:bg-violet-50">
-              Ganti foto
+              Change photo
               <input
                 type="file"
                 accept="image/*"
@@ -146,10 +146,10 @@ export default function SettingsClient(p: Props) {
       </section>
 
       <section className={card}>
-        <h2 className="text-sm font-semibold">Profil</h2>
+        <h2 className="text-sm font-semibold">Profile</h2>
         <form onSubmit={saveProfile} className="mt-3 flex flex-col gap-3">
           <label className="flex flex-col gap-1 text-xs text-muted">
-            Nama lengkap
+            Full name
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -161,26 +161,26 @@ export default function SettingsClient(p: Props) {
             disabled={loading}
             className="w-fit min-h-[44px] rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
           >
-            Simpan profil
+            Save profile
           </button>
         </form>
       </section>
 
       <section className={card}>
-        <h2 className="text-sm font-semibold">Ganti password</h2>
+        <h2 className="text-sm font-semibold">Change password</h2>
         <form onSubmit={changePassword} className="mt-3 flex flex-col gap-3">
           <input
             type="password"
             value={pw1}
             onChange={(e) => setPw1(e.target.value)}
-            placeholder="Password baru"
+            placeholder="New password"
             className={input}
           />
           <input
             type="password"
             value={pw2}
             onChange={(e) => setPw2(e.target.value)}
-            placeholder="Ulangi password baru"
+            placeholder="Repeat new password"
             className={input}
           />
           <button
@@ -188,7 +188,7 @@ export default function SettingsClient(p: Props) {
             disabled={loading}
             className="w-fit min-h-[44px] rounded-lg border border-line px-4 py-2 text-sm text-soft hover:bg-violet-50 active:bg-violet-100 disabled:opacity-60"
           >
-            Ganti password
+            Change password
           </button>
         </form>
       </section>

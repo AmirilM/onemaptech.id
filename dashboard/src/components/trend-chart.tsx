@@ -94,14 +94,14 @@ export default function TrendChart({ data }: { data: Point[] }) {
   }, []);
 
   const summary = (() => {
-    if (!data.length) return "Tidak ada data.";
+    if (!data.length) return "No data.";
     const total = data.reduce((a, p) => a + p.revenue_total, 0);
-    return `Total revenue Rp ${total.toLocaleString("id-ID")} dari ${data.length} hari.`;
+    return `Total revenue Rp ${total.toLocaleString("id-ID")} over ${data.length} days.`;
   })();
 
   return (
     <div className="h-64 w-full sm:h-72">
-      <p className="sr-only">Ringkasan tren: {summary}.</p>
+      <p className="sr-only">Trend summary: {summary}.</p>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={data}

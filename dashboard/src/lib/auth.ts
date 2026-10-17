@@ -28,7 +28,7 @@ async function fetchSessionProfile(): Promise<SessionProfile | null> {
   const profile = (data ?? null) as Profile | null;
   const lockedStore =
     profile?.role === "Store Supervisor" ? (profile?.store_code ?? null) : null;
-  // Area Manager terkunci ke area-nya (sales_name = master_stores/store_transactions area_manager).
+  // Area Manager is locked to their area (sales_name = master_stores/store_transactions area_manager).
   const lockedAM =
     profile?.role === "Area Manager" ? (profile?.sales_name ?? null) : null;
   return {
@@ -41,6 +41,6 @@ async function fetchSessionProfile(): Promise<SessionProfile | null> {
   };
 }
 
-// Di-cache per request: layout + page memanggil ini 2x untuk request yang sama.
-// Tanpa argumen sehingga key cache selalu sama dalam satu request.
+// Cached per request: layout + page call this twice for the same request.
+// No arguments, so the cache key is always the same within a request.
 export const getSessionProfile = cache(fetchSessionProfile);

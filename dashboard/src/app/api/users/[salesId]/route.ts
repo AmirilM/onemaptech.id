@@ -13,7 +13,7 @@ async function findAuthId(listUsers: ListUsersFn, email: string): Promise<string
   let page = 1;
   for (;;) {
     const { data, error } = await listUsers(page);
-    if (error) throw new Error("Gagal mencari Auth user.");
+    if (error) throw new Error("Failed to find the Auth user.");
     const list = data.users;
     if (!list.length) return null;
     const hit = list.find((u) => u.email === email);
@@ -23,7 +23,7 @@ async function findAuthId(listUsers: ListUsersFn, email: string): Promise<string
   }
 }
 
-// PATCH /api/users/[salesId] — edit (Admin, atau diri sendiri untuk nama/password/avatar)
+// PATCH /api/users/[salesId] — edit (admin, or self for name/password/avatar)
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ salesId: string }> },
@@ -41,13 +41,13 @@ export async function PATCH(
     if (body.store_name !== undefined) patch.store_name = body.store_name || null;
     if (body.role) {
       if (!ROLES.includes(body.role))
-        return NextResponse.json({ error: "Role tidak valid." }, { status: 400 });
+        return NextResponse.json({ error: "Invalid role." }, { status: 400 });
       patch.role = body.role;
     }
     if (body.password) patch.password = body.password;
   }
   if (!Object.keys(patch).length)
-    return NextResponse.json({ error: "Tidak ada perubahan." }, { status: 400 });
+    return NextResponse.json({ error: "No changes." }, { status: 400 });
 
   const { data: updated, error } = await g.service
     .from("profiles")
@@ -57,7 +57,7 @@ export async function PATCH(
     .maybeSingle();
   if (error || !updated)
     return NextResponse.json(
-      { error: error?.message ?? "User tidak ditemukan." },
+      { error: error?.message ?? "User not found." },
       { status: 404 },
     );
   const row = updated as {
@@ -68,7 +68,7 @@ export async function PATCH(
     password: string;
   };
 
-  // Sinkron ke Auth user (cari by email)
+  // Sync to the Auth user (look up by email)
   const email = `${salesId}@onemaptech.id`;
   const authId = await findAuthId(
     (pg: number) => g.service.auth.admin.listUsers({ page: pg, perPage: 100 }),
@@ -89,7 +89,7 @@ export async function PATCH(
   return NextResponse.json({ ok: true });
 }
 
-// DELETE /api/users/[salesId] — hapus (Admin only): Auth user + baris profiles
+// DELETE /api/users/[salesId] — delete (admin only): Auth user + profiles row
 export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ salesId: string }> },
