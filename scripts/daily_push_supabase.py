@@ -103,7 +103,7 @@ def main():
     ap.add_argument("--xlsx", default=str(ROOT / "data" / "raw" / "store-transactions.xlsx"))
     ap.add_argument("--sheet", default="RAW")
     ap.add_argument("--table", default="store_transactions")
-    ap.add_argument("--batch", type=int, default=100)
+    ap.add_argument("--batch", type=int, default=300)
     ap.add_argument("--no-clean", action="store_true",
                     help="Jangan kosongkan tabel dulu (default: replace penuh dengan --clean).")
     ap.add_argument("--skip-clean", action="store_true", help="Lewati tahap clean.")
