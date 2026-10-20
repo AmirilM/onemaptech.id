@@ -39,6 +39,16 @@ export default function AppSidebar({ name, role, avatarUrl, isAdmin }: Props) {
     });
   }
 
+  // Submenu clicks while collapsed expand the sidebar so labels stay readable.
+  function expand() {
+    setCollapsed(false);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, "0");
+    } catch {
+      /* ignore */
+    }
+  }
+
   return (
     <aside
       className={`sticky top-0 hidden h-dvh shrink-0 flex-col overflow-hidden border-r border-line p-4 transition-[width] duration-200 md:flex ${
@@ -103,7 +113,11 @@ export default function AppSidebar({ name, role, avatarUrl, isAdmin }: Props) {
         </button>
       </div>
       <div className="relative mt-2 flex-1 overflow-y-auto">
-        <SidebarNav isAdmin={isAdmin} collapsed={collapsed} />
+        <SidebarNav
+          isAdmin={isAdmin}
+          collapsed={collapsed}
+          onExpand={expand}
+        />
       </div>
       {collapsed ? (
         <div className="relative flex flex-col items-center gap-2">

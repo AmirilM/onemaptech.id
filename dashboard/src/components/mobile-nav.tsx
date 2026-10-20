@@ -107,8 +107,11 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
                 <X size={20} aria-hidden />
               </button>
             </div>
-            <div className="relative mt-2 flex-1 overflow-y-auto" onClick={() => setOpen(false)}>
-              <SidebarNav isAdmin={isAdmin} />
+            <div className="relative mt-2 flex-1 overflow-y-auto">
+              <SidebarNav
+                isAdmin={isAdmin}
+                onNavigate={() => setOpen(false)}
+              />
             </div>
             <div className="relative flex items-center gap-3 rounded-xl border border-line bg-white/80 p-3 backdrop-blur">
               {avatarUrl ? (
