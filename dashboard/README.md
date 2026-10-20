@@ -67,6 +67,8 @@ the frontend.
 
 Sidebar: Dashboard (greeting + KPI + trend + leaderboard + top product),
 Daily Summary (trend + table for the 1st–end of month + growth vs yesterday),
+Daily Store (daily sales per store/area for the current month + area ranking
+for AM/RH/Admin, with PNG and vector PDF export plus in-browser PDF preview),
 Product Analytics (device products only: sublob ranking by Qty/Revenue with
 share + cumulative, lob→sublob treemap, and product metrics; Accessories & VAS
 are out of scope), Report (preview + export the
