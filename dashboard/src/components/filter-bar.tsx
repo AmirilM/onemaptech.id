@@ -142,8 +142,14 @@ export default function FilterBar({
     const next = new URLSearchParams(params.toString());
     if (storeVal) next.set("store", storeVal);
     else next.delete("store");
-    if (amVal) next.set("am", amVal);
-    else next.delete("am");
+    // A locked store (Store Supervisor) never keeps an area param around.
+    if (lockedStore) {
+      next.delete("am");
+    } else if (lockedAM || amVal) {
+      next.set("am", lockedAM ?? amVal);
+    } else {
+      next.delete("am");
+    }
     if (dateMode !== "none") {
       if (r?.from && r?.to) {
         next.set("from", toISODate(r.from));
@@ -235,7 +241,9 @@ export default function FilterBar({
               disabled={!!lockedAM || isPending}
               className={`${input} w-full disabled:opacity-60 pl-10`}
             >
-              <option value="">All areas</option>
+              <option value="" hidden={!!lockedAM}>
+                All areas
+              </option>
               {(lockedAM ? [lockedAM] : areaManagers).map((a) => (
                 <option key={a} value={a}>
                   {a}
@@ -259,7 +267,7 @@ export default function FilterBar({
             disabled={!!lockedStore || isPending}
             className={`${input} w-full disabled:opacity-60 pl-10`}
           >
-            <option value="">All stores</option>
+            {!lockedStore && <option value="">All stores</option>}
             {stores.map((s) => (
               <option key={s.store_code} value={s.store_code}>
                 {s.store_code} — {s.store_name ?? "-"}

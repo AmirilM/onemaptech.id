@@ -31,7 +31,13 @@ export async function guard(
       ok: false,
       response: NextResponse.json({ error: "Server is not configured." }, { status: 500 }),
     };
-  const salesId = (user.user_metadata?.sales_id as string | undefined) ?? "";
+  // Trust only app_metadata (service-role writable) or the e-mail convention.
+  // user_metadata is editable by the user and must never drive authorization.
+  const appSalesId = user.app_metadata?.sales_id;
+  const salesId =
+    typeof appSalesId === "string" && appSalesId.trim() !== ""
+      ? appSalesId.trim()
+      : (user.email ?? "").split("@")[0];
   const { data: prof } = salesId
     ? await svc
         .from("profiles")

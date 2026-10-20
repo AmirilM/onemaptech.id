@@ -4,8 +4,10 @@ Seed Supabase Auth dari public.profiles.
 
 - Email konvensi: {sales_id}@onemaptech.id  (profiles tidak punya kolom email)
 - Password: kolom password profiles (plaintext sementara)
-- Metadata: sales_id, sales_name, role, store_code (dipakai aplikasi + RLS)
+- Metadata: app_metadata (sales_id, role) dipakai untuk otorisasi (hanya bisa
+  diubah dengan service role); user_metadata hanya untuk tampilan.
 - Idempoten: user yang sudah ada di-update (password + metadata).
+- profiles.user_id ikut disinkronkan (dipakai policy RLS).
 
 Butuh service/secret key (JANGAN pakai anon key):
     python3 scripts/seed_auth.py [--dry-run]
@@ -71,19 +73,31 @@ def main():
         email = f"{p['sales_id']}@{DOMAIN}"
         meta = {"sales_id": p["sales_id"], "sales_name": p.get("sales_name"),
                 "role": p.get("role"), "store_code": p.get("store_code")}
+        app_meta = {"sales_id": p["sales_id"], "role": p.get("role")}
         if args.dry_run:
             print(f"  {'UPDATE' if email in existing else 'CREATE'} {email} role={p.get('role')} store={p.get('store_code')}")
             continue
         try:
             if email in existing:
-                sb.auth.admin.update_user_by_id(existing[email], {"password": p["password"], "user_metadata": meta})
+                uid = existing[email]
+                sb.auth.admin.update_user_by_id(uid, {
+                    "password": p["password"],
+                    "app_metadata": app_meta,
+                    "user_metadata": meta,
+                })
                 updated += 1
                 print(f"  UPDATE {email}")
             else:
-                sb.auth.admin.create_user({"email": email, "password": p["password"],
-                                           "email_confirm": True, "user_metadata": meta})
+                resp = sb.auth.admin.create_user({"email": email, "password": p["password"],
+                                                  "email_confirm": True,
+                                                  "app_metadata": app_meta,
+                                                  "user_metadata": meta})
+                uid = getattr(getattr(resp, "user", None), "id", None)
                 created += 1
                 print(f"  CREATE {email}")
+            # Link profiles.user_id (used by the RLS scope policies).
+            if uid:
+                sb.table("profiles").update({"user_id": uid}).eq("sales_id", p["sales_id"]).execute()
         except Exception as e:
             print(f"  GAGAL {email}: {e}")
 

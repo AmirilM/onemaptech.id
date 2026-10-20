@@ -54,5 +54,6 @@ python3 scripts/push/push_target.py --clean
 ## Dashboard
 
 Web dashboard Next.js di `dashboard/` (lihat `dashboard/README.md`).
-Butuh 2 SQL dijalankan di SQL Editor: `sql/dashboard-views.sql` lalu
-`sql/dashboard-rls.sql`. Seed akun: `python3 scripts/seed_auth.py`.
+Urutan di SQL Editor: `sql/dashboard-views.sql` → `python3 scripts/seed_auth.py`
+(mengisi `profiles.user_id` + `app_metadata`) → `sql/dashboard-rls.sql`
+(RLS ber-scope per role).

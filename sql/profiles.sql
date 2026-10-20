@@ -11,8 +11,13 @@ create table if not exists public.profiles (
     role       text not null
                check (role in ('Store Supervisor', 'Area Manager', 'Regional Head', 'Admin')),
     password   text not null,
+    user_id    uuid,
     created_at timestamptz not null default now()
 );
+
+-- Link ke Supabase Auth (dipakai policy RLS ber-scope di dashboard-rls.sql).
+create unique index if not exists profiles_user_id_key
+    on public.profiles (user_id);
 
 create index if not exists profiles_store_code_idx
     on public.profiles (store_code);

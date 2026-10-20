@@ -11,7 +11,15 @@ import type {
   StoreRow,
 } from "@/lib/types";
 import FilterBar from "@/components/filter-bar";
-import { distinctAMs, effectiveAM, getStoreMap, storeInScope } from "@/lib/scope";
+import {
+  detectScopedSource,
+  getLatestDataDate,
+  getStoreMap,
+  resolveScope,
+  scopedName,
+  storeOptionsFrom,
+  type StoreOption,
+} from "@/lib/scope";
 import GreetHead from "@/components/greet-head";
 import PaceCard from "@/components/pace-card";
 import type { QtyBarItem } from "@/components/qty-bar-chart";
@@ -440,55 +448,48 @@ async function DashContent({
   // Batch 1: mapping + filter list + freshness (independent of the session).
   // Auth/profile are not re-queried here (already via getSessionProfile,
   // which is cached per request and also used by the layout).
-  const [storeMap, storeListRes, latestRes] = await Promise.all([
+  const [storeMap, storeListRes, source] = await Promise.all([
     getStoreMap(supabase),
     supabase
-      .from("mv_leaderboard_store")
+      .from("v_leaderboard_store")
       .select("store_code,store_name")
       .order("store_code"),
-    supabase
-      .from("mv_dashboard_daily")
-      .select("date")
-      .order("date", { ascending: false })
-      .limit(1),
+    detectScopedSource(supabase),
   ]);
   const prof = session.profile;
   const userEmail = session.email;
 
-  const lockedStore = session.lockedStore;
-  const lockedAM = session.lockedAM;
-  // AM scope (strict): store → AM map from master_stores.
-  const storeListRaw = storeListRes.data;
-  const amList = distinctAMs(storeMap);
-  const am = effectiveAM(lockedAM, params.am || "");
-  const amStores = am
-    ? storeMap.filter((r) => r.area_manager === am).map((r) => r.store_code)
-    : [];
-  // If the area filter is active but the mapping is unreadable (e.g. no access
-  // to master_stores yet), do not show misleading global numbers.
-  const amScopeBroken = am !== "" && amStores.length === 0;
-  const store = storeInScope(lockedStore ?? (params.store || ""), am, amStores);
+  // Single source of truth for store/area scoping (role-based, fail-closed).
+  const allStores = storeOptionsFrom(
+    storeListRes.data as StoreOption[] | null,
+    storeMap,
+  );
+  const scope = resolveScope(session, params, storeMap, allStores);
+  const { store, am, amStores } = scope;
+  const scopeError = scope.error;
 
-  // Store list for the filter (strict: an AM only sees their own stores)
-  const storeList = (
-    (storeListRaw ?? []) as { store_code: string; store_name: string | null }[]
-  ).filter((s) => !am || amStores.includes(s.store_code));
+  const leaderboardTable = scopedName(source, "leaderboard_store");
+  const storeTable = scopedName(source, "dashboard_store");
+  const storeDailyTable = scopedName(source, "dashboard_store_daily");
+  const dailyTable = scopedName(source, "dashboard_daily");
 
   // Data freshness — independent of the date filter
-  const latest = latestRes.data;
-  const latestDate =
-    (latest?.[0] as { date: string } | undefined)?.date ?? "-";
+  const latestDate = (await getLatestDataDate(supabase, source)) || "-";
 
   // Leaderboard: only the columns the table renders (less payload than select *).
   const LB_SELECT =
     "store_code,store_name,total_target,revenue_total,ach_total_pct,apple_target,revenue_apple,ach_apple_pct,android_target,revenue_android,ach_android_pct,rank_achievement";
   let lbQuery = supabase
-    .from("mv_leaderboard_store")
+    .from(leaderboardTable)
     .select(LB_SELECT)
     .order("ach_total_pct", { ascending: false, nullsFirst: false });
-  if (store) lbQuery = lbQuery.eq("store_code", store);
-  else if (am && amStores.length) lbQuery = lbQuery.in("store_code", amStores);
-  else if (amScopeBroken) lbQuery = lbQuery.eq("store_code", "__no_match__");
+  if (scope.mode === "store") lbQuery = lbQuery.eq("store_code", store);
+  else if (scope.mode === "area")
+    lbQuery = amStores.length
+      ? lbQuery.in("store_code", amStores)
+      : lbQuery.eq("store_code", "__no_match__");
+  else if (scope.mode === "blocked")
+    lbQuery = lbQuery.eq("store_code", "__no_match__");
   const lbPromise = lbQuery.then(
     (r) => (r.data ?? []) as LeaderboardRow[],
   );
@@ -542,37 +543,37 @@ async function DashContent({
     qty_motorola: d.qty_motorola,
   });
   // Function declaration (hoisted) so it can be called in parallel below.
-  // Branching logic kept exactly as before.
+  // Every branch follows the role-derived scope (never falls back to global).
   async function fetchTrend(): Promise<TrendPoint[]> {
-    if (store) {
+    if (scope.mode === "store") {
       let q = supabase
-        .from("mv_dashboard_store_daily")
+        .from(storeDailyTable)
         .select(QTY_SELECT)
         .eq("store_code", store)
         .order("date");
       if (monthStart) q = q.gte("date", monthStart);
       const { data } = await q;
       return ((data ?? []) as StoreDailyRow[]).map(toTrendPoint);
-    } else if (am && amStores.length) {
+    } else if (scope.mode === "area") {
+      if (!amStores.length) return [];
       let q = supabase
-        .from("mv_dashboard_store_daily")
+        .from(storeDailyTable)
         .select(QTY_SELECT)
         .in("store_code", amStores)
         .order("date");
       if (monthStart) q = q.gte("date", monthStart);
       const { data } = await q;
       return ((data ?? []) as StoreDailyRow[]).map(toTrendPoint);
-    } else if (am) {
-      return [];
-    } else {
+    } else if (scope.mode === "all") {
       let q = supabase
-        .from("mv_dashboard_daily")
+        .from(dailyTable)
         .select(QTY_SELECT)
         .order("date");
       if (monthStart) q = q.gte("date", monthStart);
       const { data } = await q;
       return ((data ?? []) as DailyRow[]).map(toTrendPoint);
     }
+    return [];
   }
   // Leaderboard + trend + targets are independent of each other → one batch.
   // fetchTargets is declared below (hoisted, safe to call here).
@@ -678,9 +679,9 @@ async function DashContent({
     vas_target: number | null;
   };
   async function fetchTargets(): Promise<KpiTargets> {
-  if (store) {
+  if (scope.mode === "store") {
     const { data } = await supabase
-      .from("mv_dashboard_store")
+      .from(storeTable)
       .select(
         "total_target,apple_target,android_target,accessories_target,vas_target",
       )
@@ -701,9 +702,9 @@ async function DashContent({
       accessories_target: s?.accessories_target ?? null,
       vas_target: s?.vas_target ?? null,
     };
-  } else if (am && amStores.length) {
+  } else if (scope.mode === "area" && amStores.length) {
     const { data: targets } = await supabase
-      .from("mv_dashboard_store")
+      .from(storeTable)
       .select(
         "total_target,apple_target,android_target,accessories_target,vas_target",
       )
@@ -728,16 +729,7 @@ async function DashContent({
       accessories_target: sum((x) => x.accessories_target),
       vas_target: sum((x) => x.vas_target),
     };
-  } else if (amScopeBroken) {
-    // Area mapping unreadable: do not show misleading global targets.
-    return {
-      total_target: null,
-      apple_target: null,
-      android_target: null,
-      accessories_target: null,
-      vas_target: null,
-    };
-  } else {
+  } else if (scope.mode === "all") {
     const { data: targets } = await supabase
       .from("master_target")
       .select(
@@ -764,6 +756,14 @@ async function DashContent({
       vas_target: sum((x) => x.vas_target),
     };
   }
+  // Area mapping unreadable / access blocked: never show global targets.
+  return {
+    total_target: null,
+    apple_target: null,
+    android_target: null,
+    accessories_target: null,
+    vas_target: null,
+  };
   }
   const kpi = { ...kpiRevenue, ...kpiTargets };
   const { elapsed, daysInMonth } = getWibPeriod();
@@ -772,7 +772,14 @@ async function DashContent({
 
   const card = "card-surface p-4 md:p-5";
 
-  const scopeLabel = store ? `Store ${store}` : am ? `Area ${am}` : "All stores";
+  const scopeLabel =
+    scope.mode === "store"
+      ? `Store ${store}`
+      : scope.mode === "area"
+        ? `Area ${am}`
+        : scope.mode === "all"
+          ? "All stores"
+          : "No access";
 
   return (
     <main className="mx-auto max-w-[1600px] p-4 md:p-8">
@@ -787,23 +794,25 @@ async function DashContent({
             />
             <p className="mt-1 text-xs text-muted">
               {prof
-                ? `${prof.role}${lockedAM ? ` · ${lockedAM}` : prof.store_code ? ` · ${prof.store_code} — ${prof.store_name ?? ""}` : " · all stores"}`
+                ? `${prof.role}${scope.mode === "area" ? ` · ${am}` : scope.mode === "all" ? " · all stores" : prof.store_code ? ` · ${prof.store_code} — ${prof.store_name ?? ""}` : " · no store"}`
                 : userEmail}{" "}
               · data updated {latestDate}
             </p>
           </header>
 
-          <div className="mt-4">
-            <FilterBar
-              stores={(storeList ?? []) as { store_code: string; store_name: string | null }[]}
-              lockedStore={lockedStore}
-              currentStore={store}
-              dateMode="none"
-              areaManagers={lockedAM ? [] : amList}
-              lockedAM={lockedAM}
-              currentAM={am}
-            />
-          </div>
+          {scope.mode !== "blocked" && (
+            <div className="mt-4">
+              <FilterBar
+                stores={scope.storeOptions}
+                lockedStore={scope.canPickStore ? null : scope.store || null}
+                currentStore={store}
+                dateMode="none"
+                areaManagers={scope.areaOptions}
+                lockedAM={scope.canPickArea ? null : scope.am || null}
+                currentAM={am}
+              />
+            </div>
+          )}
         </div>
         {/* Pace card: rata atas (sejajar baris "DASHBOARD") + rata kanan kolom.
             Tetap `hidden` di bawah xl, sama seperti blok gambar yang dulu
@@ -821,13 +830,12 @@ async function DashContent({
         </div>
       </div>
 
-      {amScopeBroken && (
+      {scopeError && (
         <div className="mt-4 rounded-2xl border border-warning/30 bg-warning/10 p-4 text-sm">
-          <p className="font-semibold text-warning">Unable to read area data</p>
-          <p className="mt-1 text-muted">
-            Area-to-store mapping ({am}) could not be loaded. Ask an admin to run
-            the latest <code>sql/dashboard-rls.sql</code> in the SQL Editor, then reload.
+          <p className="font-semibold text-warning">
+            {scope.mode === "blocked" ? "Access restricted" : "Unable to read scope data"}
           </p>
+          <p className="mt-1 text-muted">{scopeError}</p>
         </div>
       )}
 

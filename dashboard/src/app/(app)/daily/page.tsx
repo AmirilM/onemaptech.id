@@ -9,7 +9,15 @@ import DailySummaryTables, {
   type DailySummaryRow,
 } from "@/components/daily-summary-tables";
 import DailySummaryCards from "@/components/daily-summary-cards";
-import { distinctAMs, effectiveAM, getStoreMap, storeInScope } from "@/lib/scope";
+import {
+  detectScopedSource,
+  getLatestDataDate,
+  getStoreMap,
+  resolveScope,
+  scopedName,
+  storeOptionsFrom,
+  type StoreOption,
+} from "@/lib/scope";
 
 type Params = { store?: string; am?: string };
 
@@ -76,33 +84,25 @@ async function DailyContent({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  const lockedStore = session?.lockedStore ?? null;
-  const lockedAM = session?.lockedAM ?? null;
-  const [storeMap, latest, storeListRes] = await Promise.all([
+  const [storeMap, source, storeListRes] = await Promise.all([
     getStoreMap(supabase),
+    detectScopedSource(supabase),
     supabase
-      .from("mv_dashboard_daily")
-      .select("date")
-      .order("date", { ascending: false })
-      .limit(1),
-    supabase
-      .from("mv_leaderboard_store")
+      .from("v_leaderboard_store")
       .select("store_code,store_name")
       .order("store_code"),
   ]);
-  const latestData = latest.data;
-  const storeListRaw = storeListRes.data;
-  const amList = distinctAMs(storeMap);
-  const am = effectiveAM(lockedAM, params.am || "");
-  const amStores = am
-    ? storeMap.filter((r) => r.area_manager === am).map((r) => r.store_code)
-    : [];
-  const amScopeBroken = am !== "" && amStores.length === 0;
-  const store = storeInScope(lockedStore ?? (params.store || ""), am, amStores);
+  const allStores = storeOptionsFrom(
+    storeListRes.data as StoreOption[] | null,
+    storeMap,
+  );
+  const scope = resolveScope(session, params, storeMap, allStores);
+  const { store, amStores } = scope;
+  const storeDailyTable = scopedName(source, "dashboard_store_daily");
+  const dailyTable = scopedName(source, "dashboard_daily");
 
   // Current month derived automatically from the latest data date (month-to-date).
-  const latestDate =
-    (latestData?.[0] as { date: string } | undefined)?.date ?? "";
+  const latestDate = await getLatestDataDate(supabase, source);
   // Running days = the last day that has data (from the existing latestDate).
   const daysElapsed = latestDate ? Number(latestDate.slice(8, 10)) : 0;
   const month = latestDate.slice(0, 7);
@@ -115,19 +115,19 @@ async function DailyContent({
     : "";
 
   let raw: DailySummaryRow[] = [];
-  if (start && !amScopeBroken) {
-    if (store) {
+  if (start && !scope.error) {
+    if (scope.mode === "store") {
       const { data } = await supabase
-        .from("mv_dashboard_store_daily")
+        .from(storeDailyTable)
         .select(COLS)
         .eq("store_code", store)
         .gte("date", start)
         .lte("date", end)
         .order("date");
       raw = ((data ?? []) as DailySummaryRow[]).map(toFullRow);
-    } else if (am && amStores.length) {
+    } else if (scope.mode === "area" && amStores.length) {
       const { data } = await supabase
-        .from("mv_dashboard_store_daily")
+        .from(storeDailyTable)
         .select(`store_code,${COLS}`)
         .in("store_code", amStores)
         .gte("date", start)
@@ -160,9 +160,9 @@ async function DailyContent({
       raw = [...byDate.values()].sort((a, b) =>
         a.date < b.date ? -1 : 1,
       );
-    } else if (!am) {
+    } else if (scope.mode === "all") {
       const { data } = await supabase
-        .from("mv_dashboard_daily")
+        .from(dailyTable)
         .select(COLS)
         .gte("date", start)
         .lte("date", end)
@@ -181,12 +181,16 @@ async function DailyContent({
     }
   }
 
-  const storeList = (
-    (storeListRaw ?? []) as { store_code: string; store_name: string | null }[]
-  ).filter((s) => !am || amStores.includes(s.store_code));
-
   const card = "card-surface p-4 md:p-5";
-  const scopeKey = `${store}|${am}|${month}`;
+  const scopeKey = `${scope.mode}|${store}|${scope.am}|${month}`;
+  const scopeLabel =
+    scope.mode === "store"
+      ? `Store ${store}`
+      : scope.mode === "area"
+        ? `Area ${scope.am}`
+        : scope.mode === "all"
+          ? "All stores"
+          : "No access";
 
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-8">
@@ -197,32 +201,33 @@ async function DailyContent({
         Daily Summary
       </h1>
       <p className="mt-1 text-xs text-muted">
-        {store ? `Store ${store}` : am ? `Area ${am}` : "All stores"} · {month ? formatMonthYear(month) : "-"}
+        {scopeLabel} · {month ? formatMonthYear(month) : "-"}
       </p>
 
-      <div className="mt-4">
-        <FilterBar
-          stores={(storeList ?? []) as { store_code: string; store_name: string | null }[]}
-          lockedStore={lockedStore}
-          currentStore={store}
-          dateMode="none"
-          areaManagers={lockedAM ? [] : amList}
-          lockedAM={lockedAM}
-          currentAM={am}
-        />
-      </div>
-
-      {amScopeBroken && (
-        <div className="mt-4 rounded-2xl border border-warning/30 bg-warning/10 p-4 text-sm">
-          <p className="font-semibold text-warning">Unable to read area data</p>
-          <p className="mt-1 text-muted">
-            Area-to-store mapping ({am}) could not be loaded. Ask an admin to run
-            the latest <code>sql/dashboard-rls.sql</code> in the SQL Editor, then reload.
-          </p>
+      {scope.mode !== "blocked" && (
+        <div className="mt-4">
+          <FilterBar
+            stores={scope.storeOptions}
+            lockedStore={scope.canPickStore ? null : scope.store || null}
+            currentStore={store}
+            dateMode="none"
+            areaManagers={scope.areaOptions}
+            lockedAM={scope.canPickArea ? null : scope.am || null}
+            currentAM={scope.am}
+          />
         </div>
       )}
 
-      {!amScopeBroken && rows.length > 0 && (
+      {scope.error && (
+        <div className="mt-4 rounded-2xl border border-warning/30 bg-warning/10 p-4 text-sm">
+          <p className="font-semibold text-warning">
+            {scope.mode === "blocked" ? "Access restricted" : "Unable to read scope data"}
+          </p>
+          <p className="mt-1 text-muted">{scope.error}</p>
+        </div>
+      )}
+
+      {!scope.error && rows.length > 0 && (
         <DailySummaryCards rows={rows} daysElapsed={daysElapsed} />
       )}
 

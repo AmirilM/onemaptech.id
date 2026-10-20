@@ -1,7 +1,21 @@
 # Dashboard (Next.js)
 
-Sales performance dashboard — dark premium. Data comes from Supabase MVs
-(`mv_dashboard_*`, `mv_leaderboard_store`, `mv_top_product`).
+Sales performance dashboard — dark premium. Data comes from Supabase scoped
+views (`v_dashboard_*`, `v_leaderboard_store`, `v_top_product`), which fall back
+to the raw MVs (`mv_*`) until `sql/dashboard-rls.sql` is applied.
+
+## Role scope
+
+| Role | Area filter | Store filter | Data |
+|---|---|---|---|
+| Store Supervisor | hidden | locked to `profiles.store_code` | own store |
+| Area Manager | locked to `profiles.sales_name` | stores of that area | own area |
+| Regional Head | free | free | all stores |
+| Admin | free | free | all stores |
+
+Scope is resolved once per request in `src/lib/scope.ts` (`resolveScope`) and is
+fail-closed: a missing profile, a supervisor without `store_code`, or an unknown
+role gets no data (never "all stores").
 
 ## Setup
 
@@ -27,10 +41,20 @@ python3 scripts/seed_auth.py
 
 ## SQL to run (SQL Editor, once)
 
-1. `sql/dashboard-views.sql` — 5 materialized views + refresh functions
-2. `sql/dashboard-rls.sql` — GRANT + RLS for the `authenticated` role
-3. `sql/dashboard-v2.sql` — `avatar_url` column + `avatars` Storage bucket
-4. `sql/product-analytics.sql` — RPC `product_analytics_devices` for the Product Analytics page
+1. `sql/dashboard-views.sql` — materialized views + refresh functions
+2. `sql/profiles.sql` (only for a fresh database; adds `user_id`)
+3. `python3 scripts/seed_auth.py` — creates/updates Auth users **and**
+   `profiles.user_id` (required by the RLS scope)
+4. `sql/dashboard-rls.sql` — scoped RLS + role-filtered views (`v_*`)
+   * Store Supervisor → own store; Area Manager → own area;
+     Regional Head / Admin → all stores.
+   * Re-run it after changing policies. Re-run `seed_auth.py` whenever new
+     profiles are inserted outside the User Management page.
+5. `sql/dashboard-v2.sql` — `avatar_url` column + `avatars` Storage bucket
+6. `sql/product-analytics.sql` — RPC `product_analytics_devices` for the Product Analytics page
+
+> Until step 4 is applied the app falls back to the raw `mv_*` names, so the
+> dashboard keeps working — but scoping is then enforced by the app only.
 
 ## Deploy (Vercel)
 

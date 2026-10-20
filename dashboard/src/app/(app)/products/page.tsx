@@ -4,7 +4,12 @@ import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth";
 import FilterBar from "@/components/filter-bar";
 import ProductAnalyticsView from "@/components/product-analytics";
-import { distinctAMs, effectiveAM, getStoreMap, storeInScope } from "@/lib/scope";
+import {
+  getStoreMap,
+  resolveScope,
+  storeOptionsFrom,
+  type StoreOption,
+} from "@/lib/scope";
 import {
   DEVICE_METRIC_DEFAULT,
   normalizeDeviceRows,
@@ -46,48 +51,54 @@ async function ProductsContent({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const lockedStore = session?.lockedStore ?? null;
-  const lockedAM = session?.lockedAM ?? null;
-
   // storeMap + store list are independent → one batch.
   const [storeMap, storeListRes] = await Promise.all([
     getStoreMap(supabase),
     supabase
-      .from("mv_leaderboard_store")
+      .from("v_leaderboard_store")
       .select("store_code,store_name")
       .order("store_code"),
   ]);
-  const storeListRaw = storeListRes.data;
-
-  const amList = distinctAMs(storeMap);
-  const am = effectiveAM(lockedAM, params.am || "");
-  const amStores = am
-    ? storeMap.filter((r) => r.area_manager === am).map((r) => r.store_code)
-    : [];
-  const amScopeBroken = am !== "" && amStores.length === 0;
-  const store = storeInScope(lockedStore ?? (params.store || ""), am, amStores);
-  const scopeLabel = store ? `Store ${store}` : am ? `Area ${am}` : "All stores";
-
-  // Store list for the filter (strict: an AM only sees their own stores)
-  const storeList = (
-    (storeListRaw ?? []) as { store_code: string; store_name: string | null }[]
-  ).filter((s) => !am || amStores.includes(s.store_code));
+  const allStores = storeOptionsFrom(
+    storeListRes.data as StoreOption[] | null,
+    storeMap,
+  );
+  const scope = resolveScope(session, params, storeMap, allStores);
+  const { store } = scope;
+  const scopeLabel =
+    scope.mode === "store"
+      ? `Store ${store}`
+      : scope.mode === "area"
+        ? `Area ${scope.am}`
+        : scope.mode === "all"
+          ? "All stores"
+          : "No access";
 
   const metric: DeviceMetric =
     params.metric === "revenue" ? "revenue" : DEVICE_METRIC_DEFAULT;
 
   // Server-side aggregation via RPC (avoids the PostgREST row cap and keeps the
-  // payload to ~1 row per sublob). Scope args follow the strict store/AM rules.
-  const p_store = store ? store : amScopeBroken ? "__no_match__" : null;
-  const p_am = !store && am && amStores.length ? am : null;
-  const { data: rpcData, error: rpcError } = await supabase.rpc(
-    "product_analytics_devices",
-    { p_store, p_am },
-  );
+  // payload to ~1 row per sublob). Scope args follow the strict role rules.
+  const cannotReadScope = scope.mode === "blocked" || !!scope.error;
+  const p_store =
+    scope.mode === "store" ? store : cannotReadScope ? "__no_match__" : null;
+  const p_am =
+    scope.mode === "area"
+      ? scope.amStores.length
+        ? scope.am
+        : "__no_match__"
+      : null;
+  const { data: rpcData, error: rpcError } = cannotReadScope
+    ? { data: null, error: null }
+    : await supabase.rpc("product_analytics_devices", { p_store, p_am });
   const rows = rpcError ? [] : normalizeDeviceRows(rpcData as unknown[] | null);
 
   const exportName = `product-analytics${
-    store ? `-${store}` : am ? `-${am.replace(/\s+/g, "")}` : ""
+    scope.mode === "store"
+      ? `-${store}`
+      : scope.mode === "area"
+        ? `-${scope.am.replace(/\s+/g, "")}`
+        : ""
   }-${metric}`;
 
   return (
@@ -102,25 +113,26 @@ async function ProductsContent({
         {scopeLabel} · device products only (Apple + Android)
       </p>
 
-      <div className="mt-4">
-        <FilterBar
-          stores={(storeList ?? []) as { store_code: string; store_name: string | null }[]}
-          lockedStore={lockedStore}
-          currentStore={store}
-          dateMode="none"
-          areaManagers={lockedAM ? [] : amList}
-          lockedAM={lockedAM}
-          currentAM={am}
-        />
-      </div>
+      {scope.mode !== "blocked" && (
+        <div className="mt-4">
+          <FilterBar
+            stores={scope.storeOptions}
+            lockedStore={scope.canPickStore ? null : scope.store || null}
+            currentStore={store}
+            dateMode="none"
+            areaManagers={scope.areaOptions}
+            lockedAM={scope.canPickArea ? null : scope.am || null}
+            currentAM={scope.am}
+          />
+        </div>
+      )}
 
-      {amScopeBroken && (
+      {scope.error && (
         <div className="mt-4 rounded-2xl border border-warning/30 bg-warning/10 p-4 text-sm">
-          <p className="font-semibold text-warning">Unable to read area data</p>
-          <p className="mt-1 text-muted">
-            Area-to-store mapping ({am}) could not be loaded. Ask an admin to run
-            the latest <code>sql/dashboard-rls.sql</code> in the SQL Editor, then reload.
+          <p className="font-semibold text-warning">
+            {scope.mode === "blocked" ? "Access restricted" : "Unable to read scope data"}
           </p>
+          <p className="mt-1 text-muted">{scope.error}</p>
         </div>
       )}
 
@@ -135,7 +147,7 @@ async function ProductsContent({
         </div>
       )}
 
-      {!amScopeBroken && !rpcError && (
+      {!cannotReadScope && !rpcError && (
         <ProductAnalyticsView
           rows={rows}
           initialMetric={metric}

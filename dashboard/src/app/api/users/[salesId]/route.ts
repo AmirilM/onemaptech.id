@@ -77,6 +77,8 @@ export async function PATCH(
   if (authId) {
     await g.service.auth.admin.updateUserById(authId, {
       ...(body.password && isAdmin ? { password: body.password } : {}),
+      // Authorization data lives in app_metadata (service-role only).
+      app_metadata: { sales_id: row.sales_id, role: row.role },
       user_metadata: {
         sales_id: row.sales_id,
         sales_name: row.sales_name,
@@ -84,6 +86,11 @@ export async function PATCH(
         store_code: row.store_code,
       },
     });
+    // Keep the RLS link (profiles.user_id) in sync.
+    await g.service
+      .from("profiles")
+      .update({ user_id: authId })
+      .eq("sales_id", salesId);
   }
   revalidatePath("/", "layout");
   return NextResponse.json({ ok: true });

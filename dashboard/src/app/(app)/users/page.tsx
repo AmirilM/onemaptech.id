@@ -75,7 +75,7 @@ async function UsersContent() {
         if (!users.length) break;
         for (const u of users) {
           const sid =
-            (u.user_metadata?.sales_id as string | undefined) ??
+            (u.app_metadata?.sales_id as string | undefined) ??
             (u.email?.endsWith("@onemaptech.id")
               ? u.email.split("@")[0]
               : undefined);
