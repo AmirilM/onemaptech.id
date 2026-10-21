@@ -1,9 +1,11 @@
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";
+import { Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth";
 import { num, pct, pctExact, rupiah } from "@/lib/format";
+import { computeKpiPoints } from "@/lib/kpi-points";
 import type {
   DailyRow,
   LeaderboardRow,
@@ -76,7 +78,9 @@ function kpiCard(
   elapsed: number,
   daysInMonth: number,
   variant: KpiVariant | null,
+  point: number | null,
   wide = false,
+  achievable = false,
 ) {
   const ach = target ? Math.round((10000 * actual) / target) / 100 : null;
   const estimated =
@@ -166,6 +170,15 @@ function kpiCard(
           </span>
         </div>
       </div>
+      <div className="mt-2.5 flex items-center justify-between gap-2 rounded-lg bg-primary/10 px-2.5 py-1.5 ring-1 ring-inset ring-primary/15">
+        <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-primary">
+          <Sparkles className="h-3 w-3" aria-hidden />
+          Point
+        </span>
+        <span className="text-[15px] font-bold leading-none text-primary tabular-nums">
+          {point ?? "–"}
+        </span>
+      </div>
       <div
         className="relative mt-2 h-1.5 overflow-hidden rounded-full bg-track"
         role="img"
@@ -251,7 +264,7 @@ function kpiCard(
           {label}
         </p>
 
-        <div className="mt-4 grid items-center gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-11 xl:pr-[150px]">
+        <div className="mt-4 grid items-center gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-12 xl:pr-[250px]">
           {/* Zona A — actual sales */}
           <div className="min-w-0 sm:col-span-1 lg:col-span-4">
             <p className="text-[11px] font-semibold uppercase leading-4 tracking-[0.16em] text-muted">
@@ -312,7 +325,7 @@ function kpiCard(
           </dl>
 
           {/* Zona C — achievement */}
-          <div className="sm:col-span-2 sm:border-t sm:border-line sm:pt-4 lg:col-span-3 lg:border-t-0 lg:border-l lg:border-line lg:pt-0 lg:pl-5">
+          <div className="sm:col-span-1 sm:border-t sm:border-line sm:pt-4 lg:col-span-2 lg:border-t-0 lg:border-l lg:border-line lg:pt-0 lg:pl-5">
             <p className="text-[11px] font-semibold uppercase leading-4 tracking-[0.16em] text-muted">
               Achievement
             </p>
@@ -329,6 +342,33 @@ function kpiCard(
                 {pct(estPct)}
               </span>
             </p>
+          </div>
+
+          {/* Zona D — total poin; warna emerald saat Achievable */}
+          <div className="sm:col-span-1 sm:border-t sm:border-line sm:pt-4 lg:col-span-2 lg:border-t-0 lg:border-l lg:border-line lg:pt-0 lg:pl-5">
+            <div
+              className={`relative flex flex-col justify-center overflow-hidden rounded-2xl px-4 py-4 text-white shadow-[0_18px_38px_-18px_rgba(124,58,237,0.75)] ring-1 ring-white/20 ${
+                achievable
+                  ? "bg-gradient-to-br from-accent via-[#047857] to-[#065f46]"
+                  : "bg-gradient-to-br from-primary via-primary-hover to-[#4c1d95]"
+              }`}
+            >
+              <div aria-hidden className="pointer-events-none absolute inset-0">
+                <div className="absolute -right-6 -bottom-8 h-24 w-24 rounded-full border border-white/15" />
+                <div className="absolute -right-2 -bottom-4 h-16 w-16 rounded-full border border-white/10" />
+                <div className="absolute -top-4 -left-4 h-16 w-16 rounded-full bg-white/10 blur-lg" />
+              </div>
+              <div className="relative flex items-center justify-between gap-2">
+                <p className="text-[10px] font-bold uppercase leading-4 tracking-[0.18em] text-white/75">
+                  Total Point
+                </p>
+                <Sparkles className="h-3.5 w-3.5 text-white/80" aria-hidden />
+              </div>
+              <p className="relative mt-1.5 text-[42px] font-extrabold leading-none tracking-tighter tabular-nums">
+                {point ?? "–"}
+              </p>
+              {achievable && <span className="sr-only">Achievable</span>}
+            </div>
           </div>
         </div>
 
@@ -408,7 +448,7 @@ function DashboardSkeleton() {
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className={`${pulse} h-[232px] sm:col-span-2 lg:col-span-4`} />
         {["Apple", "Android", "Accessories", "VAS"].map((l) => (
-          <div key={l} className={`${pulse} h-[232px]`} />
+          <div key={l} className={`${pulse} h-[270px]`} />
         ))}
       </div>
       <div className={`mt-4 h-80 ${pulse}`} />
@@ -766,6 +806,20 @@ async function DashContent({
   };
   }
   const kpi = { ...kpiRevenue, ...kpiTargets };
+  const pointResult = computeKpiPoints(
+    {
+      apple: kpi.revenue_apple,
+      android: kpi.revenue_android,
+      accessories: kpi.revenue_accessories,
+      vas: kpi.revenue_vas,
+    },
+    {
+      apple_target: kpi.apple_target,
+      android_target: kpi.android_target,
+      accessories_target: kpi.accessories_target,
+      vas_target: kpi.vas_target,
+    },
+  );
   const { elapsed, daysInMonth } = getWibPeriod();
   const pacePct =
     daysInMonth > 0 ? Math.round((10000 * elapsed) / daysInMonth) / 100 : 0;
@@ -845,11 +899,11 @@ async function DashContent({
           Current-period revenue · vs target
         </p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, elapsed, daysInMonth, null, true)}
-          {kpiCard("Apple Revenue", kpi.revenue_apple, kpi.apple_target, elapsed, daysInMonth, "apple")}
-          {kpiCard("Android Revenue", kpi.revenue_android, kpi.android_target, elapsed, daysInMonth, "android")}
-          {kpiCard("Accessories Revenue", kpi.revenue_accessories, kpi.accessories_target, elapsed, daysInMonth, "accessories")}
-          {kpiCard("VAS Revenue", kpi.revenue_vas, kpi.vas_target, elapsed, daysInMonth, "vas")}
+          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, elapsed, daysInMonth, null, pointResult.total, true, pointResult.achievable)}
+          {kpiCard("Apple Revenue", kpi.revenue_apple, kpi.apple_target, elapsed, daysInMonth, "apple", pointResult.points.apple)}
+          {kpiCard("Android Revenue", kpi.revenue_android, kpi.android_target, elapsed, daysInMonth, "android", pointResult.points.android)}
+          {kpiCard("Accessories Revenue", kpi.revenue_accessories, kpi.accessories_target, elapsed, daysInMonth, "accessories", pointResult.points.accessories)}
+          {kpiCard("VAS Revenue", kpi.revenue_vas, kpi.vas_target, elapsed, daysInMonth, "vas", pointResult.points.vas)}
         </div>
       </section>
 
