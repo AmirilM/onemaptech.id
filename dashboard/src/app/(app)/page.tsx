@@ -345,12 +345,12 @@ function kpiCard(
           </div>
 
           {/* Zona D — total poin; warna emerald saat Achievable */}
-          <div className="sm:col-span-1 sm:border-t sm:border-line sm:pt-4 lg:col-span-2 lg:border-t-0 lg:border-l lg:border-line lg:pt-0 lg:pl-5">
+          <div className="sm:col-span-1 sm:border-t sm:border-line sm:pt-4 lg:col-span-2 lg:border-t-0 lg:border-l lg:border-line lg:pt-0 lg:pl-4">
             <div
-              className={`relative flex flex-col justify-center overflow-hidden rounded-2xl px-4 py-4 text-white shadow-[0_18px_38px_-18px_rgba(124,58,237,0.75)] ring-1 ring-white/20 ${
+              className={`relative flex flex-col justify-center overflow-hidden rounded-2xl px-3 py-4 text-white ring-1 ring-white/20 ${
                 achievable
-                  ? "bg-gradient-to-br from-accent via-[#047857] to-[#065f46]"
-                  : "bg-gradient-to-br from-primary via-primary-hover to-[#4c1d95]"
+                  ? "bg-gradient-to-br from-accent via-[#047857] to-[#065f46] shadow-[0_18px_38px_-18px_rgba(5,150,105,0.75)]"
+                  : "bg-gradient-to-br from-primary via-primary-hover to-[#4c1d95] shadow-[0_18px_38px_-18px_rgba(124,58,237,0.75)]"
               }`}
             >
               <div aria-hidden className="pointer-events-none absolute inset-0">
@@ -358,13 +358,10 @@ function kpiCard(
                 <div className="absolute -right-2 -bottom-4 h-16 w-16 rounded-full border border-white/10" />
                 <div className="absolute -top-4 -left-4 h-16 w-16 rounded-full bg-white/10 blur-lg" />
               </div>
-              <div className="relative flex items-center justify-between gap-2">
-                <p className="text-[10px] font-bold uppercase leading-4 tracking-[0.18em] text-white/75">
-                  Total Point
-                </p>
-                <Sparkles className="h-3.5 w-3.5 text-white/80" aria-hidden />
-              </div>
-              <p className="relative mt-1.5 text-[42px] font-extrabold leading-none tracking-tighter tabular-nums">
+              <p className="relative whitespace-nowrap text-[9px] font-bold uppercase leading-4 tracking-[0.1em] text-white/75">
+                Total Point
+              </p>
+              <p className="relative mt-1.5 text-[38px] font-extrabold leading-none tracking-tighter tabular-nums">
                 {point ?? "–"}
               </p>
               {achievable && <span className="sr-only">Achievable</span>}
@@ -899,7 +896,7 @@ async function DashContent({
           Current-period revenue · vs target
         </p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, elapsed, daysInMonth, null, pointResult.total, true, pointResult.achievable)}
+          {kpiCard("Total Revenue", kpi.revenue_total, kpi.total_target, elapsed, daysInMonth, null, pointResult.totalPoint, true, pointResult.achievable)}
           {kpiCard("Apple Revenue", kpi.revenue_apple, kpi.apple_target, elapsed, daysInMonth, "apple", pointResult.points.apple)}
           {kpiCard("Android Revenue", kpi.revenue_android, kpi.android_target, elapsed, daysInMonth, "android", pointResult.points.android)}
           {kpiCard("Accessories Revenue", kpi.revenue_accessories, kpi.accessories_target, elapsed, daysInMonth, "accessories", pointResult.points.accessories)}

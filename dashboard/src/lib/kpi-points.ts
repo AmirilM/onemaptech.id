@@ -19,6 +19,7 @@ export type KpiPointResult = {
   weights: KpiWeights;
   points: Record<KpiPointKey, number | null>;
   total: number;
+  totalPoint: number | null;
   achievable: boolean;
 };
 
@@ -89,6 +90,9 @@ export function computeKpiPoints(
     weights.mandatory !== null &&
     total >= 85 &&
     mandatoryPoint === mandatoryWeight;
+  // Tanpa satu pun target, total bukan angka 0 yang bermakna — sembunyikan.
+  const hasAnyTarget =
+    weights.apple + weights.android + weights.accessories + weights.vas > 0;
 
-  return { weights, points, total, achievable };
+  return { weights, points, total, totalPoint: hasAnyTarget ? total : null, achievable };
 }

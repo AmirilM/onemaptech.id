@@ -161,3 +161,28 @@ test("achievable: when Android is absent, Apple becomes mandatory", () => {
   assert.equal(result.total, 100);
   assert.equal(result.achievable, true);
 });
+
+test("totalPoint is null when no KPI has a target", () => {
+  const result = computeKpiPoints(
+    { apple: 0, android: 0, accessories: 0, vas: 0 },
+    {
+      apple_target: null,
+      android_target: null,
+      accessories_target: null,
+      vas_target: null,
+    },
+  );
+
+  assert.equal(result.total, 0);
+  assert.equal(result.totalPoint, null);
+  assert.equal(result.achievable, false);
+});
+
+test("totalPoint equals total when at least one KPI has a target", () => {
+  const result = computeKpiPoints(
+    { apple: 0, android: 100, accessories: 100, vas: 100 },
+    { apple_target: 0, android_target: 100, accessories_target: 100, vas_target: 100 },
+  );
+
+  assert.equal(result.totalPoint, 100);
+});
