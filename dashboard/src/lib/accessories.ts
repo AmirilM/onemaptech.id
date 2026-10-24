@@ -3,10 +3,9 @@
 // Sumber data: RPC `product_analytics_accessories` (kpi_group = 'ACCESSORIES').
 // Satu baris RPC = satu sap_article; artikel selalu punya satu brand/lob/deskripsi.
 //
-// Tiga lapis agregasi di halaman ini:
-//   - brand  : kontribusi tiap brand terhadap total accessories
-//   - LOB    : kontribusi tiap lob di dalam brand-nya
-//   - artikel: detail per sap_description, kontribusi terhadap total accessories
+// Satu pohon tiga level untuk halaman ini:
+//   brand -> LOB -> produk (sap_description)
+// Share selalu dihitung terhadap induknya: brand vs total, LOB vs brand, produk vs LOB.
 
 export type AccessoryRow = {
   brand: string;
@@ -18,24 +17,40 @@ export type AccessoryRow = {
 };
 
 export type AccessoryShare = {
+  /** Porsi terhadap induk (brand→total, LOB→brand, produk→LOB). */
   qtyShare: number;
   revenueShare: number;
+  /** Porsi revenue terhadap total seluruh Accessories. */
+  totalRevenueShare: number;
 };
+
+export type AccessoryProduct = AccessoryShare &
+  AccessoryRow & {
+    /** Average Selling Price = revenue / qty (null bila qty 0). */
+    asp: number | null;
+    /** Satu artikel = satu SKU. */
+    skuCount: number;
+  };
 
 export type AccessoryLob = AccessoryShare & {
   lob: string;
   qty: number;
   revenue: number;
+  asp: number | null;
+  /** Distinct sap_article yang terjual di LOB ini. */
+  skuCount: number;
+  products: AccessoryProduct[];
 };
 
 export type AccessoryBrand = AccessoryShare & {
   brand: string;
   qty: number;
   revenue: number;
+  asp: number | null;
+  /** Distinct sap_article yang terjual di brand ini. */
+  skuCount: number;
   lobs: AccessoryLob[];
 };
-
-export type AccessoryItem = AccessoryShare & AccessoryRow;
 
 export type AccessoryTotals = {
   qty: number;
@@ -109,27 +124,59 @@ export function computeAccessoryTotals(rows: AccessoryRow[]): AccessoryTotals {
   return { qty, revenue, brandCount: brands.size, articleCount: articles.size };
 }
 
-/** Brand + LOB-nya, urut revenue menurun. Share dihitung terhadap total accessories. */
+type LobBucket = {
+  qty: number;
+  revenue: number;
+  products: Map<string, AccessoryRow>;
+};
+
+/** Average Selling Price = revenue / qty (null bila qty 0). */
+export function asp(qty: number, revenue: number): number | null {
+  return qty > 0 ? revenue / qty : null;
+}
+
+/**
+ * Pohon brand -> LOB -> produk, urut revenue menurun di tiap level.
+ * Share induk: brand vs total, LOB vs brand, produk vs LOB.
+ * totalRevenueShare selalu terhadap total seluruh Accessories.
+ */
 export function computeAccessoryBrands(rows: AccessoryRow[]): AccessoryBrand[] {
   const totals = computeAccessoryTotals(rows);
   const map = new Map<
     string,
-    { qty: number; revenue: number; lobs: Map<string, { qty: number; revenue: number }> }
+    {
+      qty: number;
+      revenue: number;
+      articles: Set<string>;
+      lobs: Map<string, LobBucket>;
+    }
   >();
 
   for (const r of rows) {
     let brand = map.get(r.brand);
     if (!brand) {
-      brand = { qty: 0, revenue: 0, lobs: new Map() };
+      brand = { qty: 0, revenue: 0, articles: new Set(), lobs: new Map() };
       map.set(r.brand, brand);
     }
     brand.qty += r.qty;
     brand.revenue += r.revenue;
+    brand.articles.add(r.article);
 
-    const lob = brand.lobs.get(r.lob) ?? { qty: 0, revenue: 0 };
+    let lob = brand.lobs.get(r.lob);
+    if (!lob) {
+      lob = { qty: 0, revenue: 0, products: new Map() };
+      brand.lobs.set(r.lob, lob);
+    }
     lob.qty += r.qty;
     lob.revenue += r.revenue;
-    brand.lobs.set(r.lob, lob);
+
+    const product = lob.products.get(r.article);
+    if (product) {
+      product.qty += r.qty;
+      product.revenue += r.revenue;
+    } else {
+      lob.products.set(r.article, { ...r });
+    }
   }
 
   const out: AccessoryBrand[] = [];
@@ -138,49 +185,34 @@ export function computeAccessoryBrands(rows: AccessoryRow[]): AccessoryBrand[] {
       brand: name,
       qty: brand.qty,
       revenue: brand.revenue,
+      asp: asp(brand.qty, brand.revenue),
+      skuCount: brand.articles.size,
       qtyShare: share(brand.qty, totals.qty),
       revenueShare: share(brand.revenue, totals.revenue),
+      totalRevenueShare: share(brand.revenue, totals.revenue),
       lobs: [...brand.lobs.entries()]
-        .map(([lob, v]) => ({
-          lob,
-          qty: v.qty,
-          revenue: v.revenue,
-          qtyShare: share(v.qty, brand.qty),
-          revenueShare: share(v.revenue, brand.revenue),
+        .map(([lobName, lob]) => ({
+          lob: lobName,
+          qty: lob.qty,
+          revenue: lob.revenue,
+          asp: asp(lob.qty, lob.revenue),
+          skuCount: lob.products.size,
+          qtyShare: share(lob.qty, brand.qty),
+          revenueShare: share(lob.revenue, brand.revenue),
+          totalRevenueShare: share(lob.revenue, totals.revenue),
+          products: [...lob.products.values()]
+            .map((p) => ({
+              ...p,
+              asp: asp(p.qty, p.revenue),
+              skuCount: 1,
+              qtyShare: share(p.qty, lob.qty),
+              revenueShare: share(p.revenue, lob.revenue),
+              totalRevenueShare: share(p.revenue, totals.revenue),
+            }))
+            .sort(compareRevenue),
         }))
         .sort(compareRevenue),
     });
   }
   return out.sort(compareRevenue);
-}
-
-/** Detail per artikel (sap_description), urut revenue menurun. */
-export function computeAccessoryItems(rows: AccessoryRow[]): AccessoryItem[] {
-  const totals = computeAccessoryTotals(rows);
-  const map = new Map<string, AccessoryRow>();
-
-  for (const r of rows) {
-    const item = map.get(r.article);
-    if (item) {
-      item.qty += r.qty;
-      item.revenue += r.revenue;
-    } else {
-      map.set(r.article, { ...r });
-    }
-  }
-
-  return [...map.values()]
-    .map((r) => ({
-      ...r,
-      qtyShare: share(r.qty, totals.qty),
-      revenueShare: share(r.revenue, totals.revenue),
-    }))
-    .sort(compareRevenue);
-}
-
-/** Pilihan filter LOB (sudah dinormalisasi), urut abjad. */
-export function accessoryLobOptions(rows: AccessoryRow[]): string[] {
-  return [...new Set(rows.map((r) => r.lob))].sort((a, b) =>
-    a.localeCompare(b, "id"),
-  );
 }
