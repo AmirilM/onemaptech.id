@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import ConfirmDialog from "@/components/confirm-dialog";
 
 export type UserRow = {
   sales_id: string;
@@ -33,6 +35,8 @@ export default function UserForm({
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showPw, setShowPw] = useState(false);
   const isEdit = !!initial?.sales_id;
 
   async function submit(e: React.FormEvent) {
@@ -61,7 +65,11 @@ export default function UserForm({
   }
 
   async function remove() {
-    if (!confirm(`Delete user ${initial!.sales_id}? (profiles + Auth)`)) return;
+    setConfirmDelete(true);
+  }
+
+  async function handleDelete() {
+    setConfirmDelete(false);
     setLoading(true);
     try {
       const res = await fetch(`/api/users/${initial!.sales_id}`, { method: "DELETE" });
@@ -98,49 +106,85 @@ export default function UserForm({
         </p>
         <div className="mt-4 flex flex-col gap-3">
           {!isEdit && (
-            <input
-              value={f.sales_id}
-              onChange={(e) => setF({ ...f, sales_id: e.target.value })}
-              placeholder="Sales ID"
-              className={input}
-            />
+            <label className="flex flex-col gap-1 text-xs text-muted">
+              <span>Sales ID</span>
+              <input
+                id="sales-id"
+                value={f.sales_id}
+                onChange={(e) => setF({ ...f, sales_id: e.target.value })}
+                placeholder="Sales ID"
+                className={input}
+              />
+            </label>
           )}
-          <input
-            value={f.sales_name}
-            onChange={(e) => setF({ ...f, sales_name: e.target.value })}
-            placeholder="Full name"
-            className={input}
-          />
+          <label className="flex flex-col gap-1 text-xs text-muted">
+            <span>Full name</span>
+            <input
+              id="sales-name"
+              value={f.sales_name}
+              onChange={(e) => setF({ ...f, sales_name: e.target.value })}
+              placeholder="Full name"
+              className={input}
+            />
+          </label>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <input
-              value={f.store_code}
-              onChange={(e) => setF({ ...f, store_code: e.target.value })}
-              placeholder="Store code"
-              className={input}
-            />
-            <input
-              value={f.store_name}
-              onChange={(e) => setF({ ...f, store_name: e.target.value })}
-              placeholder="Store name"
-              className={input}
-            />
+            <label className="flex flex-col gap-1 text-xs text-muted">
+              <span>Store code</span>
+              <input
+                id="store-code"
+                value={f.store_code}
+                onChange={(e) => setF({ ...f, store_code: e.target.value })}
+                placeholder="Store code"
+                className={input}
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-muted">
+              <span>Store name</span>
+              <input
+                id="store-name"
+                value={f.store_name}
+                onChange={(e) => setF({ ...f, store_name: e.target.value })}
+                placeholder="Store name"
+                className={input}
+              />
+            </label>
           </div>
-          <select
-            value={f.role}
-            onChange={(e) => setF({ ...f, role: e.target.value })}
-            className={input}
-          >
-            {ROLES.map((r) => (
-              <option key={r}>{r}</option>
-            ))}
-          </select>
-          <input
-            type="password"
-            value={f.password}
-            onChange={(e) => setF({ ...f, password: e.target.value })}
-            placeholder={isEdit ? "New password (leave blank to keep)" : "Password"}
-            className={input}
-          />
+          <label className="flex flex-col gap-1 text-xs text-muted">
+            <span>Role</span>
+            <select
+              id="role"
+              value={f.role}
+              onChange={(e) => setF({ ...f, role: e.target.value })}
+              className={input}
+            >
+              {ROLES.map((r) => (
+                <option key={r}>{r}</option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-xs text-muted">
+            <span>
+              {isEdit ? "New password (leave blank to keep)" : "Password"}
+            </span>
+            <div className="relative">
+              <input
+                id="password"
+                type={showPw ? "text" : "password"}
+                value={f.password}
+                onChange={(e) => setF({ ...f, password: e.target.value })}
+                className={`${input} pr-12`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPw((v) => !v)}
+                aria-pressed={showPw}
+                aria-label={showPw ? "Sembunyikan password" : "Tampilkan password"}
+                className="absolute right-3 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-lg text-muted hover:bg-violet-50 hover:text-ink"
+              >
+                {showPw ? <EyeOff size={20} aria-hidden /> : <Eye size={20} aria-hidden />}
+              </button>
+            </div>
+          </label>
         </div>
         {error && (
           <p className="mt-3 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
@@ -178,6 +222,16 @@ export default function UserForm({
           </div>
         </div>
       </form>
+      <ConfirmDialog
+        open={confirmDelete}
+        title="Hapus user"
+        description={`Menghapus ${initial!.sales_id} dari profiles dan Auth. Tindakan tidak dapat dibatalkan.`}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        destructive
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDelete(false)}
+      />
     </div>
   );
 }

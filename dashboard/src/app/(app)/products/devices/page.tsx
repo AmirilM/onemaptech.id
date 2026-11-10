@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth";
 import FilterBar from "@/components/filter-bar";
 import ProductAnalyticsView from "@/components/product-analytics";
+import Breadcrumb from "@/components/breadcrumb";
 import {
   getStoreMap,
   resolveScope,
@@ -102,7 +103,13 @@ async function ProductsContent({
   }-${metric}`;
 
   return (
-    <main className="mx-auto max-w-7xl p-4 md:p-8">
+    <main className="mx-auto max-w-7xl p-4 md:p-8" id="main-content">
+      <Breadcrumb
+        items={[
+          { label: "Dashboard", href: "/" },
+          { label: "Devices" },
+        ]}
+      />
       <p className="text-xs font-semibold tracking-[0.2em] text-primary">
         PRODUCT ANALYTICS
       </p>

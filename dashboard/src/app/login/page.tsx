@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useState } from "react";
 import {
   ArrowRight,
@@ -59,17 +60,24 @@ export default function LoginPage() {
     "h-[52px] w-full rounded-xl border border-slate-200 bg-white text-[15px] text-slate-900 outline-none placeholder:text-slate-400 focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition";
 
   return (
-    <main className="relative flex min-h-dvh flex-col overflow-hidden bg-[#F4F4F6]">
-      <style>{`@keyframes login-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}`}</style>
+    <main className="relative flex min-h-dvh flex-col overflow-hidden bg-[#F4F4F6]" id="main-content">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-white focus:rounded-lg focus:font-semibold"
+      >
+        Skip to content
+      </a>
+
 
       {/* Background — One Data, Many Possibilities collage */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/login-bg.webp"
           alt=""
-          fetchPriority="high"
-          className="h-full w-full object-cover object-center"
+          fill
+          sizes="100vw"
+          className="object-cover object-center"
+          priority
         />
         {/* Overlay so the right card stays readable while the left stays vivid */}
         <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/0 to-white/80" />
@@ -86,11 +94,13 @@ export default function LoginPage() {
           className="flex items-center justify-center p-6 [padding-bottom:env(safe-area-inset-bottom)] lg:bg-white/40 lg:p-10 lg:backdrop-blur-[2px]"
         >
           <div className="w-full max-w-[420px] rounded-2xl border border-slate-100 bg-white p-8 shadow-[0_24px_60px_-24px_rgba_76,29,149,0.25)]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src="/logo/logo-192.png"
               alt="Logo OneMaptech"
+              width={192}
+              height={192}
               className="mx-auto size-24 object-contain"
+              priority
             />
             <h1 className="mt-4 text-center text-[26px] font-extrabold tracking-tight text-slate-900">
               ONE<span className="text-violet-600">MAP</span>TECH
@@ -182,8 +192,7 @@ export default function LoginPage() {
                   key={errorKey}
                   role="alert"
                   aria-live="assertive"
-                  style={{ animation: "login-shake 0.3s ease" }}
-                  className="mt-4 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-[13px] leading-relaxed text-rose-600"
+                  className="login-shake mt-4 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-[13px] leading-relaxed text-rose-600"
                 >
                   <TriangleAlert
                     size={15}

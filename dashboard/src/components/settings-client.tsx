@@ -134,12 +134,17 @@ export default function SettingsClient(p: Props) {
               {p.role}
               {p.storeCode ? ` · ${p.storeCode}` : ""}
             </p>
-            <label className="mt-2 inline-block cursor-pointer rounded-lg border border-line px-3 py-1.5 text-xs text-soft hover:bg-violet-50">
+            <label
+              htmlFor="avatar-upload"
+              className="mt-2 inline-block cursor-pointer rounded-lg border border-line px-3 py-1.5 text-xs text-soft hover:bg-violet-50"
+            >
               Change photo
               <input
+                id="avatar-upload"
                 type="file"
                 accept="image/*"
                 className="hidden"
+                aria-label="Upload profile photo"
                 onChange={uploadAvatar}
               />
             </label>
@@ -171,20 +176,28 @@ export default function SettingsClient(p: Props) {
       <section className={card}>
         <h2 className="text-sm font-semibold">Change password</h2>
         <form onSubmit={changePassword} className="mt-3 flex flex-col gap-3">
-          <input
-            type="password"
-            value={pw1}
-            onChange={(e) => setPw1(e.target.value)}
-            placeholder="New password"
-            className={input}
-          />
-          <input
-            type="password"
-            value={pw2}
-            onChange={(e) => setPw2(e.target.value)}
-            placeholder="Repeat new password"
-            className={input}
-          />
+          <label className="flex flex-col gap-1 text-xs text-muted">
+            <span>New password</span>
+            <input
+              id="new-password"
+              type="password"
+              value={pw1}
+              onChange={(e) => setPw1(e.target.value)}
+              placeholder="New password"
+              className={input}
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-xs text-muted">
+            <span>Repeat new password</span>
+            <input
+              id="repeat-password"
+              type="password"
+              value={pw2}
+              onChange={(e) => setPw2(e.target.value)}
+              placeholder="Repeat new password"
+              className={input}
+            />
+          </label>
           <button
             type="submit"
             disabled={loading}

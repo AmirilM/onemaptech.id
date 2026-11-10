@@ -211,6 +211,8 @@ export default function FilterBar({
   const input =
     "min-h-[44px] rounded-lg border border-line bg-canvas px-3 py-2 text-base text-ink outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/30 md:text-sm";
 
+  const hasActiveFilter = Boolean(store || am || range?.from || lockedStore || lockedAM);
+
   return (
     <>
       <style>{`@keyframes omt-progress{0%{transform:translateX(-100%)}100%{transform:translateX(400%)}} .omt-progress-bar{animation:omt-progress 1.1s ease-in-out infinite}`}</style>
@@ -288,7 +290,7 @@ export default function FilterBar({
           onClick={() => setOpen((o) => !o)}
           disabled={isPending}
           aria-expanded={open}
-          aria-haspopup="dialog"
+          aria-haspopup="grid"
           aria-labelledby="period-label period-value"
           className={`${input} flex w-full items-center justify-between gap-3 sm:w-auto sm:min-w-64`}
         >
@@ -359,15 +361,17 @@ export default function FilterBar({
       </div>
       )}
 
-      <button
-        type="button"
-        onClick={reset}
-        disabled={isPending}
-        className="flex min-h-[44px] shrink-0 items-center gap-2 rounded-lg border border-line px-4 py-2 text-sm text-soft hover:bg-violet-50 active:bg-violet-100 disabled:opacity-60"
-      >
-        <RotateCcw size={16} aria-hidden />
-        {isPending ? "Loading…" : "Reset"}
-      </button>
+      {hasActiveFilter && (
+        <button
+          type="button"
+          onClick={reset}
+          disabled={isPending}
+          className="flex min-h-[44px] shrink-0 items-center gap-2 rounded-lg border border-line px-4 py-2 text-sm text-soft hover:bg-violet-50 active:bg-violet-100 disabled:opacity-60"
+        >
+          <RotateCcw size={16} aria-hidden />
+          {isPending ? "Loading…" : "Reset"}
+        </button>
+      )}
       {lockedStore && (
         <span className="w-full text-xs text-warning sm:w-auto">
           Locked to store {lockedStore} (your role).

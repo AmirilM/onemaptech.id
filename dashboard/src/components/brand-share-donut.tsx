@@ -37,18 +37,11 @@ function BrandShareTooltip({
   const share = total ? (100 * qty) / total : null;
   return (
     <div
-      style={{
-        background: "#FFFFFF",
-        border: "1px solid #E8E8EF",
-        borderRadius: 12,
-        fontSize: 12,
-        maxWidth: "80vw",
-        padding: "8px 12px",
-        boxShadow: "0 8px 24px rgba(23,23,28,0.12)",
-      }}
+      className="bg-surface border border-line rounded-xl p-3 text-ink shadow-[0_8px_24px_rgba(23,23,28,0.12)]"
+      style={{ maxWidth: "80vw", fontSize: 12 }}
     >
-      <p style={{ color: "#17171C", margin: 0, fontWeight: 600 }}>{name}</p>
-      <p style={{ color: "#4B5563", margin: "4px 0 0" }}>
+      <p className="font-semibold m-0">{name}</p>
+      <p className="mt-1 text-soft m-0">
         {num(qty)} unit ({pctExact(share)})
       </p>
     </div>

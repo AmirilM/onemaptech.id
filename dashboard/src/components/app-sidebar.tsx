@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { initials } from "@/lib/names";
@@ -74,11 +75,13 @@ export default function AppSidebar({ name, role, avatarUrl, isAdmin }: Props) {
       <div className={`relative flex items-center py-3 ${collapsed ? "flex-col gap-2 px-0" : "justify-between px-2"}`}>
         {!collapsed && (
           <div className="flex items-center gap-2.5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src="/logo/logo-192.png"
               alt="Logo OneMaptech"
+              width={192}
+              height={192}
               className="h-9 w-9 shrink-0 object-contain"
+              priority
             />
             <div>
               <p className="text-sm font-bold tracking-[0.18em] text-ink">
@@ -89,12 +92,14 @@ export default function AppSidebar({ name, role, avatarUrl, isAdmin }: Props) {
           </div>
         )}
         {collapsed && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src="/logo/logo-192.png"
             alt="Logo OneMaptech"
             title="OneMaptech"
+            width={192}
+            height={192}
             className="h-10 w-10 shrink-0 object-contain"
+            priority
           />
         )}
         <button

@@ -214,7 +214,7 @@ export default function LeaderboardTable({
       )
     ) : null;
   // Sticky identity columns: the zebra stripe sticks along via the even variant:
-  const stickyCell = "sticky bg-surface even:bg-canvas";
+  const stickyCell = "sticky z-10 bg-surface even:bg-canvas";
 
   const from = sorted.length === 0 ? 0 : start + 1;
   const to = Math.min(start + pageSize, sorted.length);
@@ -265,7 +265,7 @@ export default function LeaderboardTable({
       </div>
 
       <div className="mt-3 overflow-x-auto rounded-xl border border-line">
-        <table className="w-full min-w-[1020px] border-collapse">
+        <table className="w-full border-collapse">
           <caption className="sr-only">
             Store ranking by Total Sales vs Total Target achievement,
             broken down by Apple and Android

@@ -56,7 +56,15 @@ async function AppShell({ children }: { children: React.ReactNode }) {
         avatarUrl={session.profile?.avatar_url ?? null}
         isAdmin={session.isAdmin}
       />
-      <div className="relative z-10 min-w-0 w-full flex-1 bg-transparent md:w-auto">{children}</div>
+      <div className="relative z-10 min-w-0 w-full flex-1 bg-transparent md:w-auto">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-white focus:rounded-lg focus:font-semibold"
+        >
+          Skip to content
+        </a>
+        {children}
+      </div>
     </>
   );
 }

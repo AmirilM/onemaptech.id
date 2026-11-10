@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth";
 import SettingsClient from "@/components/settings-client";
+import Breadcrumb from "@/components/breadcrumb";
 
 export default function SettingsPage() {
   return (
@@ -42,7 +43,13 @@ async function SettingsContent() {
   };
 
   return (
-    <main className="mx-auto max-w-7xl p-4 md:p-8">
+    <main className="mx-auto max-w-7xl p-4 md:p-8" id="main-content">
+      <Breadcrumb
+        items={[
+          { label: "Dashboard", href: "/" },
+          { label: "Settings" },
+        ]}
+      />
       <p className="text-xs font-semibold tracking-[0.2em] text-primary">
         SETTINGS
       </p>

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
@@ -45,11 +46,14 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
     <>
       <div className="sticky top-0 z-40 flex w-full items-center justify-between border-b border-line bg-surface/90 px-4 py-3 backdrop-blur [padding-top:env(safe-area-inset-top)] md:hidden">
         <div className="flex items-center gap-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          {/* Logo OneMaptech */}
+          <Image
             src="/logo/logo-192.png"
             alt="Logo OneMaptech"
+            width={192}
+            height={192}
             className="h-8 w-8 shrink-0 object-contain"
+            priority
           />
           <p className="text-sm font-bold tracking-[0.18em] text-ink">
             ONEMAPTECH
@@ -74,6 +78,8 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
           />
           <aside
             id="mobile-drawer"
+            role="dialog"
+            aria-modal="true"
             className="absolute left-0 top-0 flex h-full max-h-dvh w-72 max-w-[85vw] flex-col overflow-hidden border-r border-line p-4 [padding-bottom:env(safe-area-inset-bottom)]"
             style={{
               backgroundColor: "#F7F6FD",
@@ -84,11 +90,13 @@ export default function MobileNav({ name, role, avatarUrl, isAdmin }: Props) {
           >
             <div className="flex items-center justify-between px-2 py-3">
               <div className="flex items-center gap-2">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src="/logo/logo-192.png"
                   alt="Logo OneMaptech"
+                  width={192}
+                  height={192}
                   className="h-8 w-8 shrink-0 object-contain"
+                  priority
                 />
                 <div>
                   <p className="text-sm font-bold tracking-[0.18em] text-ink">

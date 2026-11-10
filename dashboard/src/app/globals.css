@@ -9,7 +9,7 @@
   --color-line: #e8e8ef;
   --color-track: #ede9fe;
   --color-ink: #17171c;
-  --color-muted: #6b7280;
+  --color-muted: #5f6368;
   --color-soft: #4b5563;
   --color-faint: #9ca3af;
   --color-primary: #7c3aed;
@@ -133,6 +133,32 @@ select option {
 }
 .animate-float {
   animation: float 6s ease-in-out infinite;
+}
+
+/* Animasi shake error login — di-nonaktifkan saat prefers-reduced-motion. */
+@keyframes login-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-3px);
+  }
+}
+.login-shake {
+  animation: login-shake 0.3s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-shake {
+    animation: none !important;
+  }
 }
 
 /* Visible focus for all interactive controls */

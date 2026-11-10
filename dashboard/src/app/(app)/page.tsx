@@ -833,7 +833,7 @@ async function DashContent({
           : "No access";
 
   return (
-    <main className="mx-auto max-w-[1600px] p-4 md:p-8">
+    <main className="mx-auto max-w-[1600px] p-4 md:p-8" id="main-content">
       <div className="grid gap-4 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-7">
           <header>
@@ -866,10 +866,10 @@ async function DashContent({
           )}
         </div>
         {/* Pace card: rata atas (sejajar baris "DASHBOARD") + rata kanan kolom.
-            Tetap `hidden` di bawah xl, sama seperti blok gambar yang dulu
+            Tetap `hidden` di bawah md, sama seperti blok gambar yang dulu
             menempati kolom ini. Pembungkus `min-w-0` supaya kalau kolomnya
             menyempit, teks kartunya terpotong rapi, bukan meluber. */}
-        <div className="hidden min-w-0 items-start justify-end xl:col-span-5 xl:flex">
+        <div className="hidden min-w-0 items-start justify-end xl:col-span-5 md:flex">
           <div className="min-w-0">
             <PaceCard
               elapsed={elapsed}
